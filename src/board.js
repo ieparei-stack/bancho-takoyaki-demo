@@ -5,6 +5,7 @@ const Board = (() => {
   const VIEW = { w: 1280, h: 720 };
   const PLATE = { cx: 560, cy: 380, w: 520, h: 340, r: 36 };
   const HOLE = { r: 62, gapX: 160, gapY: 150 };
+  const BATTER = { fill: '#f1dfb4', stroke: '#d9bf86' };
   const COLS = 3;
   const ROWS = 2;
 
@@ -45,7 +46,10 @@ const Board = (() => {
         const g = el('g', { 'data-hole': id }, svg);
         el('circle', { cx, cy, r: HOLE.r + 4, fill: '#5c5855' }, g);
         el('circle', { cx, cy, r: HOLE.r, fill: 'url(#hole-shade)' }, g);
-        holes.push({ id, cx, cy, el: g });
+        const batter = el('circle', {
+          cx, cy, r: 0, fill: BATTER.fill, stroke: BATTER.stroke, 'stroke-width': 2,
+        }, g);
+        holes.push({ id, cx, cy, r: HOLE.r, el: g, batter });
       }
     }
     return svg;
