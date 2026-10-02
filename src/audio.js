@@ -154,6 +154,13 @@ const Sfx = (() => {
     };
   }
 
+  // "짝" — 6구멍을 다 짠 뒤 마림바 도-미-솔-도 빠른 아르페지오
+  function finish() {
+    if (!ctx) return;
+    const t = ctx.currentTime + 0.12;
+    [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6].forEach((f, i) => marimba(ctx, master, t + i * 0.045, f, i === 3));
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -162,6 +169,7 @@ const Sfx = (() => {
   return {
     unlock,
     pourStart,
+    finish,
     schedulePour, // 검증용 오프라인 렌더링에서도 쓴다
     get ctx() { return ctx; },
   };
