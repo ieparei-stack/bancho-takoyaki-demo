@@ -9,8 +9,10 @@ const Board = (() => {
   const COLS = 3;
   const ROWS = 2;
 
-  const holes = []; // { id, row, col, cx, cy, r, batter, face, eyes, bridge, hit }
+  const holes = []; // { id, row, col, cx, cy, r, batter, octo, face, eyes, bridge, hit }
+  const layers = {};
   let plate = null;
+  let svg = null;
 
   function el(tag, attrs, parent) {
     const node = document.createElementNS(NS, tag);
@@ -20,7 +22,7 @@ const Board = (() => {
   }
 
   function create(container) {
-    const svg = el('svg', {
+    svg = el('svg', {
       viewBox: `0 0 ${VIEW.w} ${VIEW.h}`,
       preserveAspectRatio: 'xMidYMid meet',
     }, container);
@@ -41,6 +43,8 @@ const Board = (() => {
     const bridgeLayer = el('g', {}, svg);
     const batterLayer = el('g', {}, svg);
     const hitLayer = el('g', {}, svg);
+    layers.side = el('g', {}, svg);                             // 불판 옆 도구(문어 접시 등)
+    layers.drag = el('g', { 'pointer-events': 'none' }, svg);  // 끌고 다니는 물건
 
     const x0 = PLATE.cx - HOLE.gapX * (COLS - 1) / 2;
     const y0 = PLATE.cy - HOLE.gapY * (ROWS - 1) / 2;
@@ -56,6 +60,7 @@ const Board = (() => {
         const bridge = el('rect', { rx: 18, visibility: 'hidden' }, bridgeLayer);
 
         const batter = el('ellipse', { cx, cy, rx: 0, ry: 0, 'stroke-width': 2 }, batterLayer);
+        const octo = el('g', {}, batterLayer);
         const face = el('g', { visibility: 'hidden' }, batterLayer);
         const eyes = [0, 1].map(() => ({
           white: el('ellipse', { fill: '#fffaf0' }, face),
@@ -65,7 +70,7 @@ const Board = (() => {
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, face, eyes, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, octo, face, eyes, bridge, hit });
       }
     }
     return svg;
@@ -77,10 +82,27 @@ const Board = (() => {
     return holes[hole.row * COLS + col];
   }
 
+  // 마우스 이벤트 좌표 → SVG 논리 좌표
+  function toSvg(e) {
+    const p = svg.createSVGPoint();
+    p.x = e.clientX;
+    p.y = e.clientY;
+    return p.matrixTransform(svg.getScreenCTM().inverse());
+  }
+
+  // 그 점이 들어가는 구멍 (입력 원 기준), 없으면 null
+  function holeAt(x, y) {
+    return holes.find((h) => Math.hypot(x - h.cx, y - h.cy) <= h.r + 4) || null;
+  }
+
   return {
     create,
     holes,
     neighbor,
+    toSvg,
+    holeAt,
+    el,
+    layer: (name) => layers[name],
     get plate() { return plate; },
   };
 })();

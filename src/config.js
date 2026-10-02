@@ -10,6 +10,7 @@ const Config = (() => {
         targetMs: 1000, perfectMs: 50, goodMs: 120, autoStopMs: 120,
         holdBeats: 2, soundSet: 1,
       },
+      octopus: { legRatio: 0.6 },
     },
     faces: {
       batter: { color: '#f1dfb4', squashY: 1, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0 },

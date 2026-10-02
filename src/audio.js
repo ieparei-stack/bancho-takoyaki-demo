@@ -161,6 +161,12 @@ const Sfx = (() => {
     [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6].forEach((f, i) => marimba(ctx, master, t + i * 0.045, f, i === 3));
   }
 
+  // "퐁" — 문어가 반죽에 들어갈 때. 다리가 삐지면 살짝 낮게
+  function plop(low) {
+    if (!ctx) return;
+    bubble(ctx, master, ctx.currentTime, low ? 330 : 440, false);
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -170,6 +176,7 @@ const Sfx = (() => {
     unlock,
     pourStart,
     finish,
+    plop,
     schedulePour, // 검증용 오프라인 렌더링에서도 쓴다
     get ctx() { return ctx; },
   };

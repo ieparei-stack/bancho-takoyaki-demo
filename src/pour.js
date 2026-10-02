@@ -20,7 +20,7 @@ const Pour = (() => {
   }
 
   function start(hole, e) {
-    if (active || e.button !== 0) return;
+    if (active || e.button !== 0 || Octopus.busy()) return;
     if (next >= Board.holes.length) { reset(); return; }
     if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
 
@@ -79,6 +79,7 @@ const Pour = (() => {
     const result = autoStopped ? '넘침' : judge(errorMs);
     results.push(result);
 
+    hole.hasBatter = true; // 이제 문어를 넣을 수 있다
     showFace(hole, result, size(hole, held));
     log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
 
@@ -134,9 +135,14 @@ const Pour = (() => {
     results = [];
     roundStart = null;
     for (const k in glanceAt) delete glanceAt[k];
-    Board.holes.forEach(Face.clear);
+    for (const hole of Board.holes) {
+      hole.hasBatter = false;
+      Face.clear(hole);
+      Octopus.clear(hole);
+    }
+    Octopus.reset();
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }
 
-  return { init };
+  return { init, busy: () => !!active };
 })();
