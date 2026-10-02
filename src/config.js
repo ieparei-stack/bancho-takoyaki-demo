@@ -6,12 +6,21 @@ const Config = (() => {
   // data.js와 같은 구조. 값이 잘못됐을 때만 쓰인다.
   const DEFAULTS = {
     timing: {
-      pour: { targetMs: 1000, perfectMs: 50, goodMs: 120, autoStopMs: 120 },
+      pour: {
+        targetMs: 1000, perfectMs: 50, goodMs: 120, autoStopMs: 120,
+        holdBeats: 2, soundSet: 1,
+      },
     },
     faces: {},
     customers: {},
     day: {},
     letters: {},
+  };
+
+  // 정해진 값 중 하나만 허용하는 항목
+  const ALLOWED = {
+    'timing.pour.soundSet': [1, 2, 3],
+    'timing.pour.holdBeats': [1, 2, 3, 4],
   };
 
   function kind(v) {
@@ -53,6 +62,11 @@ const Config = (() => {
     }
     if (kind(raw) !== kind(def)) {
       warnings.push(`${path} 값이 ${why(raw)} 기본값 ${JSON.stringify(def)}(으)로 진행합니다`);
+      return clone(def);
+    }
+    const allowed = ALLOWED[path];
+    if (allowed && !allowed.includes(raw)) {
+      warnings.push(`${path} 값 ${JSON.stringify(raw)}은(는) ${allowed.join('·')} 중 하나여야 해서 기본값 ${JSON.stringify(def)}(으)로 진행합니다`);
       return clone(def);
     }
     return clone(raw);

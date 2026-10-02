@@ -2,7 +2,7 @@
 // 판정은 화면에 글자로 띄우지 않고 판정 로그에만 남긴다. (설계 원칙 2)
 const Pour = (() => {
   const filled = new Set();
-  let active = null; // { hole, downAt }
+  let active = null; // { hole, downAt, sound }
 
   function init() {
     for (const hole of Board.holes) {
@@ -14,7 +14,13 @@ const Pour = (() => {
 
   function start(hole, e) {
     if (active || filled.has(hole.id) || e.button !== 0) return;
-    active = { hole, downAt: e.timeStamp };
+    // 첫 클릭이 바로 짜기여도 소리가 나도록 여기서도 연다
+    Sfx.unlock();
+    const p = CFG.timing.pour;
+    const sound = Sfx.pourStart({
+      soundSet: p.soundSet, targetMs: p.targetMs, autoStopMs: p.autoStopMs, holdBeats: p.holdBeats,
+    });
+    active = { hole, downAt: e.timeStamp, sound };
     requestAnimationFrame(tick);
   }
 
@@ -44,21 +50,24 @@ const Pour = (() => {
 
   function finish(upAt, autoStopped) {
     if (!active) return;
-    const { hole, downAt } = active;
+    const { hole, downAt, sound } = active;
     active = null;
     filled.add(hole.id);
+    if (autoStopped) sound.gurgle(); else sound.release();
 
     const held = upAt - downAt;
     setFill(hole, held);
-    const { targetMs } = CFG.timing.pour;
+    const { targetMs, soundSet } = CFG.timing.pour;
     const errorMs = Math.round(held - targetMs);
     const result = autoStopped ? '넘침' : judge(errorMs);
     const cueAt = Math.round(downAt + targetMs);
     const inputAt = Math.round(upAt);
     const sign = errorMs > 0 ? '+' : '';
+    // 출력 지연: 스피커에서 소리가 실제로 나기까지 걸리는 시간. 튜닝 참고용
+    const latencyMs = Sfx.ctx ? Math.round(((Sfx.ctx.baseLatency || 0) + (Sfx.ctx.outputLatency || 0)) * 1000) : null;
     Log.add({
-      step: '짜기', hole: hole.id + 1, cueAt, inputAt, errorMs, result, autoStopped,
-      line: `짜기 #${hole.id + 1} | 큐 ${cueAt} | 입력 ${inputAt} | ${sign}${errorMs}ms | ${result}${autoStopped ? ' (자동 종료)' : ''}`,
+      step: '짜기', hole: hole.id + 1, cueAt, inputAt, errorMs, result, autoStopped, soundSet, latencyMs,
+      line: `짜기 #${hole.id + 1} | 큐 ${cueAt} | 입력 ${inputAt} | ${sign}${errorMs}ms | ${result}${autoStopped ? ' (자동 종료)' : ''} | 소리 ${soundSet}`,
     });
   }
 
