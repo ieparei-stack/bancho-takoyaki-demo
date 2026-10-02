@@ -1,0 +1,6 @@
+// 초기화
+(() => {
+  Board.create(document.getElementById('stage'));
+  Log.init(document.getElementById('log-panel'), document.getElementById('log-toggle'));
+  window.addEventListener('pointerdown', Sfx.unlock, { once: true });
+})();

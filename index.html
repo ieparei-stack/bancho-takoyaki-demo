@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>타코야키 — 반쵸 더 셰프 데모</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #1b1512; overflow: hidden; }
+  body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: #f3e6d6; user-select: none; }
+  #stage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #stage svg { width: 100%; height: 100%; display: block; }
+
+  #log-toggle {
+    position: fixed; right: 14px; bottom: 14px; z-index: 10;
+    padding: 6px 12px; border: 1px solid #6b5848; border-radius: 6px;
+    background: #2a211b; color: #f3e6d6; font: inherit; font-size: 13px; cursor: pointer; opacity: .75;
+  }
+  #log-toggle:hover { opacity: 1; }
+  #log-panel {
+    position: fixed; right: 14px; bottom: 52px; z-index: 10;
+    width: 420px; max-height: 45vh; overflow-y: auto;
+    padding: 10px 12px; border: 1px solid #6b5848; border-radius: 8px;
+    background: rgba(20, 15, 12, .9); font-family: Consolas, monospace; font-size: 12px; line-height: 1.5;
+  }
+  #log-panel[hidden] { display: none; }
+  #log-panel .empty { color: #9a8878; }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<button id="log-toggle" type="button">📋 로그</button>
+<div id="log-panel" hidden></div>
+
+<script src="data.js"></script>
+<script src="src/log.js"></script>
+<script src="src/audio.js"></script>
+<script src="src/board.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>
