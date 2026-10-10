@@ -173,7 +173,7 @@ const Customer = (() => {
     if (!raf) raf = requestAnimationFrame(tick);
   }
 
-  // 임시: T20 결산 화면으로 교체
+  // 영업 끝 → 잠깐 뒤 결산 화면 (T20)
   function endDay() {
     const t = Board.el('text', {
       x: 560, y: 380, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 64, 'font-weight': 900,
@@ -185,6 +185,7 @@ const Customer = (() => {
       step: '하루 끝', customers: records.length, satisfied: happy, total,
       line: `── 1일차 끝 | 손님 ${records.length}명 · 만족 ${happy} · 매출 ${won(total)}`,
     });
+    setTimeout(() => Result.show({ records, total }), CFG.day.resultDelayMs);
   }
 
   // 조리를 시작하면 말풍선이 작아져 손님 옆에 남는다 (후네 자리를 가리지 않게)

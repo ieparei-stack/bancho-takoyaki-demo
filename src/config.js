@@ -56,9 +56,19 @@ const Config = (() => {
         meh: { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
       },
     },
-    day: {},
+    day: { resultDelayMs: 1200, replyGreat: 8000, replyOk: 4000 },
     letters: {
       grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
+      result: { title: '1일차 결산', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
+      funny: {
+        noOcto: '문어 실종 사건', burnt: '숯불 특선 (주문한 적 없음)', raw: '반숙 타코야키, 신메뉴인가요?',
+        sauce: '소스 온천에 몸 담근 타코야키', meh: '개성 넘치는 한 접시', ace: '이 정도면 사장보다 낫다',
+      },
+      reply: {
+        great: '손님들이 또 온대. …문어는 내일도 네가 사 와. 수고했어!',
+        ok: '첫날 치고 나쁘지 않네. 오늘은 푹 쉬어.',
+        bad: '불판이 좀 놀랐겠지만, 내일은 더 잘할 거야. 수고했어.',
+      },
     },
   };
 

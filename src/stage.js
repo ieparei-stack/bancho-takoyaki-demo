@@ -10,6 +10,8 @@ const Stage = (() => {
 
   let index = 0;
   let finished = false; // 한 판을 다 끝냈다 (손님에게 건넸다)
+  let round = 1;        // 오늘 몇 번째 판
+  const history = [];   // 결산(T20)용: { round, name, grade, score }
   let banner = null; // { el, startAt, raf, timer }
   const enterHooks = {};
 
@@ -47,6 +49,7 @@ const Stage = (() => {
     const max = scores.length * 2;
     const g = grade(sum);
     const text = CFG.letters.grade[g];
+    history.push({ round, name, grade: g, score: sum });
     Log.add({
       step: '단계 끝', stage: name, score: sum, max, grade: g,
       line: `── ${NAME[name]} 끝 | ${sum}/${max} | ${text}`,
@@ -100,7 +103,8 @@ const Stage = (() => {
     clearBanner();
     index = 0;
     finished = false;
+    round++;
   }
 
-  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner, finished: () => finished };
+  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner, finished: () => finished, history: () => history };
 })();

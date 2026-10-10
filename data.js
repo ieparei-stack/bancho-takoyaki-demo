@@ -128,9 +128,31 @@ window.DATA = {
       meh:    { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
     },
   },
-  day: {},
+  // 하루 (후속 확장용). 1일차 결산
+  day: {
+    resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
+    replyGreat: 8000,    // 매출이 이 이상이면 답장 great. 제안
+    replyOk: 4000,       // 이 이상이면 ok, 아래면 bad. 제안
+  },
   letters: {
     // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)
     grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
+    // 결산 화면 (T20). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
+    result: { title: '1일차 결산', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
+    // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
+    funny: {
+      noOcto: '문어 실종 사건',
+      burnt: '숯불 특선 (주문한 적 없음)',
+      raw: '반숙 타코야키, 신메뉴인가요?',
+      sauce: '소스 온천에 몸 담근 타코야키',
+      meh: '개성 넘치는 한 접시',
+      ace: '이 정도면 사장보다 낫다',
+    },
+    // 답장 편지 한 줄 (매출 기준: day.replyGreat / replyOk)
+    reply: {
+      great: '손님들이 또 온대. …문어는 내일도 네가 사 와. 수고했어!',
+      ok: '첫날 치고 나쁘지 않네. 오늘은 푹 쉬어.',
+      bad: '불판이 좀 놀랐겠지만, 내일은 더 잘할 거야. 수고했어.',
+    },
   },
 };

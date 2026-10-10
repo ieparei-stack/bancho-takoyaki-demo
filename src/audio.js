@@ -281,6 +281,12 @@ const Sfx = (() => {
     tone(ctx, master, ctx.currentTime, { freq: 220, toFreq: 160, type: 'triangle', gain: 0.25, decay: 0.4 });
   }
 
+  // 결산 항목이 나타날 때 "톡"
+  function tick() {
+    if (!ctx) return;
+    marimba(ctx, master, ctx.currentTime, NOTE.E5, false);
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -296,6 +302,7 @@ const Sfx = (() => {
     flake,
     coin,
     hmm,
+    tick,
     flipOk,
     flipFail,
     flip2Ok,
