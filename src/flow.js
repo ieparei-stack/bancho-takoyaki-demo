@@ -18,7 +18,7 @@ const Flow = (() => {
   let hud = null;
 
   function start() {
-    hud = Board.el('text', { x: 28, y: 72, 'font-size': 16, fill: '#9a8878' }, Board.layer('side'));
+    hud = Board.el('text', { x: 28, y: 72, 'font-size': 16, fill: '#c9b8a4' }, Board.layer('side'));
     beginDay(0);
   }
 
@@ -29,8 +29,16 @@ const Flow = (() => {
     return days()[dayIdx];
   }
 
+  // 상태 → 배경 시간대 (T22, 제안)
+  const TIME = {
+    LETTER: 'morning', SHOP: 'morning', PREP: 'morning',
+    OPEN_BELL: 'open', ORDER: 'open', COOK: 'open', REACTION: 'open',
+    DAY_END_TALK: 'night', GIFT_CHOICE: 'night', DEMO_END: 'night',
+  };
+
   function go(next) {
     state = next;
+    Scene.setTime(TIME[state]);
     hud.textContent = `${dayIdx + 1}일차 · ${NAME[state]}`;
     Log.add({ step: '흐름', day: dayIdx + 1, state, line: `── ${dayIdx + 1}일차 · ${state}` });
     ENTER[state]();

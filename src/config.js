@@ -37,6 +37,15 @@ const Config = (() => {
         final: { squash: 0.85, stretch: 1.1, ms: 200, bounces: 2, shine: false },
       },
     },
+    scene: {
+      times: {
+        morning: { skyTop: '#f2b880', skyBottom: '#a8d0e6', city: '#8a97ad', lamp: 0, dark: 0 },
+        open: { skyTop: '#3a2a5c', skyBottom: '#d47a5a', city: '#3a2f4a', lamp: 1, dark: 0 },
+        night: { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
+      },
+      awning: ['#c8372d', '#f3e6d6'], wood: '#3b2a1f', counter: '#8a5a34',
+    },
+    art: { background: '' },
     customers: {
       leaveMs: 2000,
       cast: {

@@ -2,6 +2,7 @@
 (() => {
   Config.load();
   Board.create(document.getElementById('stage'));
+  Scene.init();
   Log.init(document.getElementById('log-panel'), document.getElementById('log-toggle'));
   Pour.init();
   Octopus.init();

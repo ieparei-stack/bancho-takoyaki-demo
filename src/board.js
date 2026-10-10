@@ -1,6 +1,6 @@
 // 불판 SVG. 화면은 1280×720 논리 좌표.
 // 배치용 상수는 여기에 둔다. data.js는 플레이 수치·텍스트 전용이다.
-// 레이어 순서: 철판 → 구멍 → 반죽 다리(넘침) → 반죽·얼굴 → 입력 영역
+// 레이어 순서: 배경(포장마차) → 손님 → 카운터 앞턱 → 철판 → 구멍 → 반죽 다리(넘침) → 반죽·얼굴 → 입력 영역 → 옆 도구 → 끌기 → 맨 위
 const Board = (() => {
   const NS = 'http://www.w3.org/2000/svg';
   const VIEW = { w: 1280, h: 720 };
@@ -32,6 +32,10 @@ const Board = (() => {
     el('stop', { offset: '0%', 'stop-color': '#3a3633' }, grad);
     el('stop', { offset: '70%', 'stop-color': '#1e1c1b' }, grad);
     el('stop', { offset: '100%', 'stop-color': '#0d0c0c' }, grad);
+
+    layers.bg = el('g', {}, svg);       // 포장마차 배경 (scene.js)
+    layers.guest = el('g', {}, svg);    // 손님 (카운터 너머)
+    layers.counter = el('g', {}, svg);  // 카운터 앞턱 — 손님 아랫부분을 가린다
 
     plate = el('rect', {
       x: PLATE.cx - PLATE.w / 2, y: PLATE.cy - PLATE.h / 2,

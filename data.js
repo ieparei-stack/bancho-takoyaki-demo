@@ -107,6 +107,20 @@ window.DATA = {
   // 손님. 한 명씩 차례로, 이탈·대기 게이지 없음 (2026-10-10 사용자). 누가 며칠째 오는지는 day.days
   //   cast: 손님 정의. emoji 그림(임시 — 7단계 도형, 9단계 이미지) / name / order 주문 말풍선 / again 한 판 더 말풍선
   //   문구는 Claude 초안 (플레이 후 수정). 맛 취향·선물은 6·7단계
+  // 배경 (T22): 도형 포장마차. 색은 전부 제안값. 시간대는 Flow 상태에 맞춰 바뀐다
+  //   times: 아침(편지·장보기·준비) / 영업(종~반응) / 밤(밤 대화·선물·끝). skyTop·skyBottom 하늘, city 골목 실루엣, lamp 등불 0~1, dark 밤 덮개 0~1
+  scene: {
+    times: {
+      morning: { skyTop: '#f2b880', skyBottom: '#a8d0e6', city: '#8a97ad', lamp: 0, dark: 0 },
+      open:    { skyTop: '#3a2a5c', skyBottom: '#d47a5a', city: '#3a2f4a', lamp: 1, dark: 0 },
+      night:   { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
+    },
+    awning: ['#c8372d', '#f3e6d6'],  // 천막 줄무늬 두 색
+    wood: '#3b2a1f',                  // 작업대
+    counter: '#8a5a34',               // 카운터 앞턱
+  },
+  // 아트 이미지 자리 (9단계에 넣는다, 2026-10-10 사용자). 비어 있으면 도형을 쓴다. 경로 또는 data URI
+  art: { background: '' },
   customers: {
     leaveMs: 2000,  // 반응을 보여준 뒤 다음으로 넘어가기까지, ms. 제안
     cast: {

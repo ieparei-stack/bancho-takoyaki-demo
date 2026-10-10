@@ -3,7 +3,7 @@
 // 누가 언제 오고 남고 떠나는지는 Flow(상태 머신, T21)가 정한다. 그림은 이모지 임시 (7단계 도형 → 9단계 이미지).
 const Customer = (() => {
   // 배치 상수 (건네는 선 y 170 위쪽 공간)
-  const SPOT = { x: 560, y: 85 };
+  const SPOT = { x: 560, y: 108 };     // 카운터(y 150) 너머 — 아래가 가려져 상반신만
   const ENTER_X = 1380;
   const EXIT_X = -160;
   const WALK_MS = 500;
@@ -26,12 +26,13 @@ const Customer = (() => {
 
   function init() {
     const side = Board.layer('side');
-    g = Board.el('g', { display: 'none', 'pointer-events': 'none' }, side);
+    const guest = Board.layer('guest');
+    g = Board.el('g', { display: 'none', 'pointer-events': 'none' }, guest);
     emoji = Board.el('text', {
       x: 0, y: 0, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': EMOJI_SIZE,
       'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif',
     }, g);
-    const bg = Board.el('g', { display: 'none', 'pointer-events': 'none' }, side);
+    const bg = Board.el('g', { display: 'none', 'pointer-events': 'none' }, guest);
     const box = Board.el('rect', { x: BUBBLE.x, y: BUBBLE.y, width: BUBBLE.w, height: BUBBLE.h, rx: 18, fill: '#fffaf0', stroke: '#c9b89c', 'stroke-width': 3 }, bg);
     Board.el('path', { d: `M ${BUBBLE.x + 2} ${BUBBLE.y + 34} L ${BUBBLE.x - 16} ${BUBBLE.y + 44} L ${BUBBLE.x + 2} ${BUBBLE.y + 46} Z`, fill: '#fffaf0', stroke: '#c9b89c', 'stroke-width': 3, 'stroke-linejoin': 'round' }, bg);
     Board.el('rect', { x: BUBBLE.x + 1, y: BUBBLE.y + 32, width: 6, height: 16, fill: '#fffaf0' }, bg); // 꼬리 이음새 가림
@@ -40,6 +41,7 @@ const Customer = (() => {
       'font-size': 24, 'font-weight': 700, fill: '#3a2a1e',
     }, bg);
     bubble = { g: bg, text, box };
+    Board.el('rect', { x: 12, y: 10, width: 190, height: 74, rx: 10, fill: 'rgba(10,6,4,0.55)' }, side); // 글자 뒤 띠 (배경 위에서도 읽히게)
     salesText = Board.el('text', { x: SALES.x, y: SALES.y, 'font-size': 24, 'font-weight': 700, fill: '#f3e6d6' }, side);
     showTotal();
   }
