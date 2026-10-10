@@ -72,8 +72,8 @@ const Result = (() => {
     text(g, 110, 268, `만족 ${happy} / ${records.length}명`, { fill: SUB });
     records.forEach((r, i) => {
       const react = CFG.customers.reactions[r.reaction];
-      text(g, 175 + i * 150, 330, `${r.customer.emoji}→${react.emoji}`, { 'font-size': 30, 'text-anchor': 'middle', 'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif' });
-      text(g, 175 + i * 150, 362, won(r.sales), { 'font-size': 16, 'text-anchor': 'middle', fill: SUB });
+      text(g, 150 + i * 100, 330, `${r.customer.emoji}→${react.emoji}`, { 'font-size': 22, 'text-anchor': 'middle', 'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif' });
+      text(g, 150 + i * 100, 362, won(r.sales), { 'font-size': 16, 'text-anchor': 'middle', fill: SUB });
     });
 
     // ② 판정 집계: 단계별 등급 × 손님, 그리고 타코야키 표정 집계
@@ -82,13 +82,13 @@ const Result = (() => {
     const gx = 110;
     const gy = 410;
     text(g, gx, gy, '단계 등급', { fill: SUB });
-    records.forEach((r, i) => text(g, gx + 150 + i * 120, gy, r.customer.emoji, { 'font-size': 24, 'text-anchor': 'middle', 'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif' }));
+    records.forEach((r, i) => text(g, gx + 120 + i * 88, gy, r.customer.emoji, { 'font-size': 24, 'text-anchor': 'middle', 'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif' }));
     GRADED.forEach((name, row) => {
       const y = gy + 34 + row * 30;
       text(g, gx, y, STAGE_LABEL[name], { 'font-size': 18 });
       records.forEach((r, i) => {
         const h = hist.find((e) => e.round === i + 1 && e.name === name);
-        if (h) text(g, gx + 150 + i * 120, y, CFG.letters.grade[h.grade], { 'font-size': 18, 'font-weight': 900, 'text-anchor': 'middle', fill: GRADE_COLOR[h.grade] });
+        if (h) text(g, gx + 120 + i * 88, y, CFG.letters.grade[h.grade], { 'font-size': 15, 'font-weight': 900, 'text-anchor': 'middle', fill: GRADE_COLOR[h.grade] });
       });
     });
     g = add(el('g', {}, root));

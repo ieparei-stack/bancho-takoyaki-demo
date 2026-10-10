@@ -1,6 +1,6 @@
-// 손님 (T17): 화면 위쪽에 이모지 손님이 걸어 들어와 주문 말풍선을 띄운다. 1일차는 대기 게이지 없음 (2026-10-10 사용자).
-// 한 명씩 차례로 온다. 건넨 후네는 맨 앞 손님이 받고(T18) 표정별 가격 합(실패 0원)으로 매출, 반응 대사·표정.
-// 반응 뒤 손님이 떠나면 새 판 + 다음 손님, 1일차 2명이 끝나면 영업 끝 (T19).
+// 손님: 화면 위쪽에 걸어 들어와 주문 말풍선을 띄운다(T17). 대기 게이지 없음 (2026-10-10 사용자).
+// 건넨 후네는 맨 앞 손님이 받고(T18) 표정별 가격 합(실패 0원)으로 매출, 반응 대사·표정.
+// 누가 언제 오고 남고 떠나는지는 Flow(상태 머신, T21)가 정한다. 그림은 이모지 임시 (7단계 도형 → 9단계 이미지).
 const Customer = (() => {
   // 배치 상수 (건네는 선 y 170 위쪽 공간)
   const SPOT = { x: 560, y: 85 };
@@ -19,12 +19,10 @@ const Customer = (() => {
   let x = ENTER_X;
   let raf = 0;
   let walk = null;     // { from, to, t0, then }
-  let served = 0;      // 오늘 받은 손님 수
-  let current = null;  // data.js customers.list 항목
-  let index = 0;
-  let total = 0;       // 오늘 매출
+  let current = null;  // data.js customers.cast 항목 + id
+  let total = 0;       // 매출 (데모 전체)
   let salesText = null;
-  const records = [];  // 결산(T20)용: { customer, faces, sales, reaction, satisfied, boat }
+  const records = [];  // 결산용: { day, customer, faces, sales, reaction, satisfied, boat }
 
   function init() {
     const side = Board.layer('side');
@@ -58,7 +56,7 @@ const Customer = (() => {
     return `₩${n.toLocaleString('ko-KR')}`;
   }
   function showTotal() {
-    salesText.textContent = `오늘 매출 ${won(total)}`;
+    salesText.textContent = `매출 ${won(total)}`;
   }
 
   // 표정 6개 → 반응 키 (위에서부터 처음 맞는 것). 문구·이모지·임계는 data.js
@@ -93,16 +91,15 @@ const Customer = (() => {
     showBubble();
     popup(sales);
     if (sales > 0) Sfx.coin(); else Sfx.hmm();
-    served++;
-    setTimeout(leave, CFG.customers.leaveMs);
-    records.push({ customer: current, faces, sales, reaction: key, satisfied: react.satisfied, sauceLen, flakes, boat });
+    records.push({ day: Flow.day(), customer: current, faces, sales, reaction: key, satisfied: react.satisfied, sauceLen, flakes, boat });
 
     const NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
     const tally = Object.keys(NAME).map((k) => [NAME[k], faces.filter((f) => f === k).length]).filter(([, c]) => c).map(([k, c]) => `${k} ${c}`).join(' · ');
     Log.add({
-      step: '서빙', customer: index + 1, faces, sales, reaction: key, satisfied: react.satisfied, total,
-      line: `서빙 | 손님 ${index + 1} ${current.emoji} | ${tally} | ${won(sales)} | 반응 ${key}(${react.satisfied ? '만족' : '불만'}) | 오늘 ${won(total)}`,
+      step: '서빙', day: Flow.day(), customer: current.id, faces, sales, reaction: key, satisfied: react.satisfied, total,
+      line: `서빙 | ${Flow.day()}일차 ${current.name} ${current.emoji} | ${tally} | ${won(sales)} | 반응 ${key}(${react.satisfied ? '만족' : '불만'}) | 누적 ${won(total)}`,
     });
+    Flow.served();
   }
 
   // 손님 옆에 "+₩" 이 떠오르며 흐려진다
@@ -122,10 +119,8 @@ const Customer = (() => {
     requestAnimationFrame(step);
   }
 
-  function arrive(i) {
-    index = i;
-    const list = CFG.customers.list;
-    current = list[index % list.length];
+  function arrive(spec) {
+    current = spec;
     emoji.textContent = current.emoji;
     bubble.text.textContent = current.order;
     bubble.g.setAttribute('display', 'none');
@@ -133,10 +128,9 @@ const Customer = (() => {
     g.setAttribute('display', 'inline');
     walk = { from: ENTER_X, to: SPOT.x, t0: performance.now(), then: showBubble };
     if (!raf) raf = requestAnimationFrame(tick);
-    Log.add({ step: '손님', index: index + 1, line: `손님 ${index + 1} 도착 | ${current.emoji} "${current.order}"` });
+    Log.add({ step: '손님', id: current.id, line: `손님 도착 | ${current.name} ${current.emoji} "${current.order}"` });
   }
 
-  // 걸어 들어오기(통통 걸음) → 도착하면 말풍선, 그 뒤로는 숨쉬기
   // 걷기(통통 걸음) → 끝나면 then. 서 있을 때는 숨쉬기
   function tick(now) {
     raf = 0;
@@ -158,34 +152,22 @@ const Customer = (() => {
     if (g.getAttribute('display') !== 'none') raf = requestAnimationFrame(tick);
   }
 
-  // 반응을 보여준 뒤 왼쪽으로 나간다 → 새 판 + 다음 손님, 또는 영업 끝
-  function leave() {
+  // 주문이 남았다: 그 자리에 남아 원래 얼굴로, 말풍선은 "한 판 더"
+  function stay(line) {
+    emoji.textContent = current.emoji;
+    bubble.text.textContent = line;
+    bubble.g.removeAttribute('transform');
+    showBubble();
+  }
+
+  // 왼쪽으로 걸어 나간다 → then (Flow가 다음 손님 또는 밤 대화)
+  function leave(then) {
     bubble.g.setAttribute('display', 'none');
     walk = { from: x, to: EXIT_X, t0: performance.now(), then: () => {
       g.setAttribute('display', 'none');
-      if (served < CFG.customers.day1) {
-        Pour.newRound();
-        arrive(served);
-      } else {
-        endDay();
-      }
+      then();
     } };
     if (!raf) raf = requestAnimationFrame(tick);
-  }
-
-  // 영업 끝 → 잠깐 뒤 결산 화면 (T20)
-  function endDay() {
-    const t = Board.el('text', {
-      x: 560, y: 380, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 64, 'font-weight': 900,
-      fill: '#ffd34d', stroke: '#1b1512', 'stroke-width': 8, 'paint-order': 'stroke',
-    }, Board.layer('top'));
-    t.textContent = '오늘 영업 끝!';
-    const happy = records.filter((r) => r.satisfied).length;
-    Log.add({
-      step: '하루 끝', customers: records.length, satisfied: happy, total,
-      line: `── 1일차 끝 | 손님 ${records.length}명 · 만족 ${happy} · 매출 ${won(total)}`,
-    });
-    setTimeout(() => Result.show({ records, total }), CFG.day.resultDelayMs);
   }
 
   // 조리를 시작하면 말풍선이 작아져 손님 옆에 남는다 (후네 자리를 가리지 않게)
@@ -204,5 +186,5 @@ const Customer = (() => {
     bubble.g.setAttribute('display', 'none');
   }
 
-  return { init, arrive, shrinkBubble, reset, serve, pickReaction, getRecords: () => records, get spot() { return SPOT; } };
+  return { init, arrive, stay, leave, shrinkBubble, reset, serve, pickReaction, getRecords: () => records, get total() { return total; }, get spot() { return SPOT; } };
 })();

@@ -13,6 +13,7 @@ const Stage = (() => {
   let round = 1;        // 오늘 몇 번째 판
   const history = [];   // 결산(T20)용: { round, name, grade, score }
   let banner = null; // { el, startAt, raf, timer }
+  let skipping = 0;  // 등급 배너 없이 넘어가는 중 (2일차부터)
   const enterHooks = {};
 
   function current() {
@@ -21,7 +22,7 @@ const Stage = (() => {
 
   // 배너가 떠 있는 동안에는 어느 단계도 아니다 → 모든 입력이 막힌다
   function is(name) {
-    return !banner && current() === name;
+    return !banner && !skipping && current() === name;
   }
 
   function onEnter(name, fn) {
@@ -55,6 +56,11 @@ const Stage = (() => {
       line: `── ${NAME[name]} 끝 | ${sum}/${max} | ${text}`,
     });
     Sfx.finish();
+    if (Flow.day() > 1) {
+      // 등급 글자는 1일차만 (2026-10-10 사용자). 2일차부터는 짧게 쉬고 바로 다음 단계
+      skipping = setTimeout(() => { skipping = 0; next(); }, CFG.timing.stage.skipMs);
+      return;
+    }
     show(text, GRADE_COLOR[g]);
   }
 
@@ -101,10 +107,11 @@ const Stage = (() => {
 
   function reset() {
     clearBanner();
+    if (skipping) { clearTimeout(skipping); skipping = 0; }
     index = 0;
     finished = false;
     round++;
   }
 
-  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner, finished: () => finished, history: () => history };
+  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner || !!skipping, finished: () => finished, history: () => history };
 })();

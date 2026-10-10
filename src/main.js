@@ -9,6 +9,6 @@
   Box.init();
   Topping.init();
   Customer.init();
-  Customer.arrive(0);
+  Flow.start();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();

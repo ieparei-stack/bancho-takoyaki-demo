@@ -48,6 +48,7 @@ window.DATA = {
       perfect: 11,      // 이 점수 이상 PERFECT!. 제안
       great: 8,         // 이 점수 이상 GREAT!. 제안
       good: 4,          // 이 점수 이상 GOOD, 그 아래는 OOPS…. 제안
+      skipMs: 300,      // 2일차부터(등급 글자 없음) 단계 사이 쉬는 시간, ms. 제안
     },
 
     // 굽기 (③·④ 뒤집기 단계가 시작되면 6구멍이 함께 굽고, n번 구멍 큐 = 시작 + lead + (n−1) × interval)
@@ -103,15 +104,16 @@ window.DATA = {
       final:   { squash: 0.85, stretch: 1.1,  ms: 200, bounces: 2, shine: false }, // 최종 완벽: 통통 200 ms
     },
   },
-  // 손님 (4단계). 1일차 2명, 한 명씩 차례로, 이탈·대기 게이지 없음 (2026-10-10 사용자)
-  //   list: 차례대로 오는 손님. emoji 얼굴 / order 주문 말풍선. 문구는 Claude 초안 (플레이 후 수정)
+  // 손님. 한 명씩 차례로, 이탈·대기 게이지 없음 (2026-10-10 사용자). 누가 며칠째 오는지는 day.days
+  //   cast: 손님 정의. emoji 그림(임시 — 7단계 도형, 9단계 이미지) / name / order 주문 말풍선 / again 한 판 더 말풍선
+  //   문구는 Claude 초안 (플레이 후 수정). 맛 취향·선물은 6·7단계
   customers: {
-    day1: 2,
-    leaveMs: 2000,  // 반응을 보여준 뒤 떠나기까지, ms. 떠나면 새 판 + 다음 손님. 제안
-    list: [
-      { emoji: '🧑', order: '타코야키 하나요!' },
-      { emoji: '👵', order: '하나 줘요~' },
-    ],
+    leaveMs: 2000,  // 반응을 보여준 뒤 다음으로 넘어가기까지, ms. 제안
+    cast: {
+      sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!' },
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.' },
+      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!' },
+    },
     // 표정별 개당 가격(원). 실패(덜 익음·탐·문어 없음)는 0원 (2026-10-10 사용자). 나머지 수치는 제안
     price: { perfect: 800, tasty: 600, meh: 300, raw: 0, burnt: 0, blank: 0 },
     // 반응 고르는 임계 (위에서부터 처음 맞는 반응). 제안
@@ -130,6 +132,11 @@ window.DATA = {
   },
   // 하루 (후속 확장용). 1일차 결산
   day: {
+    // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수. 3일차는 8단계
+    days: [
+      { shop: false, guests: [{ id: 'sparrow', orders: 2 }] },
+      { shop: true,  guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
+    ],
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
     replyGreat: 8000,    // 매출이 이 이상이면 답장 great. 제안
     replyOk: 4000,       // 이 이상이면 ok, 아래면 bad. 제안
@@ -137,8 +144,13 @@ window.DATA = {
   letters: {
     // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)
     grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
-    // 결산 화면 (T20). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
-    result: { title: '1일차 결산', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
+    // 일차별 편지 (사용자가 직접 작성 — 2026-10-10. 지금은 자리만)
+    days: [
+      '(1일차 편지 — 나중에 작성)',
+      '(2일차 편지 — 나중에 작성)',
+    ],
+    // 결산 화면 (T20, 8단계 결과 화면으로 교체 예정). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
+    result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
     funny: {
       noOcto: '문어 실종 사건',

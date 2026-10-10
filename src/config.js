@@ -13,7 +13,7 @@ const Config = (() => {
       octopus: { legRatio: 0.6, perfectRatio: 0.3 },
       box: { flickPx: 30, flickMs: 300, coneDeg: 60, flyMs: 350 },
       topping: { boatScale: 1.6, sauceWidth: 7, flakeEveryPx: 18, flakeMax: 400, handoffY: 170 },
-      stage: { bannerMs: 1200, perfect: 11, great: 8, good: 4 },
+      stage: { skipMs: 300, bannerMs: 1200, perfect: 11, great: 8, good: 4 },
       cook: { lead1Ms: 2500, lead2Ms: 1500, intervalMs: 1500, perfectSpanMs: 1500, goodMarginMs: 300, burnMs: 3000 },
       flip: { ignoreDeg: 30, flip1MinDeg: 90, flip1MaxDeg: 360, flip2MinDeg: 180, flip2MaxDeg: 720, flip2SpeedDps: 720 },
     },
@@ -38,12 +38,12 @@ const Config = (() => {
       },
     },
     customers: {
-      day1: 2,
       leaveMs: 2000,
-      list: [
-        { emoji: '🧑', order: '타코야키 하나요!' },
-        { emoji: '👵', order: '하나 줘요~' },
-      ],
+      cast: {
+        sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!' },
+        crow_a: { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.' },
+        crow_b: { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!' },
+      },
       price: { perfect: 800, tasty: 600, meh: 300, raw: 0, burnt: 0, blank: 0 },
       rules: { burnt: 2, fails: 3, perfect: 4, saucePx: 2500, goodSales: 2400 },
       reactions: {
@@ -56,10 +56,17 @@ const Config = (() => {
         meh: { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
       },
     },
-    day: { resultDelayMs: 1200, replyGreat: 8000, replyOk: 4000 },
+    day: {
+      resultDelayMs: 1200, replyGreat: 8000, replyOk: 4000,
+      days: [
+        { shop: false, guests: [{ id: 'sparrow', orders: 2 }] },
+        { shop: true, guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
+      ],
+    },
     letters: {
       grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
-      result: { title: '1일차 결산', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
+      days: ['(1일차 편지 — 나중에 작성)', '(2일차 편지 — 나중에 작성)'],
+      result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
       funny: {
         noOcto: '문어 실종 사건', burnt: '숯불 특선 (주문한 적 없음)', raw: '반숙 타코야키, 신메뉴인가요?',
         sauce: '소스 온천에 몸 담근 타코야키', meh: '개성 넘치는 한 접시', ace: '이 정도면 사장보다 낫다',
@@ -161,5 +168,16 @@ const Config = (() => {
     return warnings;
   }
 
-  return { load, validate, DEFAULTS };
+  // 실행 중에 찾은 데이터 문제도 같은 경고 상자에 덧붙인다
+  function warn(msg) {
+    console.warn('[data.js]', msg);
+    const box = document.getElementById('warn');
+    if (!box) return;
+    const li = document.createElement('li');
+    li.textContent = msg;
+    box.querySelector('ul').appendChild(li);
+    box.hidden = false;
+  }
+
+  return { load, validate, warn, DEFAULTS };
 })();
