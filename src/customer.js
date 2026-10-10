@@ -1,9 +1,11 @@
 // 손님 (T17): 화면 위쪽에 이모지 손님이 걸어 들어와 주문 말풍선을 띄운다. 1일차는 대기 게이지 없음 (2026-10-10 사용자).
-// 한 명씩 차례로 온다. 건넨 후네는 맨 앞 손님이 받고(T18) 표정별 가격 합(실패 0원)으로 매출, 반응 대사·표정. 다음 손님 흐름은 T19.
+// 한 명씩 차례로 온다. 건넨 후네는 맨 앞 손님이 받고(T18) 표정별 가격 합(실패 0원)으로 매출, 반응 대사·표정.
+// 반응 뒤 손님이 떠나면 새 판 + 다음 손님, 1일차 2명이 끝나면 영업 끝 (T19).
 const Customer = (() => {
   // 배치 상수 (건네는 선 y 170 위쪽 공간)
   const SPOT = { x: 560, y: 85 };
   const ENTER_X = 1380;
+  const EXIT_X = -160;
   const WALK_MS = 500;
   const BUBBLE = { x: 640, y: 40, w: 230, h: 60 };
   const EMOJI_SIZE = 84;
@@ -16,7 +18,8 @@ const Customer = (() => {
   let bubble = null;   // { g, text }
   let x = ENTER_X;
   let raf = 0;
-  let walk = null;     // { from, t0 }
+  let walk = null;     // { from, to, t0, then }
+  let served = 0;      // 오늘 받은 손님 수
   let current = null;  // data.js customers.list 항목
   let index = 0;
   let total = 0;       // 오늘 매출
@@ -90,6 +93,8 @@ const Customer = (() => {
     showBubble();
     popup(sales);
     if (sales > 0) Sfx.coin(); else Sfx.hmm();
+    served++;
+    setTimeout(leave, CFG.customers.leaveMs);
     records.push({ customer: current, faces, sales, reaction: key, satisfied: react.satisfied, sauceLen, flakes, boat });
 
     const NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
@@ -126,29 +131,60 @@ const Customer = (() => {
     bubble.g.setAttribute('display', 'none');
     bubble.g.removeAttribute('transform');
     g.setAttribute('display', 'inline');
-    walk = { from: ENTER_X, t0: performance.now() };
+    walk = { from: ENTER_X, to: SPOT.x, t0: performance.now(), then: showBubble };
     if (!raf) raf = requestAnimationFrame(tick);
     Log.add({ step: '손님', index: index + 1, line: `손님 ${index + 1} 도착 | ${current.emoji} "${current.order}"` });
   }
 
   // 걸어 들어오기(통통 걸음) → 도착하면 말풍선, 그 뒤로는 숨쉬기
+  // 걷기(통통 걸음) → 끝나면 then. 서 있을 때는 숨쉬기
   function tick(now) {
     raf = 0;
     let y = SPOT.y;
     if (walk) {
       const u = Math.min(1, (now - walk.t0) / WALK_MS);
       const e = 1 - (1 - u) * (1 - u);
-      x = walk.from + (SPOT.x - walk.from) * e;
+      x = walk.from + (walk.to - walk.from) * e;
       y -= Math.abs(Math.sin(u * Math.PI * 3)) * 8 * (1 - u);
       if (u >= 1) {
+        const then = walk.then;
         walk = null;
-        showBubble();
+        if (then) then();
       }
     } else {
       y += Math.sin(now / 600) * 2; // 숨쉬기
     }
     g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-    raf = requestAnimationFrame(tick);
+    if (g.getAttribute('display') !== 'none') raf = requestAnimationFrame(tick);
+  }
+
+  // 반응을 보여준 뒤 왼쪽으로 나간다 → 새 판 + 다음 손님, 또는 영업 끝
+  function leave() {
+    bubble.g.setAttribute('display', 'none');
+    walk = { from: x, to: EXIT_X, t0: performance.now(), then: () => {
+      g.setAttribute('display', 'none');
+      if (served < CFG.customers.day1) {
+        Pour.newRound();
+        arrive(served);
+      } else {
+        endDay();
+      }
+    } };
+    if (!raf) raf = requestAnimationFrame(tick);
+  }
+
+  // 임시: T20 결산 화면으로 교체
+  function endDay() {
+    const t = Board.el('text', {
+      x: 560, y: 380, 'text-anchor': 'middle', 'dominant-baseline': 'middle', 'font-size': 64, 'font-weight': 900,
+      fill: '#ffd34d', stroke: '#1b1512', 'stroke-width': 8, 'paint-order': 'stroke',
+    }, Board.layer('top'));
+    t.textContent = '오늘 영업 끝!';
+    const happy = records.filter((r) => r.satisfied).length;
+    Log.add({
+      step: '하루 끝', customers: records.length, satisfied: happy, total,
+      line: `── 1일차 끝 | 손님 ${records.length}명 · 만족 ${happy} · 매출 ${won(total)}`,
+    });
   }
 
   // 조리를 시작하면 말풍선이 작아져 손님 옆에 남는다 (후네 자리를 가리지 않게)

@@ -39,6 +39,7 @@ const Config = (() => {
     },
     customers: {
       day1: 2,
+      leaveMs: 2000,
       list: [
         { emoji: '🧑', order: '타코야키 하나요!' },
         { emoji: '👵', order: '하나 줘요~' },

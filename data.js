@@ -107,6 +107,7 @@ window.DATA = {
   //   list: 차례대로 오는 손님. emoji 얼굴 / order 주문 말풍선. 문구는 Claude 초안 (플레이 후 수정)
   customers: {
     day1: 2,
+    leaveMs: 2000,  // 반응을 보여준 뒤 떠나기까지, ms. 떠나면 새 판 + 다음 손님. 제안
     list: [
       { emoji: '🧑', order: '타코야키 하나요!' },
       { emoji: '👵', order: '하나 줘요~' },

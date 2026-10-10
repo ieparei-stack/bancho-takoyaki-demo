@@ -16,13 +16,11 @@ const Pour = (() => {
     }
     window.addEventListener('pointerup', (e) => finish(e.timeStamp, false));
     window.addEventListener('pointercancel', (e) => finish(e.timeStamp, false));
-    // 임시: 손님에게 건네 한 판을 끝낸 뒤 불판을 클릭하면 새 판 (4단계 한 판 반복으로 대체)
-    Board.plate.addEventListener('pointerdown', reset);
   }
 
   function start(hole, e) {
     if (active || e.button !== 0 || !Stage.is('pour')) return;
-    if (next >= Board.holes.length) return; // 다 짰다. 새 판은 불판(구멍 밖) 클릭으로만 — 구멍 클릭은 뒤집기 몫
+    if (next >= Board.holes.length) return; // 다 짰다. 새 판은 손님이 떠날 때 (T19)
     if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
 
     // 첫 클릭이 바로 짜기여도 소리가 나도록 여기서도 연다
@@ -134,8 +132,9 @@ const Pour = (() => {
     });
   }
 
-  function reset() {
-    if (active || !Stage.finished()) return; // 한 판 도중에는 새 판 없음 (T15부터: 큰 후네 옆을 잘못 눌러 리셋되는 것 방지)
+  // 새 판: 손님이 받고 떠나면 불판·후네·토핑을 비운다 (T19, Customer가 부른다)
+  function newRound() {
+    if (active || !Stage.finished()) return; // 한 판 도중에는 새 판 없음
     Stage.reset();
     next = 0;
     results = [];
@@ -153,11 +152,9 @@ const Pour = (() => {
     }
     Octopus.reset();
     Topping.reset();
-    Customer.reset();
-    Customer.arrive(0); // 임시: T19에서 다음 손님 흐름으로 교체
     Box.reset();
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }
 
-  return { init, busy: () => !!active, roundStart: () => roundStart };
+  return { init, newRound, busy: () => !!active, roundStart: () => roundStart };
 })();
