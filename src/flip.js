@@ -145,7 +145,10 @@ const Flip = (() => {
     if (phase === 1 && Board.holes.every((h) => h.flip1)) {
       Stage.complete('flip1', Board.holes.map((h) => SCORE[h.flip1.result] || 0)); // 등급 → ④ 2차 뒤집기
     }
-    if (phase === 2 && Board.holes.every((h) => h.flip2)) logRound(d.doneAt);
+    if (phase === 2 && Board.holes.every((h) => h.flip2)) {
+      logRound(d.doneAt);
+      Stage.complete('flip2', Board.holes.map((h) => SCORE[h.flip2.result] || 0)); // 등급 (⑤ 상자 담기는 T14)
+    }
   }
 
   // 한 판: 1번 구멍 짜기 시작 → 마지막 2차 뒤집기

@@ -79,7 +79,7 @@ const Cook = (() => {
     s.hole.batter.setAttribute('fill', color);
     s.hole.batter.setAttribute('stroke', Face.shade(color));
     if (s.hole.bridge.getAttribute('visibility') === 'visible') s.hole.bridge.setAttribute('fill', color);
-    if (s.phase === 1) hint(s, now);
+    if (s.phase === 1) hint(s, now); else hint2(s, now);
   }
 
   // 1차 굽기 힌트 (실제 타코야키의 판단 기준을 그대로):
@@ -136,9 +136,61 @@ const Cook = (() => {
     }
   }
 
+  // 2차 굽기 힌트 (T13, 사용자 결정 2026-10-10):
+  // 예고 — 큐까지 눈이 점점 커진다(두근두근). 큐 순간부터 퍼펙트 구간(1.5 s) 동안 김이 모락모락 오른다.
+  function hint2(s, now) {
+    const c = CFG.timing.cook;
+    const k = CFG.faces.cook;
+    const h = s.hole;
+    const since = now - s.cueAt;
+    if (since >= c.perfectSpanMs) {
+      // 김이 사라졌다 → 눈도 원래대로
+      hideHint(h);
+      return;
+    }
+    const u = Math.min(1, Math.max(0, (now - s.startAt) / (s.cueAt - s.startAt)));
+    setEyeScale(h, 1 + (k.anticipate - 1) * u * u);
+
+    const show = since >= 0;
+    h.steam.setAttribute('display', show ? 'inline' : 'none');
+    if (!show) return;
+    const size = h.size || h.r;
+    const n = Math.min(k.steam, h.steamPaths.length);
+    h.steamPaths.forEach((p, i) => {
+      if (i >= n) { p.setAttribute('display', 'none'); return; }
+      const ph = (since / 900 + i / n) % 1;                 // 0.9 s 주기로 아래 → 위
+      const x0 = h.cx + (i - (n - 1) / 2) * size * 0.32;
+      const y0 = h.cy - size * 0.75 - ph * 34;
+      const w = Math.sin(now / 180 + i * 1.7) * 5;
+      const fadeIn = Math.min(1, ph / 0.15);
+      p.setAttribute('d', `M ${x0.toFixed(1)} ${y0.toFixed(1)} q ${w.toFixed(1)} -9 0 -18 q ${(-w).toFixed(1)} -9 0 -18`);
+      p.setAttribute('stroke', k.steamColor);
+      p.setAttribute('opacity', (0.8 * fadeIn * (1 - ph)).toFixed(2));
+      p.setAttribute('display', 'inline');
+    });
+  }
+
+  // 눈(흰자·눈동자) 크기 배율. 1이면 지금 표정의 원래 크기
+  function setEyeScale(h, scale) {
+    const f = h.state && CFG.faces[h.state];
+    if (!f || f.eyes === 'x') return;
+    if (h.eyeScale === scale) return;
+    h.eyeScale = scale;
+    h.eyes.forEach((eye, i) => {
+      const ry = i === 1 && f.eyeRy2 ? f.eyeRy2 : f.eyeRy;
+      eye.white.setAttribute('rx', (f.eyeRx * 1.7 * scale).toFixed(1));
+      eye.white.setAttribute('ry', (ry * 1.4 * scale).toFixed(1));
+      eye.pupil.setAttribute('rx', (f.eyeRx * scale).toFixed(1));
+      eye.pupil.setAttribute('ry', (ry * scale).toFixed(1));
+    });
+  }
+
   function hideHint(h) {
     h.core.setAttribute('visibility', 'hidden');
     h.bubbles.setAttribute('display', 'none');
+    h.steam.setAttribute('display', 'none');
+    if (h.eyeScale && h.eyeScale !== 1) setEyeScale(h, 1);
+    h.eyeScale = 1;
   }
 
   function lum(hex) {

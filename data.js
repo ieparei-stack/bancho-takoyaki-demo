@@ -76,7 +76,8 @@ window.DATA = {
     blank:   { color: '#e0a457', squashY: 1, sagY: 0, eyeRx: 3,   eyeRy: 3, eyeGap: 26, eyeY: -4, lookX: 0, mouth: 'flat', sweat: 0 },                                     // 문어 없음: 멍함 (굽기 결과 무관)
     // 굽기 색과 1차 굽기 힌트. 반죽(raw) → 테두리 굳음(set) → (큐) 황금 → 갈색 → 검정. 제안
     //   coreMin 큐 시점에 남는 가운데 반죽 반지름 비율(시작 0.95) / bubbles 큐 순간 올라오는 기포 수 (굿 창 동안 보임)
-    cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8 },
+    //   2차 신호(T13): steam 큐부터 퍼펙트 구간 동안 오르는 김 줄 수(최대 3) / steamColor / anticipate 큐 직전 눈 배율(두근두근 예고)
+    cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35 },
     // 짜기 결과 반응 (놓는 순간 반죽이 눌렸다 펴진다). 제안
     //   squash 눌림 세로 비율 / stretch 펴짐 세로 비율 / ms 길이 / bounces 횟수 / shine 윤기 점 남김
     react: {

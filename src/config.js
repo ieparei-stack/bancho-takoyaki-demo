@@ -28,7 +28,7 @@ const Config = (() => {
       raw: { color: '#efe3c4', squashY: 1, sagY: 2, eyeRx: 5, eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 0, forceColor: true, wobble: true },
       burnt: { color: '#2a211b', squashY: 1, sagY: 0, eyeRx: 6, eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, eyes: 'x', sweat: 0, forceColor: true, smoke: 2 },
       blank: { color: '#e0a457', squashY: 1, sagY: 0, eyeRx: 3, eyeRy: 3, eyeGap: 26, eyeY: -4, lookX: 0, mouth: 'flat', sweat: 0 },
-      cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8 },
+      cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35 },
       react: {
         perfect: { squash: 0.82, stretch: 1.08, ms: 320, bounces: 2, shine: true },
         good: { squash: 0.92, stretch: 1.03, ms: 200, bounces: 1, shine: false },
