@@ -6,5 +6,6 @@
   Pour.init();
   Octopus.init();
   Flip.init();
+  Box.init();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();

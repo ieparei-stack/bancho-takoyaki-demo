@@ -224,6 +224,14 @@ const Sfx = (() => {
     bubble(ctx, master, ctx.currentTime, low ? 330 : 440, false);
   }
 
+  // 후네에 앉는 "톡" + 짧게 구르는 소리
+  function boxLand() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    tone(ctx, master, t, { freq: 620, toFreq: 480, type: 'triangle', gain: 0.28, decay: 0.06 });
+    [0.07, 0.12, 0.16].forEach((d, i) => tone(ctx, master, t + d, { freq: 900 - i * 60, type: 'triangle', gain: 0.07 - i * 0.015, decay: 0.03 }));
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -234,6 +242,7 @@ const Sfx = (() => {
     pourStart,
     finish,
     plop,
+    boxLand,
     flipOk,
     flipFail,
     flip2Ok,

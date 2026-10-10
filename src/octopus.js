@@ -9,10 +9,12 @@ const Octopus = (() => {
 
   const pieces = []; // { el, home: {x, y}, used }
   let drag = null;   // { piece }
+  let dishG = null;
   let scores = [];   // 단계 등급용: 중심 2 / 깔끔 1 / 다리 삐짐 0
 
   function init() {
-    const side = Board.layer('side');
+    const side = Board.el('g', {}, Board.layer('side')); // 접시 묶음 (⑤에서 숨긴다)
+    dishG = side;
     Board.el('circle', { cx: DISH.cx, cy: DISH.cy, r: DISH.r, fill: '#f4efe6', stroke: '#cfc6b8', 'stroke-width': 4 }, side);
     Board.el('circle', { cx: DISH.cx, cy: DISH.cy, r: DISH.r - 16, fill: 'none', stroke: '#e3dbcd', 'stroke-width': 2 }, side);
     for (const [dx, dy] of SLOTS) {
@@ -60,7 +62,7 @@ const Octopus = (() => {
     if (!drag) return;
     const { piece } = drag;
     drag = null;
-    Board.layer('side').appendChild(piece.el);
+    dishG.appendChild(piece.el);
     piece.el.setAttribute('cursor', 'grab');
 
     const p = Board.toSvg(e);
@@ -170,5 +172,9 @@ const Octopus = (() => {
     }
   }
 
-  return { init, clear, reset, busy: () => !!drag };
+  function setVisible(on) {
+    dishG.setAttribute('display', on ? 'inline' : 'none');
+  }
+
+  return { init, clear, reset, setVisible, busy: () => !!drag };
 })();

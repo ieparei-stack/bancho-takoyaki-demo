@@ -2,9 +2,9 @@
 // 단계가 끝나면 6번의 점수(퍼펙트 2 / 굿 1 / 그 외 0)를 합쳐 등급 글자를 잠깐 띄우고 다음 단계로 넘어간다.
 // 등급 글자는 단계 끝에만 뜬다. 동작하는 동안에는 지금처럼 소리와 표정만. (설계 원칙 2를 '동작 중'으로 한정)
 const Stage = (() => {
-  // ① 짜기 → ② 문어 → ③ 1차 뒤집기 → ④ 2차 뒤집기 (⑤~⑦은 T14~)
-  const ORDER = ['pour', 'octopus', 'flip1', 'flip2'];
-  const NAME = { pour: '① 짜기', octopus: '② 문어', flip1: '③ 1차 뒤집기', flip2: '④ 2차 뒤집기' };
+  // ① 짜기 → ② 문어 → ③ 1차 뒤집기 → ④ 2차 뒤집기 → ⑤ 후네 담기 (⑥ 소스·⑦ 가쓰오부시는 T15~)
+  const ORDER = ['pour', 'octopus', 'flip1', 'flip2', 'box'];
+  const NAME = { pour: '① 짜기', octopus: '② 문어', flip1: '③ 1차 뒤집기', flip2: '④ 2차 뒤집기', box: '⑤ 후네 담기' };
   const GRADE_COLOR = { perfect: '#ffd34d', great: '#ff9f43', good: '#9fd36b', oops: '#9fb4c8' };
   const BANNER = { x: 560, y: 380, size: 92 }; // 불판 가운데 (board.js PLATE 기준)
 

@@ -152,6 +152,7 @@ const Pour = (() => {
       Octopus.clear(hole);
     }
     Octopus.reset();
+    Box.reset();
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }
 
