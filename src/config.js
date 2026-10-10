@@ -46,6 +46,16 @@ const Config = (() => {
       awning: ['#c8372d', '#f3e6d6'], wood: '#3b2a1f', counter: '#8a5a34',
     },
     art: { background: '' },
+    ingredients: {
+      octopus: { name: '문어', price: 0, tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
+      pinenut: { name: '잣', price: 180, tags: ['고소함'], flipWindow: 0.6, color: '#efe0a8' },
+      pear: { name: '배', price: 150, tags: ['단맛', '시원함'], flipWindow: 1.0, color: '#d6e89a' },
+      apple: { name: '사과', price: 120, tags: ['단맛', '새콤함'], flipWindow: 1.0, color: '#d8433a' },
+      radish: { name: '무', price: 80, tags: ['시원함'], flipWindow: 1.0, color: '#f6f2e6' },
+      shrimp: { name: '새우', price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b' },
+      scallion: { name: '파', price: 60, tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a' },
+      ginger: { name: '생강절임', price: 80, tags: ['새콤함', '매콤함'], flipWindow: 1.0, color: '#ef8aa8' },
+    },
     speakers: {
       bancho: { name: '반쵸', color: '#e07a2c', mark: '…', icon: '' },
       letter: { name: '편지', color: '#8a7460', mark: '✉', icon: '' },
@@ -76,7 +86,7 @@ const Config = (() => {
     day: {
       resultDelayMs: 1200, replyGreat: 8000, replyOk: 4000,
       days: [
-        { shop: false, enclosed: { money: 0, items: ['문어', '잣'] }, guests: [{ id: 'sparrow', orders: 2 }] },
+        { shop: false, enclosed: { money: 0, items: ['octopus', 'pinenut'] }, guests: [{ id: 'sparrow', orders: 2 }] },
         { shop: true, enclosed: { money: 500, items: [] }, guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
       ],
       startMoney: 0,
@@ -85,6 +95,7 @@ const Config = (() => {
       grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
       days: ['(1일차 편지 — 나중에 작성)', '(2일차 편지 — 나중에 작성)'],
       enclosed: { title: '동봉', items: '(준비물)' },
+      shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료' },
       result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
       funny: {
         noOcto: '문어 실종 사건', burnt: '숯불 특선 (주문한 적 없음)', raw: '반숙 타코야키, 신메뉴인가요?',

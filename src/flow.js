@@ -57,7 +57,7 @@ const Flow = (() => {
         go('PREP');
         return;
       }
-      panel('장보기', '재료를 산다', '6단계: 인벤토리 UI에서 구매', () => go('PREP'));
+      Shop.open(() => go('PREP'));
     },
     PREP() {
       panel('준비', '오늘 쓸 재료를 고른다', '6단계: 고른 재료가 재료판(문어 1 + 추가 3) 칸에 나타남', () => go('OPEN_BELL'));
@@ -102,14 +102,16 @@ const Flow = (() => {
     },
   };
 
-  // 편지에 동봉된 것 (T24): 송금은 돈으로, 준비물은 지금은 표시만 (6단계에 재료로)
+  // 편지에 동봉된 것 (T24): 송금은 돈으로, 준비물은 오늘 가진 재료로 (T25)
   const ENCLOSED_MS = 1500;
   function enclosed() {
     const e = today().enclosed || { money: 0, items: [] };
     const L = CFG.letters.enclosed;
+    Pantry.newDay(e.items); // 오늘 가진 재료 = 기본 재료 + 동봉 (T25)
     const parts = [];
     if (e.money) parts.push(`₩${e.money.toLocaleString('ko-KR')}`);
-    if (e.items && e.items.length) parts.push(`${e.items.join(' · ')} ${L.items}`);
+    const names = (e.items || []).filter((id) => CFG.ingredients[id]).map((id) => CFG.ingredients[id].name);
+    if (names.length) parts.push(`${names.join(' · ')} ${L.items}`);
     if (!parts.length) { go('SHOP'); return; }
     const g = Board.el('g', { cursor: 'pointer' }, Board.layer('top'));
     Board.el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'transparent', 'pointer-events': 'all' }, g);

@@ -30,6 +30,11 @@ const Wallet = (() => {
     Log.add({ step: '돈', amount, reason, money, line: `돈 | +${amount} ${reason} | ${won(money)}` });
   }
 
+  // 장보기에서 무를 때
+  function refund(amount, reason) {
+    add(amount, reason);
+  }
+
   // 모자라면 쓰지 않고 false
   function spend(amount, reason) {
     if (amount > money) {
@@ -59,5 +64,5 @@ const Wallet = (() => {
     requestAnimationFrame(step);
   }
 
-  return { init, add, spend, get money() { return money; } };
+  return { init, add, spend, refund, get money() { return money; } };
 })();

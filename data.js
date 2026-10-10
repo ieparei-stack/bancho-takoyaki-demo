@@ -121,6 +121,19 @@ window.DATA = {
   },
   // 아트 이미지 자리 (9단계에 넣는다, 2026-10-10 사용자). 비어 있으면 도형을 쓴다. 경로 또는 data URI
   art: { background: '' },
+  // 재료 (6단계, 기획서 시작값). name · price 장보기 가격 · tags 맛 태그 · flipWindow 뒤집기 성공 구간 배율(잣 0.6 = 빨리 탄다)
+  //   color 도형 아이콘 색(제안) · base 기본 재료(늘 있음, 무료). 반죽에 영향을 주는 재료는 없다 (2026-10-10 사용자: pourTarget 삭제)
+  //   장보기: 날마다 다시 사고, 산 날에는 무한 (2026-10-10 사용자)
+  ingredients: {
+    octopus:  { name: '문어',     price: 0,   tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
+    pinenut:  { name: '잣',       price: 180, tags: ['고소함'],           flipWindow: 0.6, color: '#efe0a8' },
+    pear:     { name: '배',       price: 150, tags: ['단맛', '시원함'],   flipWindow: 1.0, color: '#d6e89a' },
+    apple:    { name: '사과',     price: 120, tags: ['단맛', '새콤함'],   flipWindow: 1.0, color: '#d8433a' },
+    radish:   { name: '무',       price: 80,  tags: ['시원함'],           flipWindow: 1.0, color: '#f6f2e6' },
+    shrimp:   { name: '새우',     price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b' },
+    scallion: { name: '파',       price: 60,  tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a' },
+    ginger:   { name: '생강절임', price: 80,  tags: ['새콤함', '매콤함'], flipWindow: 1.0, color: '#ef8aa8' },
+  },
   // 화자 (T23): 이름 · 색 · 아이콘 기호. 손님은 customers.cast의 emoji·name을 쓴다. icon에 이미지를 넣으면 기호 대신 (9단계)
   //   반쵸는 짧은 반응만 ("…", "음.", "?") — 대사 줄의 mark로 표정 글자를 바꾼다
   speakers: {
@@ -164,9 +177,9 @@ window.DATA = {
   // 하루 (후속 확장용). 1일차 결산
   day: {
     // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수. 3일차는 8단계
-    //   enclosed: 편지에 동봉된 것 — money 송금(돈), items 준비물(지금은 이름 표시만, 6단계에 재료 id)
+    //   enclosed: 편지에 동봉된 것 — money 송금(돈), items 준비물(재료 id → 오늘 가진 재료)
     days: [
-      { shop: false, enclosed: { money: 0, items: ['문어', '잣'] }, guests: [{ id: 'sparrow', orders: 2 }] },
+      { shop: false, enclosed: { money: 0, items: ['octopus', 'pinenut'] }, guests: [{ id: 'sparrow', orders: 2 }] },
       { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
@@ -184,6 +197,8 @@ window.DATA = {
     ],
     // 편지 동봉 카드 (T24)
     enclosed: { title: '동봉', items: '(준비물)' },
+    // 장보기 (T25)
+    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료' },
     // 결산 화면 (T20, 8단계 결과 화면으로 교체 예정). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
     result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
