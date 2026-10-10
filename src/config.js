@@ -12,7 +12,7 @@ const Config = (() => {
       },
       octopus: { legRatio: 0.6, perfectRatio: 0.3 },
       stage: { bannerMs: 1200, perfect: 11, great: 8, good: 4 },
-      cook: { cue1Ms: 8000, cue2Ms: 4000, perfectMs: 150, goodMs: 300, burnMs: 3000 },
+      cook: { lead1Ms: 2500, lead2Ms: 1500, intervalMs: 1500, perfectSpanMs: 1500, goodMarginMs: 300, burnMs: 3000 },
       flip: { ignoreDeg: 30, flip1MinDeg: 90, flip1MaxDeg: 360, flip2MinDeg: 180, flip2MaxDeg: 720, flip2SpeedDps: 720 },
     },
     faces: {

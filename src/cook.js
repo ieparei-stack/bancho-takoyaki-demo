@@ -1,21 +1,23 @@
-// 굽기: 구멍마다 반죽을 넣은 시점부터 타이머가 돈다. 큐 시점에 "톡", 지나면 점점 탄다.
-// 1차(phase 1)는 반죽 직후, 2차(phase 2)는 1차 뒤집기 직후 시작한다. 뒤집기 조작은 T08·T09.
+// 굽기: 뒤집기 단계(③ 1차 / ④ 2차)가 시작되면 6구멍이 함께 굽기 시작하고, 1→6 차례로 큐가 온다. (T12)
+// 큐 순간 "톡"(2차 "톡톡")과 기포. 큐부터 perfectSpanMs 동안이 퍼펙트, 앞뒤 goodMarginMs가 굿, 그 뒤로 점점 탄다.
 const Cook = (() => {
   const cooking = new Map(); // hole.id → { hole, phase, startAt, cueAt, cueLogged, cueSound }
   let raf = 0;
 
-  function start(hole, t) {
-    begin(hole, 1, t);
-  }
-
-  // 1차 뒤집기가 끝나면 2차 타이머 시작 (T08에서 호출)
-  function flipped(hole, t = performance.now()) {
-    begin(hole, 2, t);
-  }
-
-  function begin(hole, phase, startAt) {
+  // n번 구멍 큐 = 단계 시작 + lead + (n−1) × interval
+  function sequence(phase, now) {
     const c = CFG.timing.cook;
-    const cueAt = startAt + (phase === 1 ? c.cue1Ms : c.cue2Ms);
+    const lead = phase === 1 ? c.lead1Ms : c.lead2Ms;
+    for (const hole of Board.holes) begin(hole, phase, now, now + lead + hole.id * c.intervalMs);
+  }
+
+  // 퍼펙트·굿 창이 끝나는 시각 (그 뒤로 탄다)
+  function windowEnd(s) {
+    const c = CFG.timing.cook;
+    return s.cueAt + c.perfectSpanMs + c.goodMarginMs;
+  }
+
+  function begin(hole, phase, startAt, cueAt) {
     const prev = cooking.get(hole.id);
     if (prev && prev.cueSound) prev.cueSound.cancel();
     if (phase === 2) hideHint(hole); // 뒤집혔다
@@ -65,10 +67,10 @@ const Cook = (() => {
       color = s.phase === 1
         ? (u < 0.6 ? mix(s.from, k.set, u / 0.6) : mix(k.set, k.golden, (u - 0.6) / 0.4))
         : mix(s.from, k.golden, u);
-    } else if (now < s.cueAt + c.goodMs) {
+    } else if (now < windowEnd(s)) {
       color = k.golden;
     } else {
-      const u = Math.min(1, (now - s.cueAt - c.goodMs) / c.burnMs);
+      const u = Math.min(1, (now - windowEnd(s)) / c.burnMs);
       color = u < 0.5 ? mix(k.golden, k.brown, u * 2) : mix(k.brown, k.burnt, (u - 0.5) * 2);
     }
     // 시작 색이 이미 더 탔으면 밝아지지 않는다
@@ -90,7 +92,7 @@ const Cook = (() => {
     const size = h.size || h.r;
     const u = Math.min(1, (now - s.startAt) / (s.cueAt - s.startAt));
 
-    if (now >= s.cueAt + c.goodMs) {
+    if (now >= windowEnd(s)) {
       // 속까지 굳었다
       hideHint(h);
       return;
@@ -116,9 +118,10 @@ const Cook = (() => {
     h.core.setAttribute('fill', coreColor);
     h.core.setAttribute('visibility', 'visible');
 
-    // 기포: 큐 순간에 한꺼번에 올라와 굿 창 동안 보글거리다 사라진다 (2026-10-10 사용자: 서서히 말고 그 순간에)
+    // 기포: 큐 순간에 한꺼번에 올라와 퍼펙트 구간(1.5 s) 동안 보글거리다 사라진다
+    // (2026-10-10 사용자: 서서히 말고 그 순간에 / 기포 보이는 동안 = 퍼펙트, 1.5 s)
     const since = now - s.cueAt;
-    const show = since >= 0 && since < c.goodMs;
+    const show = since >= 0 && since < c.perfectSpanMs;
     h.bubbles.setAttribute('display', show ? 'inline' : 'none'); // visibility는 자식이 덮어써서 display로 끈다
     if (show) {
       const grow = Math.min(1, since / 120);               // 올라오는 0.12초
@@ -161,5 +164,5 @@ const Cook = (() => {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
   }
 
-  return { start, flipped, state, stop, reset, hideHint };
+  return { sequence, state, stop, reset, hideHint };
 })();

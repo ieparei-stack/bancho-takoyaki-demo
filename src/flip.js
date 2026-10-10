@@ -1,5 +1,5 @@
 // 뒤집기: 반죽이 든 구멍을 누른 채 마우스를 돌린다. 구멍 중심 기준 회전각을 누적한다.
-// 1차(반 바퀴, T08)와 2차(한 바퀴 휙, T09) 모두 마우스를 떼는 순간 뒤집히고, 그 시각을 큐와 비교해 타이밍을 판정한다.
+// 1차(반 바퀴, ③ 단계)와 2차(한 바퀴 휙, ④ 단계) 모두 마우스를 떼는 순간 뒤집히고, 그 시각을 큐와 비교해 타이밍을 판정한다.
 // 회전량은 phase별 성공 폭 안이기만 하면 된다. 2차는 각속도가 모자라면 한 단계 강등된다.
 const Flip = (() => {
   const ANIM_MS = 150;
@@ -12,28 +12,21 @@ const Flip = (() => {
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', release);
     window.addEventListener('pointercancel', release);
-    Stage.onEnter('flip', startCooking);
+    // 단계가 시작되면 6구멍이 함께 굽기 시작하고 1→6 차례로 큐가 온다 (T12)
+    Stage.onEnter('flip1', (now) => Cook.sequence(1, now));
+    Stage.onEnter('flip2', (now) => Cook.sequence(2, now));
   }
 
-  // 임시 (T11): 뒤집기 구간에 들어오면 6구멍을 한꺼번에 굽기 시작한다.
-  // 1번 큐는 1.5 s 뒤, 나머지는 짤 때의 간격을 따라온다. T12(1차 뒤집기 단계)에서 차례 신호로 교체한다.
-  const TEMP_FIRST_CUE_MS = 1500;
-  function startCooking(now) {
-    const first = Board.holes[0].pourAt;
-    for (const hole of Board.holes) {
-      Cook.start(hole, now + TEMP_FIRST_CUE_MS - CFG.timing.cook.cue1Ms + (hole.pourAt - first));
-    }
-  }
-
+  // 지금 단계에서 이 구멍을 뒤집을 수 있으면 그 차수, 아니면 0
   function phaseOf(hole) {
     if (!hole.hasBatter) return 0;
-    if (!hole.flip1) return 1;
-    if (!hole.flip2) return 2;
-    return 0; // 다 뒤집었다
+    if (Stage.is('flip1')) return hole.flip1 ? 0 : 1;
+    if (Stage.is('flip2')) return hole.flip1 && !hole.flip2 ? 2 : 0;
+    return 0;
   }
 
   function start(hole, e) {
-    if (drag || e.button !== 0 || !Stage.is('flip')) return;
+    if (drag || e.button !== 0) return;
     const phase = phaseOf(hole);
     if (!phase) return;
     const p = Board.toSvg(e);
@@ -88,10 +81,11 @@ const Flip = (() => {
     return (hole.flip1.late || hole.flip2.late) ? 'burnt' : 'raw'; // 늦은 미스가 있으면 탐, 아니면 덜 익음
   }
 
+  // 큐(기포가 올라온 순간)부터 perfectSpanMs 동안 퍼펙트, 그 앞뒤 goodMarginMs는 굿 (2026-10-10 사용자)
   function judge(errorMs) {
-    const { perfectMs, goodMs } = CFG.timing.cook;
-    if (Math.abs(errorMs) <= perfectMs) return '퍼펙트';
-    if (Math.abs(errorMs) <= goodMs) return '굿';
+    const { perfectSpanMs, goodMarginMs } = CFG.timing.cook;
+    if (errorMs >= 0 && errorMs <= perfectSpanMs) return '퍼펙트';
+    if (errorMs >= -goodMarginMs && errorMs <= perfectSpanMs + goodMarginMs) return '굿';
     return errorMs < 0 ? '이름' : '늦음';
   }
 
@@ -127,7 +121,8 @@ const Flip = (() => {
         Face.setTilt(hole, tilt);
         Face.apply(hole, face, hole.size, hole.look);
       });
-      Cook.flipped(hole, d.doneAt);
+      Cook.stop(hole); // ④가 시작될 때까지 색 고정
+      Cook.hideHint(hole);
     } else {
       // 2차: 공 모양 + 최종 표정(합산). 더 굽지 않는다 (사용자 결정 2026-10-10)
       Cook.stop(hole);
@@ -147,6 +142,9 @@ const Flip = (() => {
       ...(phase === 2 ? { dps: d.dps, demoted, final: hole.final } : {}),
       line: `뒤집기 ${phase}차 #${hole.id + 1} | 큐 ${Math.round(cueAt)} | 입력 ${Math.round(d.doneAt)} | ${sign}${errorMs}ms | ${result} | ${deg}°${speed}`,
     });
+    if (phase === 1 && Board.holes.every((h) => h.flip1)) {
+      Stage.complete('flip1', Board.holes.map((h) => SCORE[h.flip1.result] || 0)); // 등급 → ④ 2차 뒤집기
+    }
     if (phase === 2 && Board.holes.every((h) => h.flip2)) logRound(d.doneAt);
   }
 
