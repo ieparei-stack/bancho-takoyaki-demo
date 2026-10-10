@@ -1,6 +1,6 @@
 // 뒤집기: 반죽이 든 구멍을 누른 채 마우스를 돌린다. 구멍 중심 기준 회전각을 누적한다.
-// 1차(반 바퀴)는 T08. 2차(한 바퀴 휙)는 T09에서 phase 2로 붙인다.
-// 타이밍은 제스처 완료 시각(누적 각도가 목표에 닿는 순간) 기준으로 큐와 비교한다.
+// 1차는 T08. 2차(한 바퀴 휙)는 T09에서 phase 2로 붙인다.
+// 마우스를 떼는 순간 뒤집히고, 그 시각을 큐와 비교해 타이밍을 판정한다. 회전량은 성공 폭 안이기만 하면 된다.
 const Flip = (() => {
   const ANIM_MS = 150;
   let drag = null; // { hole, phase, lastAng, deg, startAt, doneAt, lastT }
@@ -42,21 +42,19 @@ const Flip = (() => {
     drag.lastAng = a;
     drag.deg += d; // 부호 있게 누적 → 왔다 갔다는 상쇄
     drag.lastT = e.timeStamp;
-    const need = CFG.timing.flip.flip1Deg;
-    if (Math.abs(drag.deg) >= need) {
-      drag.doneAt = e.timeStamp;
-      complete(drag, false);
-    }
   }
 
+  // 떼는 순간 뒤집힌다. 회전량이 성공 폭 안이면 타이밍으로 판정, 밖이면 실패(미달/과회전)
   function release(e) {
     if (!drag) return;
     const d = drag;
     drag = null;
-    if (d.doneAt) return; // 이미 완료
-    if (Math.abs(d.deg) < CFG.timing.flip.ignoreDeg) return; // 실수 클릭
+    const f = CFG.timing.flip;
+    const deg = Math.abs(d.deg);
+    if (deg < f.ignoreDeg) return; // 실수 클릭
     d.doneAt = e.timeStamp;
-    complete(d, true);
+    const fail = deg < f.flip1MinDeg ? '미달' : deg > f.flip1MaxDeg ? '과회전' : null;
+    complete(d, fail);
   }
 
   function judge(errorMs) {
@@ -66,12 +64,12 @@ const Flip = (() => {
     return errorMs < 0 ? '이름' : '늦음';
   }
 
-  function complete(d, short) {
+  function complete(d, fail) {
     const { hole, phase } = d;
     const cook = Cook.state(hole);
     const cueAt = cook ? cook.cueAt : d.doneAt;
     const errorMs = Math.round(d.doneAt - cueAt);
-    const result = short ? '미달' : judge(errorMs);
+    const result = fail || judge(errorMs);
     const deg = Math.round(Math.abs(d.deg));
     hole.flip1 = { result, errorMs, deg, late: result === '늦음' };
 
@@ -79,7 +77,8 @@ const Flip = (() => {
     if (ok) Sfx.flipOk(); else Sfx.flipFail();
 
     const face = ok ? 'expect' : (result === '늦음' ? 'anxious2' : 'anxious1');
-    const tilt = short ? (d.deg < 0 ? -20 : 20) : 0;
+    // 회전량 실패는 비스듬하게. 미달은 돌린 쪽, 과회전은 반대쪽으로
+    const tilt = fail ? (d.deg < 0 ? -20 : 20) * (fail === '과회전' ? -1 : 1) : 0;
     Face.flipAnim(hole, ANIM_MS, () => {
       hole.dome = true;
       Face.setTilt(hole, tilt);

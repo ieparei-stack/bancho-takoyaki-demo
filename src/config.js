@@ -12,7 +12,7 @@ const Config = (() => {
       },
       octopus: { legRatio: 0.6 },
       cook: { cue1Ms: 8000, cue2Ms: 4000, perfectMs: 150, goodMs: 300, burnMs: 3000 },
-      flip: { ignoreDeg: 30, flip1Deg: 180 },
+      flip: { ignoreDeg: 30, flip1MinDeg: 90, flip1MaxDeg: 360 },
     },
     faces: {
       batter: { color: '#f1dfb4', squashY: 1, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0 },
