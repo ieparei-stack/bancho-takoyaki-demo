@@ -60,6 +60,21 @@ const Board = (() => {
         const bridge = el('rect', { rx: 18, visibility: 'hidden' }, bridgeLayer);
 
         const batter = el('ellipse', { cx, cy, rx: 0, ry: 0, 'stroke-width': 2 }, batterLayer);
+        // 1차 굽기 힌트: 아직 안 굳은 가운데 반죽 + 굳은 테두리 경계의 기포
+        const core = el('ellipse', { cx, cy, rx: 0, ry: 0, visibility: 'hidden' }, batterLayer);
+        const bubbles = el('g', { display: 'none' }, batterLayer);
+        const bubbleSlots = [];
+        for (let b = 0; b < 8; b++) {
+          // 구멍·순번으로 고정된 의사난수 → 매 프레임 자리가 흔들리지 않는다
+          const h = Math.sin((id + 1) * 127.1 + b * 311.7) * 43758.5453;
+          const f = h - Math.floor(h);
+          bubbleSlots.push({
+            ang: (b / 8) * Math.PI * 2 + f * 0.6,
+            rad: 0.45 + ((f * 7) % 1) * 0.45,     // core 경계 ~ 테두리 사이
+            r: 2.5 + ((f * 13) % 1) * 2,
+            el: el('circle', { fill: '#fff', opacity: 0.75, visibility: 'hidden' }, bubbles),
+          });
+        }
         const octo = el('g', {}, batterLayer);
         const rim = el('path', { fill: 'none', 'stroke-width': 3, visibility: 'hidden' }, batterLayer); // 뒤집힌 반구 아래 테두리
         const shine = el('ellipse', { fill: '#fff', opacity: 0.55, visibility: 'hidden' }, batterLayer); // 잘 짠 윤기
@@ -74,7 +89,7 @@ const Board = (() => {
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, octo, rim, shine, face, eyes, mouth, sweat, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, core, bubbles, bubbleSlots, octo, rim, shine, face, eyes, mouth, sweat, bridge, hit });
       }
     }
     return svg;

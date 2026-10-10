@@ -106,6 +106,7 @@ const Face = (() => {
   function flipAnim(hole, ms, then) {
     if (hole.reactRaf) cancelAnimationFrame(hole.reactRaf);
     hole.shine.setAttribute('visibility', 'hidden'); // 표면이 바뀌었다
+    Cook.hideHint(hole);
     const t0 = performance.now();
     let mid = false;
     const step = () => {
@@ -142,6 +143,7 @@ const Face = (() => {
     hole.bridge.setAttribute('visibility', 'hidden');
     hole.shine.setAttribute('visibility', 'hidden');
     hole.rim.setAttribute('visibility', 'hidden');
+    Cook.hideHint(hole);
     hole.mouth.setAttribute('visibility', 'hidden');
     hole.sweat.forEach((s) => s.setAttribute('visibility', 'hidden'));
   }

@@ -21,7 +21,7 @@ const Config = (() => {
       expect: { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5.5, eyeRy: 9, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'o', sweat: 0 },
       anxious1: { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 1 },
       anxious2: { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 2 },
-      cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
+      cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8 },
       react: {
         perfect: { squash: 0.82, stretch: 1.08, ms: 320, bounces: 2, shine: true },
         good: { squash: 0.92, stretch: 1.03, ms: 200, bounces: 1, shine: false },
