@@ -8,11 +8,11 @@ const Face = (() => {
     hole.size = size;
     hole.look = look;
 
-    const cy = hole.cy + f.sagY;
+    const cy = hole.cy + (hole.ball ? 0 : f.sagY); // 공(2차 뒤집기 뒤)은 처지지 않는다
     hole.batter.setAttribute('cx', hole.cx);
     hole.batter.setAttribute('cy', cy);
     hole.batter.setAttribute('rx', size.toFixed(1));
-    hole.baseRy = size * f.squashY; // 반응 애니메이션이 돌아올 기준
+    hole.baseRy = size * (hole.ball ? 1 : f.squashY); // 반응 애니메이션이 돌아올 기준. 공이면 동그라미
     hole.batter.setAttribute('ry', hole.baseRy.toFixed(1));
     // 굽는 중이면 굽기 색이 우선한다
     const color = hole.cookColor || f.color;
@@ -48,12 +48,14 @@ const Face = (() => {
       }
     });
 
-    // 뒤집힌 반구면 아래 테두리 호를 보여준다
+    // 뒤집힌 반구면 아래 테두리 호, 공이면 더 아래쪽 그림자 호를 보여준다
     if (hole.dome) {
       const rx = size;
       const ry = hole.baseRy;
+      const w = hole.ball ? 0.78 : 0.92; // 호 양 끝의 가로 위치 (타원 위의 점)
+      const k = hole.ball ? 0.62 : 0.38; // 호 양 끝의 세로 위치
       set(hole.rim, {
-        d: `M ${hole.cx - rx * 0.92} ${cy + ry * 0.38} A ${rx} ${ry} 0 0 0 ${hole.cx + rx * 0.92} ${cy + ry * 0.38}`,
+        d: `M ${hole.cx - rx * w} ${cy + ry * k} A ${rx} ${ry} 0 0 0 ${hole.cx + rx * w} ${cy + ry * k}`,
         stroke: shade(shade(color)), visibility: 'visible',
       });
     } else {
@@ -135,6 +137,7 @@ const Face = (() => {
     hole.state = null;
     hole.look = 0;
     hole.dome = false;
+    hole.ball = false;
     delete hole.cookColor;
     if (hole.reactRaf) { cancelAnimationFrame(hole.reactRaf); hole.reactRaf = 0; }
     setTilt(hole, 0);

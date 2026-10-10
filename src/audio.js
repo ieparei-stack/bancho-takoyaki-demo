@@ -179,8 +179,43 @@ const Sfx = (() => {
   }
   function flipFail() {
     if (!ctx) return;
-    tone(ctx, master, ctx.currentTime, { freq: 150, toFreq: 70, type: 'triangle', gain: 0.4, decay: 0.12 });
-    tone(ctx, master, ctx.currentTime + 0.02, { freq: 90, toFreq: 50, type: 'sine', gain: 0.3, decay: 0.15 });
+    thud(ctx, master, ctx.currentTime);
+  }
+  function thud(c, dest, t) {
+    tone(c, dest, t, { freq: 150, toFreq: 70, type: 'triangle', gain: 0.4, decay: 0.12 });
+    tone(c, dest, t + 0.02, { freq: 90, toFreq: 50, type: 'sine', gain: 0.3, decay: 0.15 });
+  }
+
+  // "휙" — 잡음 대역이 급히 올라간다. s = 길이(초). low면 낮고 둔하게 (느린 회전)
+  function whoosh(c, dest, t, s, low) {
+    const src = c.createBufferSource();
+    src.buffer = noise(c);
+    const bp = c.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.Q.value = 2.5;
+    bp.frequency.setValueAtTime(low ? 250 : 400, t);
+    bp.frequency.exponentialRampToValueAtTime(low ? 900 : 2500, t + s);
+    const g = c.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(low ? 0.25 : 0.4, t + s * 0.3);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + s);
+    src.connect(bp).connect(g).connect(dest);
+    src.start(t);
+    src.stop(t + s + 0.02);
+  }
+
+  // 2차 뒤집기 성공 "휙-톡" / 각속도 미달(강등) "휘이익-퍽"
+  function flip2Ok() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    whoosh(ctx, master, t, 0.12, false);
+    marimba(ctx, master, t + 0.1, NOTE.G5, true);
+  }
+  function flip2Slow() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    whoosh(ctx, master, t, 0.35, true);
+    thud(ctx, master, t + 0.3);
   }
 
   // "퐁" — 문어가 반죽에 들어갈 때. 다리가 삐지면 살짝 낮게
@@ -201,6 +236,8 @@ const Sfx = (() => {
     plop,
     flipOk,
     flipFail,
+    flip2Ok,
+    flip2Slow,
     scheduleCue,
     schedulePour, // 검증용 오프라인 렌더링에서도 쓴다
     get ctx() { return ctx; },

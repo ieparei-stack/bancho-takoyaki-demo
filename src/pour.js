@@ -21,7 +21,7 @@ const Pour = (() => {
 
   function start(hole, e) {
     if (active || e.button !== 0 || Octopus.busy() || Flip.busy()) return;
-    if (next >= Board.holes.length) { reset(); return; }
+    if (next >= Board.holes.length) return; // 다 짰다. 새 판은 불판(구멍 밖) 클릭으로만 — 구멍 클릭은 뒤집기 몫
     if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
 
     // 첫 클릭이 바로 짜기여도 소리가 나도록 여기서도 연다
@@ -143,6 +143,7 @@ const Pour = (() => {
     for (const hole of Board.holes) {
       hole.hasBatter = false;
       delete hole.flip1;
+      delete hole.flip2;
       Face.clear(hole);
       Octopus.clear(hole);
     }
