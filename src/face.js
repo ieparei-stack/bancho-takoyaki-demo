@@ -14,28 +14,63 @@ const Face = (() => {
     hole.batter.setAttribute('rx', size.toFixed(1));
     hole.baseRy = size * (hole.ball ? 1 : f.squashY); // 반응 애니메이션이 돌아올 기준. 공이면 동그라미
     hole.batter.setAttribute('ry', hole.baseRy.toFixed(1));
-    // 굽는 중이면 굽기 색이 우선한다
-    const color = hole.cookColor || f.color;
+    // 굽는 중이면 굽기 색이 우선한다. 최종 표정 중 창백·검정은 표정 색을 강제한다
+    const color = (f.forceColor ? null : hole.cookColor) || f.color;
     hole.batter.setAttribute('fill', color);
     hole.batter.setAttribute('stroke', shade(color));
 
     const lookX = look * (f.lookX || CFG.faces.over.lookX);
     const eyeY = cy + f.eyeY;
+    const xEyes = f.eyes === 'x';
     hole.eyes.forEach((eye, i) => {
       const ex = hole.cx + (i === 0 ? -1 : 1) * f.eyeGap / 2;
-      set(eye.white, { cx: ex, cy: eyeY, rx: f.eyeRx * 1.7, ry: f.eyeRy * 1.4 });
-      set(eye.pupil, { cx: ex + lookX, cy: eyeY, rx: f.eyeRx, ry: f.eyeRy });
+      const ry = i === 1 && f.eyeRy2 ? f.eyeRy2 : f.eyeRy; // 짝짝이 눈
+      set(eye.white, { cx: ex, cy: eyeY, rx: f.eyeRx * 1.7, ry: ry * 1.4, display: xEyes ? 'none' : 'inline' });
+      set(eye.pupil, { cx: ex + lookX, cy: eyeY, rx: f.eyeRx, ry, display: xEyes ? 'none' : 'inline' });
     });
+    // X 눈 (탐)
+    if (xEyes) {
+      const r = f.eyeRx;
+      const d = [0, 1].map((i) => {
+        const ex = hole.cx + (i === 0 ? -1 : 1) * f.eyeGap / 2;
+        return `M ${ex - r} ${eyeY - r} L ${ex + r} ${eyeY + r} M ${ex + r} ${eyeY - r} L ${ex - r} ${eyeY + r}`;
+      }).join(' ');
+      set(hole.xeyes, { d, display: 'inline' });
+    } else {
+      hole.xeyes.setAttribute('display', 'none');
+    }
 
-    // 입: 'o' 작은 동그라미 / 'wave' 물결 / 없음
+    // 입: 'o' 작은 동그라미 / 'wave' 물결 / 'smile' 작은 미소 / 'grin' 활짝 / 'flat' 일자 / 없음
     const my = eyeY + size * 0.3;
-    if (f.mouth === 'o') {
-      set(hole.mouth, { d: `M ${hole.cx - 4} ${my} a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0`, visibility: 'visible' });
-    } else if (f.mouth === 'wave') {
-      set(hole.mouth, { d: `M ${hole.cx - 10} ${my} q 5 -5 10 0 t 10 0`, visibility: 'visible' });
+    const MOUTH = {
+      o: `M ${hole.cx - 4} ${my} a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0`,
+      wave: `M ${hole.cx - 10} ${my} q 5 -5 10 0 t 10 0`,
+      smile: `M ${hole.cx - 7} ${my - 2} q 7 8 14 0`,
+      grin: `M ${hole.cx - 13} ${my - 4} q 13 18 26 0 z`,
+      flat: `M ${hole.cx - 5} ${my} L ${hole.cx + 5} ${my}`,
+    };
+    if (MOUTH[f.mouth]) {
+      set(hole.mouth, { d: MOUTH[f.mouth], fill: f.mouth === 'grin' ? '#6b2f22' : 'none', visibility: 'visible' });
     } else {
       hole.mouth.setAttribute('visibility', 'hidden');
     }
+
+    // 얼룩 (어설픔): 구멍마다 고정된 자리에 어두운 점
+    if (f.spots) {
+      Array.from(hole.spots.children).forEach((c, k) => {
+        const ang = (k / 3) * Math.PI * 2 + hole.id * 0.7 + 0.9;
+        set(c, { cx: hole.cx + Math.cos(ang) * size * 0.55, cy: cy + Math.sin(ang) * size * 0.55, r: size * 0.1, display: k < f.spots ? 'inline' : 'none' });
+      });
+      hole.spots.setAttribute('display', 'inline');
+    } else {
+      hole.spots.setAttribute('display', 'none');
+    }
+
+    // 움직임 플래그: 흐물(덜 익음) / 연기(탐). ambient 루프가 그린다
+    hole.wobbleOn = !!f.wobble;
+    hole.smokeOn = f.smoke || 0;
+    if (!hole.smokeOn) hole.smoke.forEach((s) => s.setAttribute('display', 'none'));
+    if (hole.wobbleOn || hole.smokeOn) ensureAmbient();
 
     // 땀방울: 오른쪽 위에 1~2개
     hole.sweat.forEach((s, i) => {
@@ -104,6 +139,35 @@ const Face = (() => {
     }
   }
 
+  // 계속 도는 움직임: 덜 익음은 흐물흐물(세로 ±4 %), 탐은 연기 2줄이 올라간다. 해당 구멍이 없으면 멈춘다
+  let ambientRaf = 0;
+  function ensureAmbient() {
+    if (!ambientRaf) ambientRaf = requestAnimationFrame(ambient);
+  }
+  function ambient() {
+    ambientRaf = 0;
+    const t = performance.now();
+    let any = false;
+    for (const h of Board.holes) {
+      if (h.wobbleOn && !h.reactRaf) {
+        any = true;
+        h.batter.setAttribute('ry', (h.baseRy * (1 + 0.04 * Math.sin(t / 190 + h.id))).toFixed(1));
+      }
+      if (h.smokeOn) {
+        any = true;
+        const s = h.size || h.r;
+        h.smoke.forEach((p, k) => {
+          if (k >= h.smokeOn) { p.setAttribute('display', 'none'); return; }
+          const x0 = h.cx + (k === 0 ? -1 : 1) * s * 0.28;
+          const y0 = h.cy - s * 0.95;
+          const w = Math.sin(t / 420 + k * 2.1) * 6;
+          set(p, { d: `M ${x0} ${y0} q ${w} -12 0 -24 q ${-w} -12 0 -24`, opacity: 0.45 + 0.25 * Math.sin(t / 300 + k), display: 'inline' });
+        });
+      }
+    }
+    if (any) ambientRaf = requestAnimationFrame(ambient);
+  }
+
   // 뒤집기 연출: 납작해졌다 다시 펴진다. 가운데서 then()을 불러 표정을 바꾼다
   function flipAnim(hole, ms, then) {
     if (hole.reactRaf) cancelAnimationFrame(hole.reactRaf);
@@ -149,6 +213,12 @@ const Face = (() => {
     Cook.hideHint(hole);
     hole.mouth.setAttribute('visibility', 'hidden');
     hole.sweat.forEach((s) => s.setAttribute('visibility', 'hidden'));
+    hole.wobbleOn = false;
+    hole.smokeOn = 0;
+    hole.xeyes.setAttribute('display', 'none');
+    hole.spots.setAttribute('display', 'none');
+    hole.smoke.forEach((s) => s.setAttribute('display', 'none'));
+    hole.eyes.forEach((eye) => { eye.white.setAttribute('display', 'inline'); eye.pupil.setAttribute('display', 'inline'); });
   }
 
   function set(node, attrs) {

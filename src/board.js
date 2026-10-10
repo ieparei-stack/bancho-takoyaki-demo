@@ -85,11 +85,17 @@ const Board = (() => {
         }));
         const mouth = el('path', { fill: 'none', stroke: '#2a1d14', 'stroke-width': 2.5, 'stroke-linecap': 'round', visibility: 'hidden' }, face);
         const sweat = [0, 1].map(() => el('path', { fill: '#8fd3f4', stroke: '#5fb4de', 'stroke-width': 1, visibility: 'hidden' }, face));
+        // 최종 표정용: X 눈(탐), 얼룩(어설픔). display로 끈다 (visibility는 자식이 부모를 덮어쓴다)
+        const xeyes = el('path', { fill: 'none', stroke: '#1a1210', 'stroke-width': 3, 'stroke-linecap': 'round', display: 'none' }, face);
+        const spots = el('g', { display: 'none' }, face);
+        for (let k = 0; k < 3; k++) el('circle', { fill: '#8a5a2e', opacity: 0.45 }, spots);
+        // 연기(탐): 기울기와 무관하게 위로 올라가므로 face 그룹 밖
+        const smoke = [0, 1].map(() => el('path', { fill: 'none', stroke: '#9c9c9c', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.7, display: 'none' }, batterLayer));
 
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, core, bubbles, bubbleSlots, octo, rim, shine, face, eyes, mouth, sweat, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, core, bubbles, bubbleSlots, octo, rim, shine, face, eyes, mouth, sweat, xeyes, spots, smoke, bridge, hit });
       }
     }
     return svg;

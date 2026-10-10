@@ -65,6 +65,18 @@ const Flip = (() => {
     complete(d, fail);
   }
 
+  // 최종 표정 (T10): 1차·2차 점수 합. 퍼펙트 2 / 굿 1 / 그 외 0. 2단계 인터뷰 #8·#10
+  const SCORE = { 퍼펙트: 2, 굿: 1 };
+  const FINAL_NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
+  function finalState(hole) {
+    if (!hole.hasOcto) return 'blank'; // 문어 없음은 굽기 결과와 무관하게 멍함
+    const sum = (SCORE[hole.flip1.result] || 0) + (SCORE[hole.flip2.result] || 0);
+    if (sum >= 4) return 'perfect';
+    if (sum === 3) return 'tasty';
+    if (sum === 2) return 'meh';
+    return (hole.flip1.late || hole.flip2.late) ? 'burnt' : 'raw'; // 늦은 미스가 있으면 탐, 아니면 덜 익음
+  }
+
   function judge(errorMs) {
     const { perfectMs, goodMs } = CFG.timing.cook;
     if (Math.abs(errorMs) <= perfectMs) return '퍼펙트';
@@ -106,21 +118,36 @@ const Flip = (() => {
       });
       Cook.flipped(hole, d.doneAt);
     } else {
-      // 2차: 공 모양. 표정은 1차 중간 표정 그대로 (최종 표정은 T10 합산). 더 굽지 않는다 (사용자 결정 2026-10-10)
+      // 2차: 공 모양 + 최종 표정(합산). 더 굽지 않는다 (사용자 결정 2026-10-10)
       Cook.stop(hole);
+      hole.final = finalState(hole);
       Face.flipAnim(hole, ANIM_MS, () => {
         hole.ball = true;
         Face.setTilt(hole, tilt);
-        Face.apply(hole, hole.state, hole.size, hole.look);
+        Face.apply(hole, hole.final, hole.size, hole.look);
+        if (hole.final === 'perfect') Face.react(hole, 'final'); // 통통
       });
     }
 
     const sign = errorMs > 0 ? '+' : '';
-    const speed = phase === 2 ? ` | ${d.dps}°/s${demoted ? ' (느림 강등)' : ''}` : '';
+    const speed = phase === 2 ? ` | ${d.dps}°/s${demoted ? ' (느림 강등)' : ''} | 최종 ${FINAL_NAME[hole.final]}` : '';
     Log.add({
       step: `뒤집기 ${phase}차`, hole: hole.id + 1, cueAt: Math.round(cueAt), inputAt: Math.round(d.doneAt), errorMs, result, deg,
-      ...(phase === 2 ? { dps: d.dps, demoted } : {}),
+      ...(phase === 2 ? { dps: d.dps, demoted, final: hole.final } : {}),
       line: `뒤집기 ${phase}차 #${hole.id + 1} | 큐 ${Math.round(cueAt)} | 입력 ${Math.round(d.doneAt)} | ${sign}${errorMs}ms | ${result} | ${deg}°${speed}`,
+    });
+    if (phase === 2 && Board.holes.every((h) => h.flip2)) logRound(d.doneAt);
+  }
+
+  // 한 판: 1번 구멍 짜기 시작 → 마지막 2차 뒤집기
+  function logRound(endAt) {
+    const start = Pour.roundStart();
+    const totalMs = Math.round(endAt - (start ?? endAt));
+    const count = (k) => Board.holes.filter((h) => h.final === k).length;
+    const tally = Object.keys(FINAL_NAME).map((k) => `${FINAL_NAME[k]} ${count(k)}`).join(' ');
+    Log.add({
+      step: '한 판', totalMs, perfect: count('perfect'), tasty: count('tasty'), meh: count('meh'), raw: count('raw'), burnt: count('burnt'), blank: count('blank'),
+      line: `── 한 판 ${(totalMs / 1000).toFixed(1)} s (1번 짜기 시작 → 마지막 2차 뒤집기) | ${tally}`,
     });
   }
 
