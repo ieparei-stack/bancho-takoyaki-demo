@@ -31,7 +31,7 @@ const Pour = (() => {
     const sound = Sfx.pourStart({
       soundSet: p.soundSet, targetMs: p.targetMs, autoStopMs: p.autoStopMs, holdBeats: p.holdBeats,
     });
-    if (hole.id === 0) roundStart = e.timeStamp;
+    if (hole.id === 0) { roundStart = e.timeStamp; Customer.shrinkBubble(); }
     active = { hole, downAt: e.timeStamp, sound };
     Face.clear(hole);
     requestAnimationFrame(tick);
@@ -153,6 +153,8 @@ const Pour = (() => {
     }
     Octopus.reset();
     Topping.reset();
+    Customer.reset();
+    Customer.arrive(0); // 임시: T19에서 다음 손님 흐름으로 교체
     Box.reset();
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }

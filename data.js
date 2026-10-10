@@ -103,7 +103,15 @@ window.DATA = {
       final:   { squash: 0.85, stretch: 1.1,  ms: 200, bounces: 2, shine: false }, // 최종 완벽: 통통 200 ms
     },
   },
-  customers: {},
+  // 손님 (4단계). 1일차 2명, 한 명씩 차례로, 이탈·대기 게이지 없음 (2026-10-10 사용자)
+  //   list: 차례대로 오는 손님. emoji 얼굴 / order 주문 말풍선. 문구는 Claude 초안 (플레이 후 수정)
+  customers: {
+    day1: 2,
+    list: [
+      { emoji: '🧑', order: '타코야키 하나요!' },
+      { emoji: '👵', order: '하나 줘요~' },
+    ],
+  },
   day: {},
   letters: {
     // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)

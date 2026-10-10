@@ -118,6 +118,8 @@ const Flip = (() => {
       const face = ok ? 'expect' : (result === '늦음' ? 'anxious2' : 'anxious1');
       Face.flipAnim(hole, ANIM_MS, () => {
         hole.dome = true;
+        const chunk = hole.octo.querySelector('[data-chunk]');
+        if (chunk) chunk.setAttribute('display', 'none'); // 조각은 안으로, 다리만 밖에
         Face.setTilt(hole, tilt);
         Face.apply(hole, face, hole.size, hole.look);
       });

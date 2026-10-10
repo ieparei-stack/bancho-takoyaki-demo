@@ -100,7 +100,9 @@ const Octopus = (() => {
     const inR = Math.min(dist, hole.r * 0.7);
     const px = hole.cx + Math.cos(ang) * inR;
     const py = hole.cy + Math.sin(ang) * inR;
-    drawChunk(hole.octo, px, py, 0.85);
+    // 조각은 1차 뒤집기 때 안으로 들어가 숨는다(다리만 남는다, 2026-10-10 사용자)
+    const chunk = Board.el('g', { 'data-chunk': '1' }, hole.octo);
+    drawChunk(chunk, px, py, 0.85);
     if (leg) drawLeg(hole.octo, px, py, ang, hole);
 
     Sfx.plop(leg);

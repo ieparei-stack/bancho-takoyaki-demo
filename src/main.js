@@ -8,5 +8,7 @@
   Flip.init();
   Box.init();
   Topping.init();
+  Customer.init();
+  Customer.arrive(0);
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();

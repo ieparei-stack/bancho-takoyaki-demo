@@ -37,7 +37,13 @@ const Config = (() => {
         final: { squash: 0.85, stretch: 1.1, ms: 200, bounces: 2, shine: false },
       },
     },
-    customers: {},
+    customers: {
+      day1: 2,
+      list: [
+        { emoji: '🧑', order: '타코야키 하나요!' },
+        { emoji: '👵', order: '하나 줘요~' },
+      ],
+    },
     day: {},
     letters: {
       grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
