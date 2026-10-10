@@ -13,8 +13,10 @@ const Face = (() => {
     hole.batter.setAttribute('cy', cy);
     hole.batter.setAttribute('rx', size.toFixed(1));
     hole.batter.setAttribute('ry', (size * f.squashY).toFixed(1));
-    hole.batter.setAttribute('fill', f.color);
-    hole.batter.setAttribute('stroke', shade(f.color));
+    // 굽는 중이면 굽기 색이 우선한다
+    const color = hole.cookColor || f.color;
+    hole.batter.setAttribute('fill', color);
+    hole.batter.setAttribute('stroke', shade(color));
 
     const lookX = look * (f.lookX || CFG.faces.over.lookX);
     const eyeY = cy + f.eyeY;
@@ -39,6 +41,7 @@ const Face = (() => {
   function clear(hole) {
     hole.state = null;
     hole.look = 0;
+    delete hole.cookColor;
     set(hole.batter, { rx: 0, ry: 0 });
     hole.face.setAttribute('visibility', 'hidden');
     hole.bridge.setAttribute('visibility', 'hidden');
@@ -55,5 +58,5 @@ const Face = (() => {
     return `rgb(${d(n >> 16)},${d((n >> 8) & 255)},${d(n & 255)})`;
   }
 
-  return { apply, bridge, clear };
+  return { apply, bridge, clear, shade };
 })();

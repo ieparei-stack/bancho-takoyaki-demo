@@ -11,11 +11,13 @@ const Config = (() => {
         holdBeats: 2, soundSet: 1,
       },
       octopus: { legRatio: 0.6 },
+      cook: { cue1Ms: 8000, cue2Ms: 4000, perfectMs: 150, goodMs: 300, burnMs: 3000 },
     },
     faces: {
       batter: { color: '#f1dfb4', squashY: 1, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0 },
       under: { color: '#e8d29e', squashY: 0.72, sagY: 7, eyeRx: 5, eyeRy: 2, eyeGap: 22, eyeY: -2, lookX: 0 },
       over: { color: '#f1dfb4', squashY: 1, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 4, bridgeW: 46 },
+      cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
     },
     customers: {},
     day: {},

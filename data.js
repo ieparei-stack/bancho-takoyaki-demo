@@ -22,6 +22,15 @@ window.DATA = {
     octopus: {
       legRatio: 0.6,    // 구멍 중심에서 반지름의 이 비율보다 멀면 다리가 삐져나온다. 확정
     },
+
+    // 굽기 (구멍별. 1차는 반죽 넣은 시점부터, 2차는 1차 뒤집기 시점부터)
+    cook: {
+      cue1Ms: 8000,     // 반죽 → 1차 큐 "톡", ms. 시작값 (실제 약 3분을 압축)
+      cue2Ms: 4000,     // 1차 뒤집기 → 2차 큐 "톡톡", ms. 시작값. 1차 : 2차 = 2 : 1 비율은 확정
+      perfectMs: 150,   // 뒤집기 퍼펙트 창 ±ms (제스처 완료 시각 기준). 확정
+      goodMs: 300,      // 뒤집기 굿 창 ±ms. 이르면 덜 익음, 늦으면 탐. 확정
+      burnMs: 3000,     // 굿 창을 지난 뒤 완전히 검게 되기까지, ms. 제안
+    },
   },
   // 타코야키 표정 (SPEC 7절). 전부 제안값
   //   color 반죽 색 / squashY 세로 비율(1 = 동그라미) / sagY 아래로 처지는 px
@@ -31,6 +40,8 @@ window.DATA = {
     batter: { color: '#f1dfb4', squashY: 1,    sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0 }, // 반죽: 눈만, 무표정
     under:  { color: '#e8d29e', squashY: 0.72, sagY: 7, eyeRx: 5, eyeRy: 2, eyeGap: 22, eyeY: -2, lookX: 0 }, // 부족: 찌그러지고 처짐, 힘없는 눈
     over:   { color: '#f1dfb4', squashY: 1,    sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 4, bridgeW: 46 }, // 넘침: 옆 구멍과 붙어 곁눈질
+    // 굽기 색. 반죽 → (큐) 황금 → 갈색 → 검정. 제안
+    cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
   },
   customers: {},
   day: {},

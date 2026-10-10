@@ -81,6 +81,7 @@ const Pour = (() => {
 
     hole.hasBatter = true; // 이제 문어를 넣을 수 있다
     showFace(hole, result, size(hole, held));
+    Cook.start(hole, upAt); // 반죽을 넣은 시점부터 굽기 시작
     log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
 
     if (next === Board.holes.length) {
@@ -135,6 +136,7 @@ const Pour = (() => {
     results = [];
     roundStart = null;
     for (const k in glanceAt) delete glanceAt[k];
+    Cook.reset();
     for (const hole of Board.holes) {
       hole.hasBatter = false;
       Face.clear(hole);
