@@ -49,7 +49,7 @@ const Flow = (() => {
       // 편지 = 대화창 (한 장 = 한 번). 문구는 사용자가 data.js letters.days에 직접 쓴다
       const raw = (CFG.letters.days || [])[dayIdx];
       const pages = Array.isArray(raw) ? raw : (raw ? [raw] : []);
-      Dialogue.play(pages.map((text) => ({ who: 'letter', text: String(text) })), () => go('SHOP'));
+      Dialogue.play(pages.map((text) => ({ who: 'letter', text: String(text) })), enclosed);
     },
     SHOP() {
       if (!today().shop) {
@@ -101,6 +101,30 @@ const Flow = (() => {
       Result.show({ records: Customer.getRecords(), total: Customer.total });
     },
   };
+
+  // 편지에 동봉된 것 (T24): 송금은 돈으로, 준비물은 지금은 표시만 (6단계에 재료로)
+  const ENCLOSED_MS = 1500;
+  function enclosed() {
+    const e = today().enclosed || { money: 0, items: [] };
+    const L = CFG.letters.enclosed;
+    const parts = [];
+    if (e.money) parts.push(`₩${e.money.toLocaleString('ko-KR')}`);
+    if (e.items && e.items.length) parts.push(`${e.items.join(' · ')} ${L.items}`);
+    if (!parts.length) { go('SHOP'); return; }
+    const g = Board.el('g', { cursor: 'pointer' }, Board.layer('top'));
+    Board.el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'transparent', 'pointer-events': 'all' }, g);
+    Board.el('rect', { x: 400, y: 300, width: 480, height: 120, rx: 18, fill: '#fffdf6', stroke: '#c9b89c', 'stroke-width': 4 }, g);
+    const t1 = Board.el('text', { x: 640, y: 340, 'text-anchor': 'middle', 'font-size': 20, fill: '#8a7460' }, g);
+    t1.textContent = `✉ ${L.title}`;
+    const t2 = Board.el('text', { x: 640, y: 388, 'text-anchor': 'middle', 'font-size': 28, 'font-weight': 900, fill: '#3a2a1e' }, g);
+    t2.textContent = parts.join('  +  ');
+    if (e.money) { Wallet.add(e.money, '송금'); Sfx.coin(); }
+    Log.add({ step: '동봉', day: dayIdx + 1, money: e.money || 0, items: e.items || [], line: `동봉 | ${parts.join(' + ')}` });
+    let gone = false;
+    const close = () => { if (gone) return; gone = true; g.remove(); go('SHOP'); };
+    g.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); close(); }, { once: true });
+    setTimeout(close, ENCLOSED_MS);
+  }
 
   function beginDay(i) {
     dayIdx = i;

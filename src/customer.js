@@ -9,7 +9,6 @@ const Customer = (() => {
   const WALK_MS = 500;
   const BUBBLE = { x: 640, y: 40, w: 230, h: 60 };
   const EMOJI_SIZE = 84;
-  const SALES = { x: 28, y: 40 };       // 왼쪽 위 매출 합계
   const POP_MS = 900;                   // "+₩" 팝업
   const FAIL = ['raw', 'burnt', 'blank'];
 
@@ -21,11 +20,9 @@ const Customer = (() => {
   let walk = null;     // { from, to, t0, then }
   let current = null;  // data.js customers.cast 항목 + id
   let total = 0;       // 매출 (데모 전체)
-  let salesText = null;
   const records = [];  // 결산용: { day, customer, faces, sales, reaction, satisfied, boat }
 
   function init() {
-    const side = Board.layer('side');
     const guest = Board.layer('guest');
     g = Board.el('g', { display: 'none', 'pointer-events': 'none' }, guest);
     emoji = Board.el('text', {
@@ -41,9 +38,6 @@ const Customer = (() => {
       'font-size': 24, 'font-weight': 700, fill: '#3a2a1e',
     }, bg);
     bubble = { g: bg, text, box };
-    Board.el('rect', { x: 12, y: 10, width: 190, height: 74, rx: 10, fill: 'rgba(10,6,4,0.55)' }, side); // 글자 뒤 띠 (배경 위에서도 읽히게)
-    salesText = Board.el('text', { x: SALES.x, y: SALES.y, 'font-size': 24, 'font-weight': 700, fill: '#f3e6d6' }, side);
-    showTotal();
   }
 
   // 말풍선을 보이고 글자 길이에 맞춘다 (보이는 상태여야 길이를 잴 수 있다)
@@ -56,9 +50,6 @@ const Customer = (() => {
 
   function won(n) {
     return `₩${n.toLocaleString('ko-KR')}`;
-  }
-  function showTotal() {
-    salesText.textContent = `매출 ${won(total)}`;
   }
 
   // 표정 6개 → 반응 키 (위에서부터 처음 맞는 것). 문구·이모지·임계는 data.js
@@ -85,8 +76,8 @@ const Customer = (() => {
     const sales = price(faces);
     const key = pickReaction(faces, sauceLen, sales);
     const react = CFG.customers.reactions[key];
-    total += sales;
-    showTotal();
+    total += sales;           // 결산용 매출 합 (송금 제외)
+    Wallet.add(sales, '매출');
     emoji.textContent = react.emoji;
     bubble.text.textContent = react.line;
     bubble.g.removeAttribute('transform');

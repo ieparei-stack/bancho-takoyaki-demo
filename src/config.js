@@ -76,13 +76,15 @@ const Config = (() => {
     day: {
       resultDelayMs: 1200, replyGreat: 8000, replyOk: 4000,
       days: [
-        { shop: false, guests: [{ id: 'sparrow', orders: 2 }] },
-        { shop: true, guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
+        { shop: false, enclosed: { money: 0, items: ['문어', '잣'] }, guests: [{ id: 'sparrow', orders: 2 }] },
+        { shop: true, enclosed: { money: 500, items: [] }, guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
       ],
+      startMoney: 0,
     },
     letters: {
       grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
       days: ['(1일차 편지 — 나중에 작성)', '(2일차 편지 — 나중에 작성)'],
+      enclosed: { title: '동봉', items: '(준비물)' },
       result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
       funny: {
         noOcto: '문어 실종 사건', burnt: '숯불 특선 (주문한 적 없음)', raw: '반숙 타코야키, 신메뉴인가요?',

@@ -9,6 +9,7 @@
   Flip.init();
   Box.init();
   Topping.init();
+  Wallet.init();
   Customer.init();
   Dialogue.init();
   Flow.start();

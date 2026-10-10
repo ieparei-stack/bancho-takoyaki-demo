@@ -164,10 +164,12 @@ window.DATA = {
   // 하루 (후속 확장용). 1일차 결산
   day: {
     // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수. 3일차는 8단계
+    //   enclosed: 편지에 동봉된 것 — money 송금(돈), items 준비물(지금은 이름 표시만, 6단계에 재료 id)
     days: [
-      { shop: false, guests: [{ id: 'sparrow', orders: 2 }] },
-      { shop: true,  guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
+      { shop: false, enclosed: { money: 0, items: ['문어', '잣'] }, guests: [{ id: 'sparrow', orders: 2 }] },
+      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
     ],
+    startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
     replyGreat: 8000,    // 매출이 이 이상이면 답장 great. 제안
     replyOk: 4000,       // 이 이상이면 ok, 아래면 bad. 제안
@@ -180,6 +182,8 @@ window.DATA = {
       '(1일차 편지 — 나중에 작성)',
       '(2일차 편지 — 나중에 작성)',
     ],
+    // 편지 동봉 카드 (T24)
+    enclosed: { title: '동봉', items: '(준비물)' },
     // 결산 화면 (T20, 8단계 결과 화면으로 교체 예정). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
     result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
