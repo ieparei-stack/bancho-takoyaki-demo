@@ -269,6 +269,18 @@ const Sfx = (() => {
     src.stop(t + 0.07);
   }
 
+  // 매출 "짤랑" / 0원 "흠…"
+  function coin() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    marimba(ctx, master, t, NOTE.C6, true);
+    marimba(ctx, master, t + 0.08, NOTE.G5 * 2, true);
+  }
+  function hmm() {
+    if (!ctx) return;
+    tone(ctx, master, ctx.currentTime, { freq: 220, toFreq: 160, type: 'triangle', gain: 0.25, decay: 0.4 });
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -282,6 +294,8 @@ const Sfx = (() => {
     boxLand,
     squirt,
     flake,
+    coin,
+    hmm,
     flipOk,
     flipFail,
     flip2Ok,

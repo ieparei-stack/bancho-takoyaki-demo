@@ -43,6 +43,17 @@ const Config = (() => {
         { emoji: '🧑', order: '타코야키 하나요!' },
         { emoji: '👵', order: '하나 줘요~' },
       ],
+      price: { perfect: 800, tasty: 600, meh: 300, raw: 0, burnt: 0, blank: 0 },
+      rules: { burnt: 2, fails: 3, perfect: 4, saucePx: 2500, goodSales: 2400 },
+      reactions: {
+        noOcto: { emoji: '🤨', line: '어… 이건 문어가 어디 갔죠?', satisfied: false },
+        burnt: { emoji: '😵', line: '음… 숯불 향이 진하네요…', satisfied: false },
+        raw: { emoji: '😰', line: '이거… 다 익은 거 맞죠?', satisfied: false },
+        great: { emoji: '😋', line: '와, 겉바속촉! 또 올게요!', satisfied: true },
+        sauce: { emoji: '😅', line: '소스… 좋아하시나 봐요?', satisfied: true },
+        good: { emoji: '🙂', line: '맛있네요, 잘 먹을게요!', satisfied: true },
+        meh: { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
+      },
     },
     day: {},
     letters: {

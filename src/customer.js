@@ -1,5 +1,5 @@
 // 손님 (T17): 화면 위쪽에 이모지 손님이 걸어 들어와 주문 말풍선을 띄운다. 1일차는 대기 게이지 없음 (2026-10-10 사용자).
-// 한 명씩 차례로 온다. 받기·반응은 T18, 다음 손님 흐름은 T19.
+// 한 명씩 차례로 온다. 건넨 후네는 맨 앞 손님이 받고(T18) 표정별 가격 합(실패 0원)으로 매출, 반응 대사·표정. 다음 손님 흐름은 T19.
 const Customer = (() => {
   // 배치 상수 (건네는 선 y 170 위쪽 공간)
   const SPOT = { x: 560, y: 85 };
@@ -7,6 +7,9 @@ const Customer = (() => {
   const WALK_MS = 500;
   const BUBBLE = { x: 640, y: 40, w: 230, h: 60 };
   const EMOJI_SIZE = 84;
+  const SALES = { x: 28, y: 40 };       // 왼쪽 위 매출 합계
+  const POP_MS = 900;                   // "+₩" 팝업
+  const FAIL = ['raw', 'burnt', 'blank'];
 
   let g = null;        // 손님 그룹 (이모지)
   let emoji = null;
@@ -15,6 +18,10 @@ const Customer = (() => {
   let raf = 0;
   let walk = null;     // { from, t0 }
   let current = null;  // data.js customers.list 항목
+  let index = 0;
+  let total = 0;       // 오늘 매출
+  let salesText = null;
+  const records = [];  // 결산(T20)용: { customer, faces, sales, reaction, satisfied, boat }
 
   function init() {
     const side = Board.layer('side');
@@ -24,17 +31,94 @@ const Customer = (() => {
       'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif',
     }, g);
     const bg = Board.el('g', { display: 'none', 'pointer-events': 'none' }, side);
-    Board.el('rect', { x: BUBBLE.x, y: BUBBLE.y, width: BUBBLE.w, height: BUBBLE.h, rx: 18, fill: '#fffaf0', stroke: '#c9b89c', 'stroke-width': 3 }, bg);
+    const box = Board.el('rect', { x: BUBBLE.x, y: BUBBLE.y, width: BUBBLE.w, height: BUBBLE.h, rx: 18, fill: '#fffaf0', stroke: '#c9b89c', 'stroke-width': 3 }, bg);
     Board.el('path', { d: `M ${BUBBLE.x + 2} ${BUBBLE.y + 34} L ${BUBBLE.x - 16} ${BUBBLE.y + 44} L ${BUBBLE.x + 2} ${BUBBLE.y + 46} Z`, fill: '#fffaf0', stroke: '#c9b89c', 'stroke-width': 3, 'stroke-linejoin': 'round' }, bg);
     Board.el('rect', { x: BUBBLE.x + 1, y: BUBBLE.y + 32, width: 6, height: 16, fill: '#fffaf0' }, bg); // 꼬리 이음새 가림
     const text = Board.el('text', {
       x: BUBBLE.x + BUBBLE.w / 2, y: BUBBLE.y + BUBBLE.h / 2, 'text-anchor': 'middle', 'dominant-baseline': 'central',
       'font-size': 24, 'font-weight': 700, fill: '#3a2a1e',
     }, bg);
-    bubble = { g: bg, text };
+    bubble = { g: bg, text, box };
+    salesText = Board.el('text', { x: SALES.x, y: SALES.y, 'font-size': 24, 'font-weight': 700, fill: '#f3e6d6' }, side);
+    showTotal();
   }
 
-  function arrive(index) {
+  // 말풍선을 보이고 글자 길이에 맞춘다 (보이는 상태여야 길이를 잴 수 있다)
+  function showBubble() {
+    bubble.g.setAttribute('display', 'inline');
+    const w = Math.max(BUBBLE.w, bubble.text.getComputedTextLength() + 44);
+    bubble.box.setAttribute('width', w.toFixed(0));
+    bubble.text.setAttribute('x', (BUBBLE.x + w / 2).toFixed(0));
+  }
+
+  function won(n) {
+    return `₩${n.toLocaleString('ko-KR')}`;
+  }
+  function showTotal() {
+    salesText.textContent = `오늘 매출 ${won(total)}`;
+  }
+
+  // 표정 6개 → 반응 키 (위에서부터 처음 맞는 것). 문구·이모지·임계는 data.js
+  function pickReaction(faces, sauceLen, sales) {
+    const r = CFG.customers.rules;
+    const n = (k) => faces.filter((f) => f === k).length;
+    const fails = faces.filter((f) => FAIL.includes(f)).length;
+    if (n('blank') >= 1) return 'noOcto';
+    if (n('burnt') >= r.burnt) return 'burnt';
+    if (fails >= r.fails) return 'raw';
+    if (n('perfect') >= r.perfect) return 'great';
+    if (sauceLen > r.saucePx) return 'sauce';
+    if (sales >= r.goodSales) return 'good';
+    return 'meh';
+  }
+
+  function price(faces) {
+    const p = CFG.customers.price;
+    return faces.reduce((sum, f) => sum + (p[f] || 0), 0);
+  }
+
+  // 건넨 후네를 받는다
+  function serve({ faces, sauceLen, flakes, boat }) {
+    const sales = price(faces);
+    const key = pickReaction(faces, sauceLen, sales);
+    const react = CFG.customers.reactions[key];
+    total += sales;
+    showTotal();
+    emoji.textContent = react.emoji;
+    bubble.text.textContent = react.line;
+    bubble.g.removeAttribute('transform');
+    showBubble();
+    popup(sales);
+    if (sales > 0) Sfx.coin(); else Sfx.hmm();
+    records.push({ customer: current, faces, sales, reaction: key, satisfied: react.satisfied, sauceLen, flakes, boat });
+
+    const NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
+    const tally = Object.keys(NAME).map((k) => [NAME[k], faces.filter((f) => f === k).length]).filter(([, c]) => c).map(([k, c]) => `${k} ${c}`).join(' · ');
+    Log.add({
+      step: '서빙', customer: index + 1, faces, sales, reaction: key, satisfied: react.satisfied, total,
+      line: `서빙 | 손님 ${index + 1} ${current.emoji} | ${tally} | ${won(sales)} | 반응 ${key}(${react.satisfied ? '만족' : '불만'}) | 오늘 ${won(total)}`,
+    });
+  }
+
+  // 손님 옆에 "+₩" 이 떠오르며 흐려진다
+  function popup(sales) {
+    const t = Board.el('text', {
+      x: SPOT.x - 70, y: SPOT.y, 'text-anchor': 'end', 'font-size': 30, 'font-weight': 900,
+      fill: sales > 0 ? '#ffd34d' : '#9fb4c8', stroke: '#1b1512', 'stroke-width': 5, 'paint-order': 'stroke',
+    }, Board.layer('top'));
+    t.textContent = `+${won(sales)}`;
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / POP_MS);
+      t.setAttribute('transform', `translate(0 ${(-30 * u).toFixed(1)})`);
+      t.setAttribute('opacity', (u < 0.6 ? 1 : 1 - (u - 0.6) / 0.4).toFixed(2));
+      if (u < 1) requestAnimationFrame(step); else t.remove();
+    };
+    requestAnimationFrame(step);
+  }
+
+  function arrive(i) {
+    index = i;
     const list = CFG.customers.list;
     current = list[index % list.length];
     emoji.textContent = current.emoji;
@@ -58,7 +142,7 @@ const Customer = (() => {
       y -= Math.abs(Math.sin(u * Math.PI * 3)) * 8 * (1 - u);
       if (u >= 1) {
         walk = null;
-        bubble.g.setAttribute('display', 'inline');
+        showBubble();
       }
     } else {
       y += Math.sin(now / 600) * 2; // 숨쉬기
@@ -83,5 +167,5 @@ const Customer = (() => {
     bubble.g.setAttribute('display', 'none');
   }
 
-  return { init, arrive, shrinkBubble, reset };
+  return { init, arrive, shrinkBubble, reset, serve, pickReaction, getRecords: () => records, get spot() { return SPOT; } };
 })();

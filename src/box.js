@@ -75,6 +75,10 @@ const Box = (() => {
     place();
   }
 
+  function setOpacity(v) {
+    boat.g.setAttribute('opacity', v.toFixed(2));
+  }
+
   // 화면 좌표 → 후네 안 좌표
   function toBoat(x, y) {
     return { x: (x - pos.x) / zoom, y: (y - pos.y) / zoom };
@@ -223,6 +227,7 @@ const Box = (() => {
     for (const b of inFlight) b.remove();
     inFlight.clear();
     boat.g.setAttribute('display', 'none');
+    boat.g.removeAttribute('opacity');
     zoom = 1;
     for (const hole of Board.holes) {
       hole.boxed = false;
@@ -232,7 +237,7 @@ const Box = (() => {
   }
 
   return {
-    init, reset, setPose, toBoat,
+    init, reset, setPose, setOpacity, toBoat,
     get g() { return boat.g; },
     get pos() { return { ...pos, zoom }; },
     WORK, OUTLINE,

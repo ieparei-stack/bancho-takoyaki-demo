@@ -111,6 +111,21 @@ window.DATA = {
       { emoji: '🧑', order: '타코야키 하나요!' },
       { emoji: '👵', order: '하나 줘요~' },
     ],
+    // 표정별 개당 가격(원). 실패(덜 익음·탐·문어 없음)는 0원 (2026-10-10 사용자). 나머지 수치는 제안
+    price: { perfect: 800, tasty: 600, meh: 300, raw: 0, burnt: 0, blank: 0 },
+    // 반응 고르는 임계 (위에서부터 처음 맞는 반응). 제안
+    //   burnt 탐 개수 / fails 실패 개수 / perfect 완벽 개수 / saucePx 소스 많이(그린 거리) / goodSales 그 밖에 '맛있네요'가 되는 매출
+    rules: { burnt: 2, fails: 3, perfect: 4, saucePx: 2500, goodSales: 2400 },
+    // 반응 이모지·대사 (Claude 초안 → 플레이 후 수정). satisfied = 결산 '만족'
+    reactions: {
+      noOcto: { emoji: '🤨', line: '어… 이건 문어가 어디 갔죠?', satisfied: false },
+      burnt:  { emoji: '😵', line: '음… 숯불 향이 진하네요…', satisfied: false },
+      raw:    { emoji: '😰', line: '이거… 다 익은 거 맞죠?', satisfied: false },
+      great:  { emoji: '😋', line: '와, 겉바속촉! 또 올게요!', satisfied: true },
+      sauce:  { emoji: '😅', line: '소스… 좋아하시나 봐요?', satisfied: true },
+      good:   { emoji: '🙂', line: '맛있네요, 잘 먹을게요!', satisfied: true },
+      meh:    { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
+    },
   },
   day: {},
   letters: {

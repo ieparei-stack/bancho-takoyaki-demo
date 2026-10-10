@@ -230,10 +230,23 @@ const Topping = (() => {
       step: '한 판 완료', sauceLen: Math.round(sauceLen), flakes: flakes.length, totalMs,
       line: `── 한 판 완료 | 소스 ${Math.round(sauceLen)} px · 가쓰오부시 ${flakes.length}조각 | 총 ${(totalMs / 1000).toFixed(1)} s (1번 짜기 → 건네기)`,
     });
-    slide(b, { x: b.x, y: -160 }, 300, () => {
+    // 결산(T20) "웃긴 실패 후네 통째로"용 복제
+    const boat = Box.g.cloneNode(true);
+    const faces = Board.holes.map((h) => h.final);
+    const sp = Customer.spot;
+    const to = { x: sp.x, y: sp.y + 25, z: 0.35 };
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / 350);
+      const e = 1 - (1 - u) * (1 - u);
+      Box.setPose(b.x + (to.x - b.x) * e, b.y + (to.y - b.y) * e, b.zoom + (to.z - b.zoom) * e);
+      Box.setOpacity(1 - u * u);
+      if (u < 1) { requestAnimationFrame(step); return; }
       Box.g.setAttribute('display', 'none');
+      Customer.serve({ faces, sauceLen: Math.round(sauceLen), flakes: flakes.length, boat });
       Stage.complete('topping', null);
-    });
+    };
+    requestAnimationFrame(step);
   }
 
   function reset() {
