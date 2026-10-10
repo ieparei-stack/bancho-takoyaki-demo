@@ -46,8 +46,10 @@ const Flow = (() => {
 
   const ENTER = {
     LETTER() {
-      const letter = (CFG.letters.days || [])[dayIdx] || '';
-      panel('편지', letter, '편지 문구는 data.js letters.days에 직접 씁니다 (T23·T24에서 대화창으로)', () => go('SHOP'));
+      // 편지 = 대화창 (한 장 = 한 번). 문구는 사용자가 data.js letters.days에 직접 쓴다
+      const raw = (CFG.letters.days || [])[dayIdx];
+      const pages = Array.isArray(raw) ? raw : (raw ? [raw] : []);
+      Dialogue.play(pages.map((text) => ({ who: 'letter', text: String(text) })), () => go('SHOP'));
     },
     SHOP() {
       if (!today().shop) {
@@ -87,7 +89,7 @@ const Flow = (() => {
       setTimeout(reacted, CFG.customers.leaveMs);
     },
     DAY_END_TALK() {
-      panel('밤 대화', '손님이 내일 힌트를 흘린다', '7단계: 대화창 + 힌트 곡선', () => go('GIFT_CHOICE'));
+      Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE'));
     },
     GIFT_CHOICE() {
       panel('선물', '받은 선물을 팔지 / 남길지', '7단계: 잣 꾸러미 · 반짝이 단추', () => {

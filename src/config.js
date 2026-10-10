@@ -46,6 +46,14 @@ const Config = (() => {
       awning: ['#c8372d', '#f3e6d6'], wood: '#3b2a1f', counter: '#8a5a34',
     },
     art: { background: '' },
+    speakers: {
+      bancho: { name: '반쵸', color: '#e07a2c', mark: '…', icon: '' },
+      letter: { name: '편지', color: '#8a7460', mark: '✉', icon: '' },
+    },
+    dialogue: {
+      night1: [{ who: 'sparrow', text: '(1일차 밤 대화)' }, { who: 'bancho', text: '…', mark: '…' }],
+      night2: [{ who: 'crow_b', text: '(2일차 밤 대화)' }, { who: 'bancho', text: '음.', mark: '음.' }],
+    },
     customers: {
       leaveMs: 2000,
       cast: {
@@ -128,6 +136,10 @@ const Config = (() => {
       const out = {};
       for (const key of Object.keys(def)) {
         out[key] = walk(def[key], raw[key], path ? `${path}.${key}` : key, warnings);
+      }
+      // 기본값에 없는 항목(새 대사 장면, 새 손님 등)은 검사 없이 그대로 둔다
+      for (const key of Object.keys(raw)) {
+        if (!(key in def)) out[key] = clone(raw[key]);
       }
       return out;
     }

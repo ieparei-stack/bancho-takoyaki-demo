@@ -121,6 +121,23 @@ window.DATA = {
   },
   // 아트 이미지 자리 (9단계에 넣는다, 2026-10-10 사용자). 비어 있으면 도형을 쓴다. 경로 또는 data URI
   art: { background: '' },
+  // 화자 (T23): 이름 · 색 · 아이콘 기호. 손님은 customers.cast의 emoji·name을 쓴다. icon에 이미지를 넣으면 기호 대신 (9단계)
+  //   반쵸는 짧은 반응만 ("…", "음.", "?") — 대사 줄의 mark로 표정 글자를 바꾼다
+  speakers: {
+    bancho: { name: '반쵸', color: '#e07a2c', mark: '…', icon: '' },
+    letter: { name: '편지', color: '#8a7460', mark: '✉', icon: '' },
+  },
+  // 장면별 대사 [{ who, text, mark? }]. text 안의 \n은 줄바꿈. 밤 대화 = night + 일차. 문구는 자리 (7단계에 힌트 곡선으로 채움)
+  dialogue: {
+    night1: [
+      { who: 'sparrow', text: '(1일차 밤 대화 — 7단계: 참새가 내일 손님 힌트를 흘림)' },
+      { who: 'bancho', text: '…', mark: '…' },
+    ],
+    night2: [
+      { who: 'crow_b', text: '(2일차 밤 대화 — 7단계: 까마귀의 한마디)' },
+      { who: 'bancho', text: '음.', mark: '음.' },
+    ],
+  },
   customers: {
     leaveMs: 2000,  // 반응을 보여준 뒤 다음으로 넘어가기까지, ms. 제안
     cast: {
@@ -158,7 +175,7 @@ window.DATA = {
   letters: {
     // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)
     grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
-    // 일차별 편지 (사용자가 직접 작성 — 2026-10-10. 지금은 자리만)
+    // 일차별 편지 (사용자가 직접 작성 — 2026-10-10. 지금은 자리만). 문자열 하나 = 한 장, ['…', '…'] = 여러 장
     days: [
       '(1일차 편지 — 나중에 작성)',
       '(2일차 편지 — 나중에 작성)',

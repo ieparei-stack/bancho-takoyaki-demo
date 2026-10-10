@@ -49,6 +49,7 @@ const Board = (() => {
     const hitLayer = el('g', {}, svg);
     layers.side = el('g', {}, svg);                             // 불판 옆 도구(문어 접시 등)
     layers.drag = el('g', { 'pointer-events': 'none' }, svg);  // 끌고 다니는 물건
+    layers.ui = el('g', {}, svg);                               // 대화창 (top을 비워도 남는다)
     layers.top = el('g', { 'pointer-events': 'none' }, svg);   // 단계 끝 등급 글자
 
     const x0 = PLATE.cx - HOLE.gapX * (COLS - 1) / 2;

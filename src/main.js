@@ -10,6 +10,7 @@
   Box.init();
   Topping.init();
   Customer.init();
+  Dialogue.init();
   Flow.start();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();
