@@ -103,6 +103,9 @@ const Pour = (() => {
       if (nb.state) Face.apply(nb, nb.state, nb.size, -dir);
     } else {
       Face.apply(hole, state, s, glanceAt[hole.id] || 0);
+      // 잘 짰으면 반죽이 반응한다 (퍼펙트 통통 + 윤기, 굿 출렁)
+      if (result === '퍼펙트') Face.react(hole, 'perfect');
+      else if (result === '굿') Face.react(hole, 'good');
     }
   }
 

@@ -61,6 +61,7 @@ const Board = (() => {
 
         const batter = el('ellipse', { cx, cy, rx: 0, ry: 0, 'stroke-width': 2 }, batterLayer);
         const octo = el('g', {}, batterLayer);
+        const shine = el('ellipse', { fill: '#fff', opacity: 0.55, visibility: 'hidden' }, batterLayer); // 잘 짠 윤기
         const face = el('g', { visibility: 'hidden' }, batterLayer);
         const eyes = [0, 1].map(() => ({
           white: el('ellipse', { fill: '#fffaf0' }, face),
@@ -70,7 +71,7 @@ const Board = (() => {
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, octo, face, eyes, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, octo, shine, face, eyes, bridge, hit });
       }
     }
     return svg;

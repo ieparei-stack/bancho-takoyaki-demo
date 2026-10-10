@@ -18,6 +18,10 @@ const Config = (() => {
       under: { color: '#e8d29e', squashY: 0.72, sagY: 7, eyeRx: 5, eyeRy: 2, eyeGap: 22, eyeY: -2, lookX: 0 },
       over: { color: '#f1dfb4', squashY: 1, sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 4, bridgeW: 46 },
       cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
+      react: {
+        perfect: { squash: 0.82, stretch: 1.08, ms: 320, bounces: 2, shine: true },
+        good: { squash: 0.92, stretch: 1.03, ms: 200, bounces: 1, shine: false },
+      },
     },
     customers: {},
     day: {},

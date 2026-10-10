@@ -42,6 +42,12 @@ window.DATA = {
     over:   { color: '#f1dfb4', squashY: 1,    sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 4, bridgeW: 46 }, // 넘침: 옆 구멍과 붙어 곁눈질
     // 굽기 색. 반죽 → (큐) 황금 → 갈색 → 검정. 제안
     cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
+    // 짜기 결과 반응 (놓는 순간 반죽이 눌렸다 펴진다). 제안
+    //   squash 눌림 세로 비율 / stretch 펴짐 세로 비율 / ms 길이 / bounces 횟수 / shine 윤기 점 남김
+    react: {
+      perfect: { squash: 0.82, stretch: 1.08, ms: 320, bounces: 2, shine: true },  // 통통 두 번 + 윤기
+      good:    { squash: 0.92, stretch: 1.03, ms: 200, bounces: 1, shine: false }, // 출렁 한 번
+    },
   },
   customers: {},
   day: {},
