@@ -36,7 +36,7 @@ const Octopus = (() => {
   }
 
   function pick(piece, e) {
-    if (piece.used || drag || e.button !== 0 || Pour.busy()) return;
+    if (piece.used || drag || e.button !== 0 || Pour.busy() || Flip.busy()) return;
     e.stopPropagation();
     Sfx.unlock();
     drag = { piece };

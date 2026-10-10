@@ -163,42 +163,6 @@ const Sfx = (() => {
 
   // ── 굽기 ────────────────────────────────────────────────
 
-  // 지글 베드: 굽는 구멍이 하나라도 있으면 아주 작게 깔린다
-  let sizzle = null;
-  function sizzleOn() {
-    if (!ctx || sizzle) return;
-    const src = ctx.createBufferSource();
-    src.buffer = noise(ctx);
-    src.loop = true;
-    const hp = ctx.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.value = 2800;
-    const g = ctx.createGain();
-    g.gain.setValueAtTime(0, ctx.currentTime);
-    g.gain.linearRampToValueAtTime(0.035, ctx.currentTime + 0.4);
-    // 지글지글 — 느린 떨림
-    const lfo = ctx.createOscillator();
-    const lfoG = ctx.createGain();
-    lfo.frequency.value = 9;
-    lfoG.gain.value = 0.015;
-    lfo.connect(lfoG).connect(g.gain);
-    src.connect(hp).connect(g).connect(master);
-    src.start();
-    lfo.start();
-    sizzle = { src, lfo, g };
-  }
-  function sizzleOff() {
-    if (!sizzle) return;
-    const { src, lfo, g } = sizzle;
-    sizzle = null;
-    const t = ctx.currentTime;
-    g.gain.cancelScheduledValues(t);
-    g.gain.setValueAtTime(g.gain.value, t);
-    g.gain.linearRampToValueAtTime(0, t + 0.3);
-    src.stop(t + 0.35);
-    lfo.stop(t + 0.35);
-  }
-
   // 굽기 큐 예약: inS초 뒤에 "톡"(1차) 또는 "톡톡"(2차). 취소 핸들을 돌려준다
   function scheduleCue(inS, phase) {
     if (!ctx) return { cancel() {} };
@@ -206,6 +170,17 @@ const Sfx = (() => {
     const nodes = woodblock(ctx, master, t);
     if (phase === 2) nodes.push(...woodblock(ctx, master, t + 0.11));
     return { cancel() { nodes.forEach((n) => { try { n.stop(); } catch (e) { /* 이미 끝남 */ } }); } };
+  }
+
+  // 뒤집기 성공 "톡" / 실패 "퍽"
+  function flipOk() {
+    if (!ctx) return;
+    marimba(ctx, master, ctx.currentTime, NOTE.G5, true);
+  }
+  function flipFail() {
+    if (!ctx) return;
+    tone(ctx, master, ctx.currentTime, { freq: 150, toFreq: 70, type: 'triangle', gain: 0.4, decay: 0.12 });
+    tone(ctx, master, ctx.currentTime + 0.02, { freq: 90, toFreq: 50, type: 'sine', gain: 0.3, decay: 0.15 });
   }
 
   // "퐁" — 문어가 반죽에 들어갈 때. 다리가 삐지면 살짝 낮게
@@ -224,8 +199,8 @@ const Sfx = (() => {
     pourStart,
     finish,
     plop,
-    sizzleOn,
-    sizzleOff,
+    flipOk,
+    flipFail,
     scheduleCue,
     schedulePour, // 검증용 오프라인 렌더링에서도 쓴다
     get ctx() { return ctx; },

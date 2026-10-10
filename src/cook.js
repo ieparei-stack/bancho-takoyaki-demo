@@ -20,8 +20,9 @@ const Cook = (() => {
     if (prev && prev.cueSound) prev.cueSound.cancel();
     // 소리 예약: performance 시계 → AudioContext 시계
     const cueSound = Sfx.scheduleCue((cueAt - performance.now()) / 1000, phase);
-    cooking.set(hole.id, { hole, phase, startAt, cueAt, cueLogged: false, cueSound });
-    Sfx.sizzleOn();
+    // 2차는 뒤집은 순간의 색에서 이어진다 (이미 탄 면은 다시 밝아지지 않는다)
+    const from = phase === 1 ? CFG.faces.cook.raw : (hole.cookColor || CFG.faces.cook.golden);
+    cooking.set(hole.id, { hole, phase, startAt, cueAt, from, cueLogged: false, cueSound });
     if (!raf) raf = requestAnimationFrame(tick);
   }
 
@@ -34,7 +35,6 @@ const Cook = (() => {
     const s = cooking.get(hole.id);
     if (s && s.cueSound) s.cueSound.cancel();
     cooking.delete(hole.id);
-    if (cooking.size === 0) Sfx.sizzleOff();
   }
 
   function tick() {
@@ -57,20 +57,26 @@ const Cook = (() => {
   function paint(s, now) {
     const c = CFG.timing.cook;
     const k = CFG.faces.cook;
-    const base = s.phase === 1 ? k.raw : k.golden;
     let color;
     if (now < s.cueAt) {
-      color = mix(base, k.golden, (now - s.startAt) / (s.cueAt - s.startAt));
+      color = mix(s.from, k.golden, (now - s.startAt) / (s.cueAt - s.startAt));
     } else if (now < s.cueAt + c.goodMs) {
       color = k.golden;
     } else {
       const u = Math.min(1, (now - s.cueAt - c.goodMs) / c.burnMs);
       color = u < 0.5 ? mix(k.golden, k.brown, u * 2) : mix(k.brown, k.burnt, (u - 0.5) * 2);
     }
+    // 시작 색이 이미 더 탔으면 밝아지지 않는다
+    if (lum(s.from) < lum(color)) color = s.from;
     s.hole.cookColor = color;
     s.hole.batter.setAttribute('fill', color);
     s.hole.batter.setAttribute('stroke', Face.shade(color));
     if (s.hole.bridge.getAttribute('visibility') === 'visible') s.hole.bridge.setAttribute('fill', color);
+  }
+
+  function lum(hex) {
+    const n = parseInt(hex.slice(1), 16);
+    return (n >> 16) * 0.3 + ((n >> 8) & 255) * 0.59 + (n & 255) * 0.11;
   }
 
   function mix(a, b, t) {
@@ -87,7 +93,6 @@ const Cook = (() => {
       delete s.hole.cookColor;
     }
     cooking.clear();
-    Sfx.sizzleOff();
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
   }
 

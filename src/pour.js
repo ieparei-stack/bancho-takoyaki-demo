@@ -20,7 +20,7 @@ const Pour = (() => {
   }
 
   function start(hole, e) {
-    if (active || e.button !== 0 || Octopus.busy()) return;
+    if (active || e.button !== 0 || Octopus.busy() || Flip.busy()) return;
     if (next >= Board.holes.length) { reset(); return; }
     if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
 
@@ -142,6 +142,7 @@ const Pour = (() => {
     Cook.reset();
     for (const hole of Board.holes) {
       hole.hasBatter = false;
+      delete hole.flip1;
       Face.clear(hole);
       Octopus.clear(hole);
     }

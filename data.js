@@ -31,6 +31,12 @@ window.DATA = {
       goodMs: 300,      // 뒤집기 굿 창 ±ms. 이르면 덜 익음, 늦으면 탐. 확정
       burnMs: 3000,     // 굿 창을 지난 뒤 완전히 검게 되기까지, ms. 제안
     },
+
+    // 뒤집기 제스처 (구멍 누른 채 마우스 회전)
+    flip: {
+      ignoreDeg: 30,    // 이보다 덜 돌리고 떼면 없던 일. 확정
+      flip1Deg: 180,    // 1차 뒤집기 완료 각도(반 바퀴). 미달로 떼면 어설프게 뒤집힘(실패). 확정
+    },
   },
   // 타코야키 표정 (SPEC 7절). 전부 제안값
   //   color 반죽 색 / squashY 세로 비율(1 = 동그라미) / sagY 아래로 처지는 px
@@ -40,6 +46,10 @@ window.DATA = {
     batter: { color: '#f1dfb4', squashY: 1,    sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0 }, // 반죽: 눈만, 무표정
     under:  { color: '#e8d29e', squashY: 0.72, sagY: 7, eyeRx: 5, eyeRy: 2, eyeGap: 22, eyeY: -2, lookX: 0 }, // 부족: 찌그러지고 처짐, 힘없는 눈
     over:   { color: '#f1dfb4', squashY: 1,    sagY: 0, eyeRx: 5, eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 4, bridgeW: 46 }, // 넘침: 옆 구멍과 붙어 곁눈질
+    // 1차 뒤집기 뒤 중간 표정. mouth 'o' 동그란 입 / 'wave' 물결 입, sweat 땀방울 수. 제안
+    expect:   { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5.5, eyeRy: 9, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'o',    sweat: 0 }, // 기대: 성공
+    anxious1: { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5,   eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 1 }, // 불안(식은땀): 이름·미달
+    anxious2: { color: '#e8c98f', squashY: 0.85, sagY: 0, eyeRx: 5,   eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 2 }, // 불안(진땀): 늦음
     // 굽기 색. 반죽 → (큐) 황금 → 갈색 → 검정. 제안
     cook: { raw: '#f1dfb4', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b' },
     // 짜기 결과 반응 (놓는 순간 반죽이 눌렸다 펴진다). 제안

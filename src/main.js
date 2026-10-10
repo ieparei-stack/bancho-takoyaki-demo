@@ -5,5 +5,6 @@
   Log.init(document.getElementById('log-panel'), document.getElementById('log-toggle'));
   Pour.init();
   Octopus.init();
+  Flip.init();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();
