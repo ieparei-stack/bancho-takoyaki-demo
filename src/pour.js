@@ -2,6 +2,7 @@
 // 판정은 화면에 글자로 띄우지 않고 판정 로그와 표정으로만 보여준다. (설계 원칙 2·3)
 const Pour = (() => {
   const RESULT_FACE = { 퍼펙트: 'batter', 굿: 'batter', 부족: 'under', 넘침: 'over' };
+  const SCORE = { 퍼펙트: 2, 굿: 1 }; // 단계 등급용, 그 외 0
 
   let next = 0;          // 다음 차례 구멍 id
   let active = null;     // { hole, downAt, sound }
@@ -20,7 +21,7 @@ const Pour = (() => {
   }
 
   function start(hole, e) {
-    if (active || e.button !== 0 || Octopus.busy() || Flip.busy()) return;
+    if (active || e.button !== 0 || !Stage.is('pour')) return;
     if (next >= Board.holes.length) return; // 다 짰다. 새 판은 불판(구멍 밖) 클릭으로만 — 구멍 클릭은 뒤집기 몫
     if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
 
@@ -79,14 +80,14 @@ const Pour = (() => {
     const result = autoStopped ? '넘침' : judge(errorMs);
     results.push(result);
 
-    hole.hasBatter = true; // 이제 문어를 넣을 수 있다
+    hole.hasBatter = true;
+    hole.pourAt = upAt; // 굽기는 뒤집기 단계에서 시작한다 (T11). 짠 간격은 큐 간격으로 쓴다
     showFace(hole, result, size(hole, held));
-    Cook.start(hole, upAt); // 반죽을 넣은 시점부터 굽기 시작
     log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
 
     if (next === Board.holes.length) {
-      Sfx.finish();
       logRound(upAt);
+      Stage.complete('pour', results.map((r) => SCORE[r] || 0)); // 짝 + 등급 글자 → ② 문어
     }
   }
 
@@ -134,7 +135,8 @@ const Pour = (() => {
   }
 
   function reset() {
-    if (active || next < Board.holes.length) return;
+    if (active || next < Board.holes.length || Stage.busy()) return;
+    Stage.reset();
     next = 0;
     results = [];
     roundStart = null;
@@ -145,6 +147,7 @@ const Pour = (() => {
       delete hole.flip1;
       delete hole.flip2;
       delete hole.final;
+      delete hole.pourAt;
       Face.clear(hole);
       Octopus.clear(hole);
     }

@@ -10,7 +10,8 @@ const Config = (() => {
         targetMs: 1000, perfectMs: 50, goodMs: 120, autoStopMs: 120,
         holdBeats: 2, soundSet: 1,
       },
-      octopus: { legRatio: 0.6 },
+      octopus: { legRatio: 0.6, perfectRatio: 0.3 },
+      stage: { bannerMs: 1200, perfect: 11, great: 8, good: 4 },
       cook: { cue1Ms: 8000, cue2Ms: 4000, perfectMs: 150, goodMs: 300, burnMs: 3000 },
       flip: { ignoreDeg: 30, flip1MinDeg: 90, flip1MaxDeg: 360, flip2MinDeg: 180, flip2MaxDeg: 720, flip2SpeedDps: 720 },
     },
@@ -36,7 +37,9 @@ const Config = (() => {
     },
     customers: {},
     day: {},
-    letters: {},
+    letters: {
+      grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
+    },
   };
 
   // 정해진 값 중 하나만 허용하는 항목

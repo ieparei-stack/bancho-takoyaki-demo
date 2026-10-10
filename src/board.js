@@ -45,6 +45,7 @@ const Board = (() => {
     const hitLayer = el('g', {}, svg);
     layers.side = el('g', {}, svg);                             // 불판 옆 도구(문어 접시 등)
     layers.drag = el('g', { 'pointer-events': 'none' }, svg);  // 끌고 다니는 물건
+    layers.top = el('g', { 'pointer-events': 'none' }, svg);   // 단계 끝 등급 글자
 
     const x0 = PLATE.cx - HOLE.gapX * (COLS - 1) / 2;
     const y0 = PLATE.cy - HOLE.gapY * (ROWS - 1) / 2;
@@ -120,8 +121,14 @@ const Board = (() => {
     return holes.find((h) => Math.hypot(x - h.cx, y - h.cy) <= h.r + 4) || null;
   }
 
+  // 그 점이 철판(둥근 모서리 무시한 사각형) 안인가
+  function onPlate(x, y) {
+    return Math.abs(x - PLATE.cx) <= PLATE.w / 2 && Math.abs(y - PLATE.cy) <= PLATE.h / 2;
+  }
+
   return {
     create,
+    onPlate,
     holes,
     neighbor,
     toSvg,

@@ -21,6 +21,16 @@ window.DATA = {
     // 문어 넣기 (반죽이 든 구멍이면 언제든)
     octopus: {
       legRatio: 0.6,    // 구멍 중심에서 반지름의 이 비율보다 멀면 다리가 삐져나온다. 확정
+      perfectRatio: 0.3, // 이 비율 안이면 단계 등급에서 퍼펙트(2점), legRatio 안이면 굿(1점). 모양은 그대로. 제안
+    },
+
+    // 단계 진행 (한 판 = 미니게임을 순서대로, 2026-10-10 사용자 결정)
+    // 단계 끝에 6번의 점수(퍼펙트 2 / 굿 1 / 그 외 0, 0~12점)를 합쳐 등급 글자를 띄운다. 글자는 letters.grade
+    stage: {
+      bannerMs: 1200,   // 등급 글자가 떠 있는 시간, ms. 그동안 입력은 막히고 끝나면 다음 단계. 제안
+      perfect: 11,      // 이 점수 이상 PERFECT!. 제안
+      great: 8,         // 이 점수 이상 GREAT!. 제안
+      good: 4,          // 이 점수 이상 GOOD, 그 아래는 OOPS…. 제안
     },
 
     // 굽기 (구멍별. 1차는 반죽 넣은 시점부터, 2차는 1차 뒤집기 시점부터)
@@ -76,5 +86,8 @@ window.DATA = {
   },
   customers: {},
   day: {},
-  letters: {},
+  letters: {
+    // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)
+    grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
+  },
 };

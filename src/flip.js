@@ -12,6 +12,17 @@ const Flip = (() => {
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', release);
     window.addEventListener('pointercancel', release);
+    Stage.onEnter('flip', startCooking);
+  }
+
+  // 임시 (T11): 뒤집기 구간에 들어오면 6구멍을 한꺼번에 굽기 시작한다.
+  // 1번 큐는 1.5 s 뒤, 나머지는 짤 때의 간격을 따라온다. T12(1차 뒤집기 단계)에서 차례 신호로 교체한다.
+  const TEMP_FIRST_CUE_MS = 1500;
+  function startCooking(now) {
+    const first = Board.holes[0].pourAt;
+    for (const hole of Board.holes) {
+      Cook.start(hole, now + TEMP_FIRST_CUE_MS - CFG.timing.cook.cue1Ms + (hole.pourAt - first));
+    }
   }
 
   function phaseOf(hole) {
@@ -22,7 +33,7 @@ const Flip = (() => {
   }
 
   function start(hole, e) {
-    if (drag || e.button !== 0 || Pour.busy() || Octopus.busy()) return;
+    if (drag || e.button !== 0 || !Stage.is('flip')) return;
     const phase = phaseOf(hole);
     if (!phase) return;
     const p = Board.toSvg(e);

@@ -1,5 +1,6 @@
-// 문어 넣기: 접시의 문어 조각을 반죽이 든 구멍으로 끌어다 놓는다.
+// 문어 넣기 (② 문어 단계): 접시의 문어 조각을 반죽이 든 구멍으로 끌어다 놓는다. 6개를 다 넣으면 단계가 끝난다.
 // 구멍 중심에서 벗어난 정도로 판정한다. 많이 벗어나면 다리가 삐져나온다.
+// 불판 밖(접시 제외)에 떨어뜨리면 잃어버린다 → 그 구멍은 문어 없는 타코야키가 된다. (사용자 결정 2026-10-10)
 const Octopus = (() => {
   // 배치·모양 상수
   const DISH = { cx: 950, cy: 380, r: 95 };
@@ -8,6 +9,7 @@ const Octopus = (() => {
 
   const pieces = []; // { el, home: {x, y}, used }
   let drag = null;   // { piece }
+  let scores = [];   // 단계 등급용: 중심 2 / 깔끔 1 / 다리 삐짐 0
 
   function init() {
     const side = Board.layer('side');
@@ -36,7 +38,7 @@ const Octopus = (() => {
   }
 
   function pick(piece, e) {
-    if (piece.used || drag || e.button !== 0 || Pour.busy() || Flip.busy()) return;
+    if (piece.used || drag || e.button !== 0 || !Stage.is('octopus')) return;
     e.stopPropagation();
     Sfx.unlock();
     drag = { piece };
@@ -63,6 +65,10 @@ const Octopus = (() => {
 
     const p = Board.toSvg(e);
     const hole = Board.holeAt(p.x, p.y);
+    if (!hole && !Board.onPlate(p.x, p.y) && Math.hypot(p.x - DISH.cx, p.y - DISH.cy) > DISH.r) {
+      lose(piece, p, e.timeStamp);
+      return;
+    }
     if (!hole || !hole.hasBatter || hole.hasOcto) {
       // 넣을 수 없는 곳 → 접시로 돌아간다
       piece.el.setAttribute('transform', `translate(${piece.home.x} ${piece.home.y})`);
@@ -79,8 +85,11 @@ const Octopus = (() => {
     const dy = y - hole.cy;
     const dist = Math.hypot(dx, dy);
     const ratio = dist / hole.r;
-    const leg = ratio > CFG.timing.octopus.legRatio;
-    const result = leg ? '다리 삐짐' : '깔끔';
+    const { legRatio, perfectRatio } = CFG.timing.octopus;
+    const leg = ratio > legRatio;
+    const center = ratio <= perfectRatio;
+    const result = leg ? '다리 삐짐' : center ? '깔끔(중심)' : '깔끔';
+    scores.push(leg ? 0 : center ? 2 : 1);
     hole.hasOcto = true;
     hole.octoLeg = leg;
 
@@ -97,6 +106,34 @@ const Octopus = (() => {
       step: '문어', hole: hole.id + 1, inputAt: Math.round(inputAt), distPx: Math.round(dist), ratio: +ratio.toFixed(2), result,
       line: `문어 #${hole.id + 1} | 입력 ${Math.round(inputAt)} | 중심 거리 ${Math.round(dist)}px (${ratio.toFixed(2)}r) | ${result}`,
     });
+    checkDone();
+  }
+
+  // 6조각을 다 썼으면(넣었거나 잃어버렸으면) 단계 끝
+  function checkDone() {
+    if (pieces.every((pc) => pc.used)) Stage.complete('octopus', scores);
+  }
+
+  // 바닥으로 떨어지며 사라진다
+  const LOSE_MS = 350;
+  function lose(piece, p, inputAt) {
+    piece.used = true;
+    scores.push(0);
+    Sfx.flipFail(); // 퍽
+    const t0 = performance.now();
+    const fall = (now) => {
+      const u = Math.min(1, (now - t0) / LOSE_MS);
+      piece.el.setAttribute('transform', `translate(${p.x} ${p.y + 60 * u * u}) rotate(${120 * u})`);
+      piece.el.setAttribute('opacity', (1 - u).toFixed(2));
+      if (u < 1) requestAnimationFrame(fall);
+      else piece.el.setAttribute('visibility', 'hidden');
+    };
+    requestAnimationFrame(fall);
+    Log.add({
+      step: '문어', inputAt: Math.round(inputAt), result: '잃어버림',
+      line: `문어 | 입력 ${Math.round(inputAt)} | 불판 밖 (${Math.round(p.x)}, ${Math.round(p.y)}) | 잃어버림`,
+    });
+    checkDone();
   }
 
   // 반죽 밖으로 말려 나온 다리
@@ -124,9 +161,11 @@ const Octopus = (() => {
   }
 
   function reset() {
+    scores = [];
     for (const piece of pieces) {
       piece.used = false;
       piece.el.setAttribute('visibility', 'visible');
+      piece.el.removeAttribute('opacity');
       piece.el.setAttribute('transform', `translate(${piece.home.x} ${piece.home.y})`);
     }
   }
