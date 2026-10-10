@@ -12,10 +12,13 @@ const Box = (() => {
   const ARC = 90;                       // 날아갈 때 포물선 높이 px
   const FOLLOW_MS = 70;                 // 후네가 목표로 따라가는 시간 상수
   const PARTS = ['batter', 'octo', 'rim', 'shine', 'face']; // 공을 이루는 노드
+  const OUTLINE = 'M -128 0 Q -100 -58 -62 -58 L 62 -58 Q 100 -58 128 0 Q 100 58 62 58 L -62 58 Q -100 58 -128 0 Z'; // 후네 외곽 (토핑 clip에도 쓴다)
+  const WORK = { x: 560, y: 400 };      // ⑥ 토핑 작업 위치 (불판 가운데)
 
   let boat = null;    // { g, balls }
   let pos = null;     // 후네 현재 위치
   let target = null;  // 후네 목표 위치
+  let zoom = 1;       // ⑥에서 커진다
   let raf = 0;
   let lastT = 0;
   let drag = null;    // { hole, x, y, t }
@@ -28,7 +31,7 @@ const Box = (() => {
     const g = Board.el('g', { display: 'none' }, side);
     // 위에서 본 후네: 양 끝이 뾰족한 종이 배
     Board.el('path', {
-      d: 'M -128 0 Q -100 -58 -62 -58 L 62 -58 Q 100 -58 128 0 Q 100 58 62 58 L -62 58 Q -100 58 -128 0 Z',
+      d: OUTLINE,
       fill: '#efe2c2', stroke: '#c4ad80', 'stroke-width': 4,
     }, g);
     Board.el('path', {
@@ -48,6 +51,33 @@ const Box = (() => {
     window.addEventListener('pointerup', () => { drag = null; });
     window.addEventListener('pointercancel', () => { drag = null; });
     Stage.onEnter('box', enter);
+    Stage.onEnter('topping', toWork);
+  }
+
+  // ⑥: 불판 가운데로 와서 커진다
+  function toWork() {
+    const from = { x: pos.x, y: pos.y, z: zoom };
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / 300);
+      const e = 1 - (1 - u) * (1 - u);
+      setPose(from.x + (WORK.x - from.x) * e, from.y + (WORK.y - from.y) * e, from.z + (CFG.timing.topping.boatScale - from.z) * e);
+      if (u < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }
+
+  function setPose(x, y, z = zoom) {
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
+    pos = { x, y };
+    target = { x, y };
+    zoom = z;
+    place();
+  }
+
+  // 화면 좌표 → 후네 안 좌표
+  function toBoat(x, y) {
+    return { x: (x - pos.x) / zoom, y: (y - pos.y) / zoom };
   }
 
   // 구멍 옆 후네 자리: 윗줄은 불판 위, 아랫줄은 불판 아래
@@ -88,7 +118,7 @@ const Box = (() => {
   }
 
   function place(bob = 1) {
-    boat.g.setAttribute('transform', `translate(${pos.x.toFixed(1)} ${pos.y.toFixed(1)}) scale(${bob.toFixed(3)} ${(2 - bob).toFixed(3)})`);
+    boat.g.setAttribute('transform', `translate(${pos.x.toFixed(1)} ${pos.y.toFixed(1)}) scale(${(zoom * bob).toFixed(3)} ${(zoom * (2 - bob)).toFixed(3)})`);
   }
 
   function press(hole, e) {
@@ -193,6 +223,7 @@ const Box = (() => {
     for (const b of inFlight) b.remove();
     inFlight.clear();
     boat.g.setAttribute('display', 'none');
+    zoom = 1;
     for (const hole of Board.holes) {
       hole.boxed = false;
       for (const name of PARTS) hole[name].removeAttribute('display');
@@ -200,5 +231,10 @@ const Box = (() => {
     Octopus.setVisible(true);
   }
 
-  return { init, reset };
+  return {
+    init, reset, setPose, toBoat,
+    get g() { return boat.g; },
+    get pos() { return { ...pos, zoom }; },
+    WORK, OUTLINE,
+  };
 })();

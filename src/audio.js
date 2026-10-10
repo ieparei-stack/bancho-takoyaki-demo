@@ -232,6 +232,43 @@ const Sfx = (() => {
     [0.07, 0.12, 0.16].forEach((d, i) => tone(ctx, master, t + d, { freq: 900 - i * 60, type: 'triangle', gain: 0.07 - i * 0.015, decay: 0.03 }));
   }
 
+  // 소스 "쭉" — 걸쭉한 잡음이 짧게 아래로
+  function squirt() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise(ctx);
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(900, t);
+    lp.frequency.exponentialRampToValueAtTime(300, t + 0.12);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.3, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.13);
+    src.connect(lp).connect(g).connect(master);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + 0.15);
+  }
+
+  // 가쓰오부시 "사삭" — 높고 가벼운 잡음
+  function flake() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise(ctx);
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 3500;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.12, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    src.connect(hp).connect(g).connect(master);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + 0.07);
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -243,6 +280,8 @@ const Sfx = (() => {
     finish,
     plop,
     boxLand,
+    squirt,
+    flake,
     flipOk,
     flipFail,
     flip2Ok,

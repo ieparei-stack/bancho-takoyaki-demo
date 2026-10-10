@@ -16,7 +16,7 @@ const Pour = (() => {
     }
     window.addEventListener('pointerup', (e) => finish(e.timeStamp, false));
     window.addEventListener('pointercancel', (e) => finish(e.timeStamp, false));
-    // 임시: 6구멍을 다 짜면 불판을 클릭해 새 판 (4단계 한 판 반복으로 대체)
+    // 임시: 손님에게 건네 한 판을 끝낸 뒤 불판을 클릭하면 새 판 (4단계 한 판 반복으로 대체)
     Board.plate.addEventListener('pointerdown', reset);
   }
 
@@ -135,7 +135,7 @@ const Pour = (() => {
   }
 
   function reset() {
-    if (active || next < Board.holes.length || Stage.busy()) return;
+    if (active || !Stage.finished()) return; // 한 판 도중에는 새 판 없음 (T15부터: 큰 후네 옆을 잘못 눌러 리셋되는 것 방지)
     Stage.reset();
     next = 0;
     results = [];
@@ -152,6 +152,7 @@ const Pour = (() => {
       Octopus.clear(hole);
     }
     Octopus.reset();
+    Topping.reset();
     Box.reset();
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }

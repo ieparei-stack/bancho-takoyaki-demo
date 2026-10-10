@@ -7,5 +7,6 @@
   Octopus.init();
   Flip.init();
   Box.init();
+  Topping.init();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();

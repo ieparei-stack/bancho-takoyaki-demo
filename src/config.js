@@ -12,6 +12,7 @@ const Config = (() => {
       },
       octopus: { legRatio: 0.6, perfectRatio: 0.3 },
       box: { flickPx: 30, flickMs: 300, coneDeg: 60, flyMs: 350 },
+      topping: { boatScale: 1.6, sauceWidth: 7, flakeEveryPx: 18, flakeMax: 400, handoffY: 170 },
       stage: { bannerMs: 1200, perfect: 11, great: 8, good: 4 },
       cook: { lead1Ms: 2500, lead2Ms: 1500, intervalMs: 1500, perfectSpanMs: 1500, goodMarginMs: 300, burnMs: 3000 },
       flip: { ignoreDeg: 30, flip1MinDeg: 90, flip1MaxDeg: 360, flip2MinDeg: 180, flip2MaxDeg: 720, flip2SpeedDps: 720 },

@@ -2,13 +2,14 @@
 // 단계가 끝나면 6번의 점수(퍼펙트 2 / 굿 1 / 그 외 0)를 합쳐 등급 글자를 잠깐 띄우고 다음 단계로 넘어간다.
 // 등급 글자는 단계 끝에만 뜬다. 동작하는 동안에는 지금처럼 소리와 표정만. (설계 원칙 2를 '동작 중'으로 한정)
 const Stage = (() => {
-  // ① 짜기 → ② 문어 → ③ 1차 뒤집기 → ④ 2차 뒤집기 → ⑤ 후네 담기 (⑥ 소스·⑦ 가쓰오부시는 T15~)
-  const ORDER = ['pour', 'octopus', 'flip1', 'flip2', 'box'];
-  const NAME = { pour: '① 짜기', octopus: '② 문어', flip1: '③ 1차 뒤집기', flip2: '④ 2차 뒤집기', box: '⑤ 후네 담기' };
+  // ① 짜기 → ② 문어 → ③ 1차 뒤집기 → ④ 2차 뒤집기 → ⑤ 후네 담기 → ⑥ 토핑·건네기 (등급 없음)
+  const ORDER = ['pour', 'octopus', 'flip1', 'flip2', 'box', 'topping'];
+  const NAME = { pour: '① 짜기', octopus: '② 문어', flip1: '③ 1차 뒤집기', flip2: '④ 2차 뒤집기', box: '⑤ 후네 담기', topping: '⑥ 토핑·건네기' };
   const GRADE_COLOR = { perfect: '#ffd34d', great: '#ff9f43', good: '#9fd36b', oops: '#9fb4c8' };
   const BANNER = { x: 560, y: 380, size: 92 }; // 불판 가운데 (board.js PLATE 기준)
 
   let index = 0;
+  let finished = false; // 한 판을 다 끝냈다 (손님에게 건넸다)
   let banner = null; // { el, startAt, raf, timer }
   const enterHooks = {};
 
@@ -33,9 +34,15 @@ const Stage = (() => {
     return 'oops';
   }
 
-  // scores: 동작마다 0·1·2
+  // scores: 동작마다 0·1·2. null이면 등급 없이 끝 (⑥ 토핑·건네기 = 한 판 끝)
   function complete(name, scores) {
-    if (banner || current() !== name) return;
+    if (banner || current() !== name || finished) return;
+    if (!scores) {
+      finished = true;
+      Log.add({ step: '단계 끝', stage: name, line: `── ${NAME[name]} 끝` });
+      Sfx.finish();
+      return;
+    }
     const sum = scores.reduce((a, b) => a + b, 0);
     const max = scores.length * 2;
     const g = grade(sum);
@@ -92,7 +99,8 @@ const Stage = (() => {
   function reset() {
     clearBanner();
     index = 0;
+    finished = false;
   }
 
-  return { is, current, complete, onEnter, reset, busy: () => !!banner };
+  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner, finished: () => finished };
 })();
