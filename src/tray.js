@@ -43,6 +43,15 @@ const Tray = (() => {
     });
   }
 
+  // 그 점이 추가 칸(1~3) 안이면 그 칸의 재료 id
+  function extraAt(x, y) {
+    for (let k = 0; k < 3; k++) {
+      const c = cell(k + 1);
+      if (chosen[k] && x >= c.x && x <= c.x + c.w && y >= c.y && y <= c.y + c.h) return chosen[k];
+    }
+    return null;
+  }
+
   function contains(x, y) {
     return Math.abs(x - BOX.cx) <= BOX.w / 2 && Math.abs(y - BOX.cy) <= BOX.h / 2;
   }
@@ -51,5 +60,5 @@ const Tray = (() => {
     root.setAttribute('display', on ? 'inline' : 'none');
   }
 
-  return { init, set, cell, contains, setVisible, chosen: () => chosen.slice() };
+  return { init, set, cell, extraAt, contains, setVisible, chosen: () => chosen.slice() };
 })();

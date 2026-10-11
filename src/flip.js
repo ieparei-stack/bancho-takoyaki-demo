@@ -73,7 +73,7 @@ const Flip = (() => {
   const SCORE = { 퍼펙트: 2, 굿: 1 };
   const FINAL_NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
   function finalState(hole) {
-    if (!hole.hasOcto) return 'blank'; // 문어 없음은 굽기 결과와 무관하게 멍함
+    if (!hole.ings || hole.ings.size === 0) return 'blank'; // 아무 재료도 없는 알만 멍함 (T27: 문어 없이 다른 재료만 든 알은 굽기대로)
     const sum = (SCORE[hole.flip1.result] || 0) + (SCORE[hole.flip2.result] || 0);
     if (sum >= 4) return 'perfect';
     if (sum === 3) return 'tasty';
@@ -118,8 +118,7 @@ const Flip = (() => {
       const face = ok ? 'expect' : (result === '늦음' ? 'anxious2' : 'anxious1');
       Face.flipAnim(hole, ANIM_MS, () => {
         hole.dome = true;
-        const chunk = hole.octo.querySelector('[data-chunk]');
-        if (chunk) chunk.setAttribute('display', 'none'); // 조각은 안으로, 다리만 밖에
+        hole.octo.querySelectorAll('[data-chunk]').forEach((c) => c.setAttribute('display', 'none')); // 문어·재료는 안으로, 다리만 밖에
         Face.setTilt(hole, tilt);
         Face.apply(hole, face, hole.size, hole.look);
       });

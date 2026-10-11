@@ -92,6 +92,7 @@ const Octopus = (() => {
     scores.push(leg ? 0 : center ? 2 : 1);
     hole.hasOcto = true;
     hole.octoLeg = leg;
+    hole.ings.add('octopus'); // 알별 재료 (T27)
 
     // 조각은 반죽 안쪽에 반쯤 묻힌다. 너무 바깥이면 안쪽으로 당겨 그린다
     const ang = Math.atan2(dy, dx);
@@ -111,9 +112,9 @@ const Octopus = (() => {
     checkDone();
   }
 
-  // 6조각을 다 썼으면(넣었거나 잃어버렸으면) 단계 끝
+  // 6조각을 다 썼으면(넣었거나 잃어버렸으면) — 1일차만 단계 끝 (T27, Fill이 판단)
   function checkDone() {
-    if (pieces.every((pc) => pc.used)) Stage.complete('octopus', scores);
+    if (pieces.every((pc) => pc.used)) Fill.octopusDone();
   }
 
   // 바닥으로 떨어지며 사라진다
@@ -160,6 +161,7 @@ const Octopus = (() => {
     hole.hasOcto = false;
     hole.octoLeg = false;
     hole.octo.replaceChildren();
+    if (hole.ings) hole.ings.clear();
   }
 
   function reset() {
@@ -177,5 +179,5 @@ const Octopus = (() => {
     Tray.setVisible(on);
   }
 
-  return { init, clear, reset, setVisible, busy: () => !!drag };
+  return { init, clear, reset, setVisible, scores: () => scores.slice(), busy: () => !!drag };
 })();

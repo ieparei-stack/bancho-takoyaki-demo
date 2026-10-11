@@ -7,6 +7,7 @@
   Pour.init();
   Tray.init();
   Octopus.init();
+  Fill.init();
   Flip.init();
   Box.init();
   Topping.init();
