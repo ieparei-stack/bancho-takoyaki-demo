@@ -65,11 +65,11 @@ const DropGuide = (() => {
     demoStop();
     const g = Board.el('g', { 'pointer-events': 'none', display: 'none' }, Board.layer('drag'));
     const piece = Board.el('g', {}, g);
-    Board.el('ellipse', { cx: 0, cy: 0, rx: 15, ry: 13, fill: '#b9475a', stroke: '#8e2f42', 'stroke-width': 2 }, piece);
+    const icon = Board.el('g', {}, piece); // 시범하는 재료 모양 (문어 / 추가 재료) — route가 바뀌면 다시 그린다
     const hand = Board.el('text', { x: 6, y: 30, 'font-size': 30, 'font-family': 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, sans-serif' }, piece);
     hand.textContent = '👆';
     const ring = Board.el('circle', { r: 10, fill: 'none', stroke: '#5fd05f', 'stroke-width': 3, opacity: 0 }, g);
-    demo = { g, piece, ring, t0: performance.now(), raf: 0 };
+    demo = { g, piece, icon, iconId: null, ring, t0: performance.now(), raf: 0 };
     demo.raf = requestAnimationFrame(demoTick);
   }
 
@@ -81,17 +81,21 @@ const DropGuide = (() => {
   }
 
   // 출발 = 안 쓴 문어 조각(없으면 첫 추가 재료 칸), 도착 = 그 재료를 넣을 수 있는 첫 구멍
+  //   그 판에 꼭 넣어야 하는 재료가 아직 없으면(T45, 1일차 2판 잣) 그 재료를 먼저 보여준다
   function route() {
+    const req = Flow.today() && Flow.today().require;
+    const need = req && req.round === Flow.round() && !Board.holes.some((h) => h.ings.has(req.ing)) ? req.ing : null;
     const home = Octopus.nextHome();
-    if (home) {
+    if (home && !need) {
       const hole = Board.holes.find((h) => h.hasBatter && !h.hasOcto);
-      if (hole) return { from: home, to: hole };
+      if (hole) return { id: 'octopus', from: home, to: hole };
     }
-    const id = Tray.chosen()[0];
+    const chosen = Tray.chosen();
+    const id = need && chosen.includes(need) ? need : chosen[0];
     if (!id) return null;
     const hole = Board.holes.find((h) => h.hasBatter && !h.ings.has(id));
-    const c = Tray.cell(1);
-    return hole ? { from: { x: c.cx, y: c.cy }, to: hole } : null;
+    const c = Tray.cell(chosen.indexOf(id) + 1);
+    return hole ? { id, from: { x: c.cx, y: c.cy }, to: hole } : null;
   }
 
   function demoTick(now) {
@@ -103,6 +107,12 @@ const DropGuide = (() => {
     const r = busy ? null : route();
     if (!r) { demo.g.setAttribute('display', 'none'); demo.t0 = now; return; }
     demo.g.setAttribute('display', 'inline');
+    if (demo.iconId !== r.id) {
+      demo.iconId = r.id;
+      demo.icon.replaceChildren();
+      if (r.id === 'octopus') Board.el('ellipse', { cx: 0, cy: 0, rx: 15, ry: 13, fill: '#b9475a', stroke: '#8e2f42', 'stroke-width': 2 }, demo.icon);
+      else Shop.icon(r.id, demo.icon, 0, 0, 16);
+    }
     const op = Flow.day() === 1 && Stage.round() === 1 ? D.strong : D.faint;
     const u = ((now - demo.t0) % D.cycleMs) / D.cycleMs;
     // 0~0.15 나타남 · 0.15~0.7 끌려감 · 0.7~0.85 놓은 자리 초록 · 0.85~1 사라짐

@@ -87,6 +87,8 @@ const Customer = (() => {
       if (c.noFav && balls.some((b) => b.fav)) continue;
       if (c.not && c.not.includes(pick.key)) continue;
       if (c.day && c.day !== Flow.day()) continue;
+      if (c.round && c.round !== Flow.round()) continue; // 그날 몇 번째 판 (T45)
+      if (c.react && !c.react.includes(pick.key)) continue; // 이 반응일 때만 (T45)
       if (typeof w.line !== 'string') { Config.warn(`customers.cast.${guest.id}.when 줄에 line이 없습니다`); continue; }
       return w;
     }
@@ -195,6 +197,23 @@ const Customer = (() => {
   }
 
   // 주문이 남았다: 그 자리에 남아 원래 얼굴로, 말풍선은 "한 판 더"
+  // 잠깐 끼어드는 말 (T45: 2판에 잣을 안 넣으면 참새가) — ms 뒤 원래 말풍선으로
+  let sayTimer = 0;
+  let saved = null;
+  function say(line, ms = 1800) {
+    if (!saved) saved = { text: bubble.text.textContent, tf: bubble.g.getAttribute('transform') };
+    clearTimeout(sayTimer);
+    bubble.text.textContent = line;
+    bubble.g.removeAttribute('transform');
+    showBubble();
+    sayTimer = setTimeout(() => {
+      bubble.text.textContent = saved.text;
+      if (saved.tf) bubble.g.setAttribute('transform', saved.tf);
+      showBubble();
+      saved = null;
+    }, ms);
+  }
+
   function stay(line) {
     emoji.textContent = current.emoji;
     bubble.text.textContent = line;
@@ -228,5 +247,5 @@ const Customer = (() => {
     bubble.g.setAttribute('display', 'none');
   }
 
-  return { init, arrive, stay, leave, shrinkBubble, reset, serve, judge, getRecords: () => records, get total() { return total; }, get spot() { return SPOT; } };
+  return { init, arrive, say, stay, leave, shrinkBubble, reset, serve, judge, getRecords: () => records, get total() { return total; }, get spot() { return SPOT; } };
 })();

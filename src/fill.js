@@ -62,8 +62,22 @@ const Fill = (() => {
     if (CFG.timing.fill.endOnOctopusDays.includes(Flow.day())) finish('문어 다 씀');
   }
 
+  // 재료를 넣은 뒤: 문어를 다 써서 막혀 있던 판이면 다시 끝내 본다 (T45)
+  function retry() {
+    if (Flow.today().require && Octopus.allUsed() && CFG.timing.fill.endOnOctopusDays.includes(Flow.day())) finish('문어 다 씀');
+  }
+
   function finish(reason) {
     if (!running || !Stage.is('octopus')) return;
+    // 그날 그 판에 꼭 넣어야 하는 재료 (T45: 1일차 2판 잣) — 없으면 손님이 끼어들고 끝나지 않는다
+    const req = Flow.today().require;
+    if (req && req.round === Flow.round() && !Board.holes.some((h) => h.ings.has(req.ing))) {
+      Customer.say(req.line);
+      Sfx.hmm();
+      running.t0 = performance.now(); // 시간 바 다시
+      Log.add({ step: '재료', refused: true, reason, line: `재료 끝 막힘 (${reason}) — ${CFG.ingredients[req.ing].name} 없음` });
+      return;
+    }
     cancelAnimationFrame(running.raf);
     running = null;
     ui.setAttribute('display', 'none');
@@ -124,6 +138,7 @@ const Fill = (() => {
     const chunk = Board.el('g', { 'data-chunk': '1' }, hole.octo);
     Shop.icon(id, chunk, hole.cx + dx, hole.cy + dy, ITEM_R);
     Sfx.plop(false);
+    setTimeout(retry, 0);
     Log.add({ step: '재료', hole: hole.id + 1, id, ings: [...hole.ings], line: `재료 #${hole.id + 1} | ${name} 넣음 | ${[...hole.ings].map((x) => CFG.ingredients[x].name).join(' · ')}` });
   }
 

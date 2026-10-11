@@ -3,7 +3,7 @@
 // 아직 내용이 없는 상태는 "무엇을 할 자리인지" 보여주는 빈 패널(클릭하면 넘어감)이다. 일차 구성은 data.js day.days.
 const Flow = (() => {
   const NAME = {
-    LETTER: '편지', SHOP: '장보기', PREP: '준비', OPEN_BELL: '종', ORDER: '주문', COOK: '굽기',
+    TITLE: '타이틀', LETTER: '편지', SHOP: '장보기', PREP: '준비', OPEN_BELL: '종', ORDER: '주문', COOK: '굽기',
     REACTION: '반응', DAY_END_TALK: '밤 대화', GIFT_CHOICE: '선물', DEMO_END: '데모 끝',
   };
   const CARD_MS = 1000;   // 일차 카드
@@ -19,7 +19,7 @@ const Flow = (() => {
 
   function start() {
     hud = Board.el('text', { x: 28, y: 72, 'font-size': 16, fill: '#c9b8a4' }, Board.layer('side'));
-    beginDay(0);
+    go('TITLE'); // 타이틀 → 1일차 (T45)
   }
 
   function days() {
@@ -31,7 +31,7 @@ const Flow = (() => {
 
   // 상태 → 배경 시간대 (T22, 제안)
   const TIME = {
-    LETTER: 'morning', SHOP: 'morning', PREP: 'morning',
+    TITLE: 'morning', LETTER: 'morning', SHOP: 'morning', PREP: 'morning',
     OPEN_BELL: 'open', ORDER: 'open', COOK: 'open', REACTION: 'open',
     DAY_END_TALK: 'night', GIFT_CHOICE: 'night', DEMO_END: 'night',
   };
@@ -46,6 +46,9 @@ const Flow = (() => {
   }
 
   const ENTER = {
+    TITLE() {
+      Title.show(() => beginDay(0));
+    },
     LETTER() {
       // 편지 = 대화창 (한 장 = 한 번). 문구는 사용자가 data.js letters.days에 직접 쓴다
       const raw = (CFG.letters.days || [])[dayIdx];
@@ -61,6 +64,11 @@ const Flow = (() => {
       Shop.open(() => go('PREP'));
     },
     PREP() {
+      if (today().prep === false) { // 1일차: 도착하자마자 영업 — 재료판은 동봉만 (T45)
+        Tray.set([]);
+        go('OPEN_BELL');
+        return;
+      }
       Prep.open(() => { Tray.set(Prep.chosen()); go('OPEN_BELL'); });
     },
     OPEN_BELL() {
@@ -92,7 +100,12 @@ const Flow = (() => {
       const recs = Customer.getRecords();
       // 성적표 → 숨은 요리를 새로 발견했으면 이름 카드 (T39) → 다음
       const rec = recs[recs.length - 1];
-      Receipt.show(rec, () => Discover.card(Discover.check(rec), () => setTimeout(reacted, CFG.customers.receiptGapMs)));
+      // 숨은 요리 발견 카드 → 처음 만든 메뉴 레시피 카드 (T45) → 일차 장면 → 다음
+      Receipt.show(rec, () => {
+        const found = Discover.check(rec);
+        const recipes = (rec.fresh || []).filter((id) => !CFG.menus[id].hidden);
+        Discover.card([...found, ...recipes], () => scene(rec, () => setTimeout(reacted, CFG.customers.receiptGapMs)));
+      });
     },
     DAY_END_TALK() {
       // 정산 카드 → 밤 대화 (T38). 밤 대화는 다음 날 손님 힌트 (SPEC 11절 힌트 곡선)
@@ -137,6 +150,31 @@ const Flow = (() => {
     const close = () => { if (gone) return; gone = true; g.remove(); go('SHOP'); };
     g.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); close(); }, { once: true });
     setTimeout(close, ENCLOSED_MS);
+  }
+
+  // 일차 장면 (T45): day.days[i].scenes = [{ after: n, dialogue, flopDialogue, give: [재료] }]
+  //   그날 n번째 판을 건넨 뒤 대화창 장면 → 재료를 건네받아 재료판에 들어온다 (1일차 참새의 "잣을 넣어 줘")
+  function scene(rec, then) {
+    const n = Customer.getRecords().filter((r) => r.day === dayIdx + 1).length;
+    const sc = (today().scenes || []).find((s) => s.after === n);
+    if (!sc) { then(); return; }
+    const flop = rec.reaction === 'flop';
+    const lines = [...((flop && CFG.dialogue[sc.flopDialogue]) || []), ...(CFG.dialogue[sc.dialogue] || [])];
+    Log.add({ step: '장면', day: dayIdx + 1, after: n, flop, line: `장면 | ${dayIdx + 1}일차 ${n}판 뒤 ${sc.dialogue}${flop ? ' (망친 판)' : ''}` });
+    Dialogue.play(lines, () => {
+      for (const id of sc.give || []) {
+        if (!CFG.ingredients[id]) { Config.warn(`장면의 재료 "${id}"가 ingredients에 없습니다`); continue; }
+        Pantry.add(id);
+        Tray.add(id);
+        Log.add({ step: '재료', id, line: `재료 | ${CFG.ingredients[id].name} 받음 (장면)` });
+      }
+      then();
+    });
+  }
+
+  // 그날 몇 번째 판을 굽는 중인가 (재료 강제·조건 대사용)
+  function round() {
+    return Customer.getRecords().filter((r) => r.day === dayIdx + 1).length + 1;
   }
 
   function beginDay(i) {
@@ -209,5 +247,5 @@ const Flow = (() => {
     }, { once: true });
   }
 
-  return { start, served, day: () => dayIdx + 1, state: () => state };
+  return { start, served, day: () => dayIdx + 1, state: () => state, today: () => today(), round };
 })();

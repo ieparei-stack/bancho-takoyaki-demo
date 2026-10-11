@@ -43,6 +43,25 @@ const Tray = (() => {
     });
   }
 
+  // 빈 칸에 재료 하나를 더한다 — 통통 튀며 들어오고 반짝 (T45, 장면에서 재료를 건네받을 때)
+  function add(id) {
+    if (chosen.includes(id) || chosen.length >= 3) return;
+    set([...chosen, id]);
+    const g = extras[chosen.length - 1];
+    const c = cell(chosen.length);
+    const ring = Board.el('rect', { x: c.x, y: c.y, width: c.w, height: c.h, rx: 10, fill: 'none', stroke: '#ffd34d', 'stroke-width': 4 }, g);
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / 900);
+      const k = u < 0.4 ? 0.3 + 0.9 * (u / 0.4) : 1.2 - 0.2 * Math.min(1, (u - 0.4) / 0.2);
+      g.setAttribute('transform', `translate(${c.cx} ${c.cy}) scale(${k.toFixed(3)}) translate(${-c.cx} ${-c.cy})`);
+      ring.setAttribute('opacity', (1 - u).toFixed(2));
+      if (u < 1) requestAnimationFrame(step); else { g.removeAttribute('transform'); ring.remove(); }
+    };
+    requestAnimationFrame(step);
+    Sfx.plop(false);
+  }
+
   // 그 점이 추가 칸(1~3) 안이면 그 칸의 재료 id
   function extraAt(x, y) {
     for (let k = 0; k < 3; k++) {
@@ -60,5 +79,5 @@ const Tray = (() => {
     root.setAttribute('display', on ? 'inline' : 'none');
   }
 
-  return { init, set, cell, extraAt, contains, setVisible, chosen: () => chosen.slice() };
+  return { init, set, add, cell, extraAt, contains, setVisible, chosen: () => chosen.slice() };
 })();

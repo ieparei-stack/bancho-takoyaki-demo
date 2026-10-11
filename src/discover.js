@@ -3,7 +3,7 @@
 // 도감 버튼은 화면 오른쪽 아래 HTML 버튼 — 굽는 동안(주문·굽기)은 숨긴다 (타이머가 도는 중에 화면을 덮지 않게)
 const Discover = (() => {
   const GOOD = ['perfect', 'tasty'];   // "맛있음 이상"
-  const COOKING = ['ORDER', 'COOK'];   // 도감 버튼을 숨기는 상태
+  const COOKING = ['TITLE', 'ORDER', 'COOK'];   // 도감 버튼을 숨기는 상태 (타이틀 포함, T45)
   const CARD = { x: 340, y: 130, w: 600, h: 400 };
   const BOOK = { x: 250, y: 70, w: 780, h: 560, rowTop: 168, rowH: 140 };
 
@@ -83,7 +83,7 @@ const Discover = (() => {
       const g = overlay();
       const cx = CARD.x + CARD.w / 2;
       Board.el('rect', { x: CARD.x, y: CARD.y, width: CARD.w, height: CARD.h, rx: 22, fill: '#fffdf6', stroke: '#e0a457', 'stroke-width': 6 }, g);
-      text(g, cx, CARD.y + 62, L().title || '숨은 요리 발견!', { 'font-size': 30, 'font-weight': 900, fill: '#e07a2c' });
+      text(g, cx, CARD.y + 62, m.hidden ? (L().title || '숨은 요리 발견!') : (L().recipe || '새 레시피!'), { 'font-size': 30, 'font-weight': 900, fill: m.hidden ? '#e07a2c' : '#3f8a2c' }); // 일반 메뉴는 레시피 해금 (T45)
       text(g, cx, CARD.y + 140, m.name, { 'font-size': 46, 'font-weight': 900 });
       ingRow(g, m.requires, cx, CARD.y + 220, true);
       text(g, cx, CARD.y + 320, m.desc || '', { 'font-size': 18, fill: '#8a7460' });

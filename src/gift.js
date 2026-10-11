@@ -25,7 +25,7 @@ const Gift = (() => {
   function receive(guest) {
     if (!guest.gift) return false;
     const recs = Customer.getRecords().filter((r) => r.day === Flow.day() && r.customer.id === guest.id);
-    if (!recs.some((r) => r.satisfied)) {
+    if (!guest.giftAlways && !recs.some((r) => r.satisfied)) { // giftAlways: 만족과 상관없이 (T45, 1일차 참새)
       Log.add({ step: '선물', id: guest.gift, from: guest.id, got: false, line: `선물 | ${guest.name} 만족 없음 → 선물 없음` });
       return false;
     }

@@ -143,7 +143,7 @@ window.DATA = {
     counter: '#8a5a34',               // 카운터 앞턱
   },
   // 아트 이미지 자리 (9단계에 넣는다, 2026-10-10 사용자). 비어 있으면 도형을 쓴다. 경로 또는 data URI
-  art: { background: '' },
+  art: { background: '', title: '' },
   // 재료 (6단계, 기획서 시작값). name · price 장보기 가격 · tags 맛 태그 · flipWindow 뒤집기 성공 구간 배율(잣 0.6 = 빨리 탄다)
   //   color 도형 아이콘 색(제안) · base 기본 재료(늘 있음, 무료). 반죽에 영향을 주는 재료는 없다 (2026-10-10 사용자: pourTarget 삭제)
   //   장보기: 날마다 다시 사고, 산 날에는 무한 (2026-10-10 사용자)
@@ -166,10 +166,21 @@ window.DATA = {
   // 장면별 대사 [{ who, text, mark? }]. text 안의 \n은 줄바꿈. 밤 대화 = night + 일차 — 정산 카드 뒤 (T38)
   //   힌트 곡선 (SPEC 11절): 1일차 밤 = 방향(달고 시원한 것), 2일차 밤 = 거의 없음. 문구 Claude 초안 → 플레이 후 수정
   dialogue: {
-    night1: [
-      { who: 'sparrow', text: '오늘 고마웠어~ 또 먹으러 올게. 짹!' },
-      { who: 'sparrow', text: '아, 내일은 까마귀들이 올 것 같은데.\n걔들은 달고 시원한 걸 좋아하더라~' },
+    // 1일차 1판 뒤 장면 (T45, 사용자 흐름 2026-10-11 — 사용자 문장을 뼈대로 Claude 초안). day.days[0].scenes가 부른다
+    day1askFlop: [
+      { who: 'sparrow', text: '…좋아, 처음이니까 넘어가지.' },
+    ],
+    day1ask: [
+      { who: 'sparrow', text: '알다시피 난 잣을 좋아한다고.\n그럼~ 잣을 넣어서 다시 만들어 줘.' },
       { who: 'bancho', text: '…', mark: '…' },
+      { who: 'sparrow', text: '뭐어~? 잣이 없다고?\n마침 내가 가져온 게 있으니, 자. 이걸 넣어서 해 봐. 짹!' },
+    ],
+    night1: [
+      { who: 'sparrow', text: '오늘 고마웠어~ 짹.' },
+      { who: 'sparrow', text: '그런데 너, 이 포장마차에 특이한 손님들이 온다는 얘기는 못 들었어?\n그, 전에 있던 인간한테 말이야.' },
+      { who: 'bancho', text: '…', mark: '…' },
+      { who: 'sparrow', text: '들었는데 무슨 얘긴지는 몰랐다고~? 흐음.' },
+      { who: 'sparrow', text: '내일은 까마귀들이 올 거야! 걔네가 뭘 좋아하는지는 잘 모르는데~\n반짝이는 거랑… 아삭하고 달달한 배 같은 거? 짹.' },
     ],
     night2: [
       { who: 'crow_b', text: '까악. 오늘 잘 먹었어.' },
@@ -209,8 +220,12 @@ window.DATA = {
       //   handle 후기 게시물 아이디 (T43, Claude 초안)
       sparrow: { emoji: '🐦', name: '참새', handle: '@chamsae_jjak', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
                  likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'],
-                 when: [{ if: { noFav: true, not: ['flop'] }, line: '음~ 잣 넣으면 더 맛있을 것 같은데~ 짹!', clue: '고소함' }],
-                 gift: 'pinenut_pack' },
+                 //   1일차 1판 = 정해진 장면의 첫 줄 (T45). round 그날 몇 번째 판 / react 이 반응일 때만
+                 when: [
+                   { if: { day: 1, round: 1, react: ['flop'] }, line: '우웩, 이게 뭐야, 완전 이상하네. 너, 타코야키 만들 줄 아는 거 맞아?', clue: '고소함' },
+                   { if: { day: 1, round: 1 }, line: '흐음~ 맛있네. 그런데… 초심을 잃었네?', clue: '고소함' },
+                 ],
+                 gift: 'pinenut_pack', giftAlways: true }, // giftAlways: 1일차 밤엔 만족과 상관없이 잣 꾸러미 (T45 사용자)
       crow_a:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_A', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button' },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_B', order: '나도 하나! 까악!', again: '하나 더! 까악!',
@@ -253,7 +268,11 @@ window.DATA = {
     // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수
     //   enclosed: 편지에 동봉된 것 — money 송금(돈), items 준비물(재료 id → 오늘 가진 재료)
     days: [
-      { shop: false, enclosed: { money: 0, items: ['octopus', 'pinenut'] }, guests: [{ id: 'sparrow', orders: 2 }] },
+      // 1일차 (T45 사용자 흐름): 편지 → 도착하자마자 참새. 동봉은 문어만, 준비(prep) 없음.
+      //   scenes: 1판 뒤 장면(잣 요구 → 잣 건네받음) / require: 2판은 잣을 한 알 이상 넣어야 진행
+      { shop: false, prep: false, enclosed: { money: 0, items: ['octopus'] }, guests: [{ id: 'sparrow', orders: 2 }],
+        scenes: [{ after: 1, dialogue: 'day1ask', flopDialogue: 'day1askFlop', give: ['pinenut'] }],
+        require: { round: 2, ing: 'pinenut', line: '잠깐! 잣! 잣 넣어야지~ 짹!' } },
       { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
       { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'tanuki', orders: 2 }] }, // 3일차 (T40): 2일차와 같은 규칙
     ],
@@ -267,14 +286,19 @@ window.DATA = {
     grade: { perfect: 'PERFECT!', great: 'GREAT!', good: 'GOOD', oops: 'OOPS…' },
     // 일차별 편지 (사용자가 직접 작성 — 2026-10-10. 지금은 자리만). 문자열 하나 = 한 장, ['…', '…'] = 여러 장
     days: [
-      '(1일차 편지 — 나중에 작성)',
+      // 1일차 = 장인의 편지 (사용자 원문 2026-10-11)
+      ['반쵸군, 자네가 다시 일본으로 돌아오겠다는 이야기를 들었네.\n다음 행선지를 정하기 전까지, 잠깐 머리도 식힐겸 타코야키 가게를 운영해보는건 어떻겠나?',
+       '오늘치 재료는 내가 준비해두었네.\n방문하는 손님들이 꽤 특이한 편이라 자네가 좋아할 것 같군...',
+       '자네가 늘 이야기하는 재료 본연의 맛도 잘 살릴 수 있을 것 같고 말이야.\n무슨 말인지 모르겠다면, 그 포장마차에 가보면 알게 될걸세.'],
       '(2일차 편지 — 나중에 작성)',
       '(3일차 편지 — 나중에 작성)',
     ],
     // 편지 동봉 카드 (T24)
     enclosed: { title: '동봉', items: '(준비물)', kept: '(어제 남긴 선물)' },
     // 숨은 요리 발견 (T39): 이름 카드·도감
-    discover: { title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
+    // 타이틀 화면 (T45). 배경 이미지는 art.title (9단계)
+    title: { sub: '반쵸 더 셰프', name: '타코야키 포장마차', start: '클릭해서 시작 ▶' },
+    discover: { recipe: '새 레시피!', title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
     settle: { title: '{n}일차 끝', sales: '오늘 매출', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', fresh: '처음 만든 메뉴', found: '숨은 요리', foundVal: '발견 {n}/{all}', gifts: '받은 선물', none: '없음', close: '클릭해서 밤으로 ▶' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다

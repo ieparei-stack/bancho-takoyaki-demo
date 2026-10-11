@@ -188,5 +188,5 @@ const Octopus = (() => {
     return pc ? pc.home : null;
   }
 
-  return { init, clear, reset, setVisible, scores: () => scores.slice(), busy: () => !!drag, nextHome };
+  return { init, clear, reset, setVisible, scores: () => scores.slice(), busy: () => !!drag, nextHome, allUsed: () => pieces.every((k) => k.used) };
 })();

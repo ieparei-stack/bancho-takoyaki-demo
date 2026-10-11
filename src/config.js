@@ -47,7 +47,7 @@ const Config = (() => {
       },
       awning: ['#c8372d', '#f3e6d6'], flame: { color: '#4aa8ff', count: 9 }, plate: { iron: ['#2a2725', '#141312'], rim: '#34302d', rimHi: '#5a5550' }, wood: '#3b2a1f', counter: '#8a5a34',
     },
-    art: { background: '' },
+    art: { background: '', title: '' },
     ingredients: {
       octopus: { name: '문어', price: 0, tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
       pinenut: { name: '잣', price: 180, tags: ['고소함'], flipWindow: 0.6, color: '#efe0a8' },
