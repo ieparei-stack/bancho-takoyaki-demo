@@ -11,10 +11,17 @@ const Cook = (() => {
     for (const hole of Board.holes) begin(hole, phase, now, now + lead + hole.id * c.intervalMs);
   }
 
+  // 그 알의 성공 구간 (T28): 든 재료의 flipWindow를 곱한다. 잣 0.6 = 빨리 탄다 → 기포·김이 짧고 빨리 탄다
+  function span(hole) {
+    const c = CFG.timing.cook;
+    let m = 1;
+    for (const id of hole.ings || []) m *= (CFG.ingredients[id] ? CFG.ingredients[id].flipWindow : 1);
+    return { mult: m, perfect: c.perfectSpanMs * m, margin: c.goodMarginMs * m };
+  }
+
   // 퍼펙트·굿 창이 끝나는 시각 (그 뒤로 탄다)
   function windowEnd(s) {
-    const c = CFG.timing.cook;
-    return s.cueAt + c.perfectSpanMs + c.goodMarginMs;
+    return s.cueAt + s.span.perfect + s.span.margin;
   }
 
   function begin(hole, phase, startAt, cueAt) {
@@ -25,7 +32,7 @@ const Cook = (() => {
     const cueSound = Sfx.scheduleCue((cueAt - performance.now()) / 1000, phase);
     // 2차는 뒤집은 순간의 색에서 이어진다 (이미 탄 면은 다시 밝아지지 않는다)
     const from = phase === 1 ? CFG.faces.cook.raw : (hole.cookColor || CFG.faces.cook.golden);
-    cooking.set(hole.id, { hole, phase, startAt, cueAt, from, cueLogged: false, cueSound });
+    cooking.set(hole.id, { hole, phase, startAt, cueAt, from, span: span(hole), cueLogged: false, cueSound });
     if (!raf) raf = requestAnimationFrame(tick);
   }
 
@@ -121,7 +128,7 @@ const Cook = (() => {
     // 기포: 큐 순간에 한꺼번에 올라와 퍼펙트 구간(1.5 s) 동안 보글거리다 사라진다
     // (2026-10-10 사용자: 서서히 말고 그 순간에 / 기포 보이는 동안 = 퍼펙트, 1.5 s)
     const since = now - s.cueAt;
-    const show = since >= 0 && since < c.perfectSpanMs;
+    const show = since >= 0 && since < s.span.perfect;
     h.bubbles.setAttribute('display', show ? 'inline' : 'none'); // visibility는 자식이 덮어써서 display로 끈다
     if (show) {
       const grow = Math.min(1, since / 120);               // 올라오는 0.12초
@@ -143,7 +150,7 @@ const Cook = (() => {
     const k = CFG.faces.cook;
     const h = s.hole;
     const since = now - s.cueAt;
-    if (since >= c.perfectSpanMs) {
+    if (since >= s.span.perfect) {
       // 김이 사라졌다 → 눈도 원래대로
       hideHint(h);
       return;
@@ -216,5 +223,5 @@ const Cook = (() => {
     if (raf) { cancelAnimationFrame(raf); raf = 0; }
   }
 
-  return { sequence, state, stop, reset, hideHint };
+  return { sequence, span, state, stop, reset, hideHint };
 })();

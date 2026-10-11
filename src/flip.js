@@ -82,10 +82,10 @@ const Flip = (() => {
   }
 
   // 큐(기포가 올라온 순간)부터 perfectSpanMs 동안 퍼펙트, 그 앞뒤 goodMarginMs는 굿 (2026-10-10 사용자)
-  function judge(errorMs) {
-    const { perfectSpanMs, goodMarginMs } = CFG.timing.cook;
-    if (errorMs >= 0 && errorMs <= perfectSpanMs) return '퍼펙트';
-    if (errorMs >= -goodMarginMs && errorMs <= perfectSpanMs + goodMarginMs) return '굿';
+  // 재료가 바꾼 그 알의 창(T28, Cook.span)으로 판정한다
+  function judge(errorMs, w) {
+    if (errorMs >= 0 && errorMs <= w.perfect) return '퍼펙트';
+    if (errorMs >= -w.margin && errorMs <= w.perfect + w.margin) return '굿';
     return errorMs < 0 ? '이름' : '늦음';
   }
 
@@ -94,7 +94,8 @@ const Flip = (() => {
     const cook = Cook.state(hole);
     const cueAt = cook ? cook.cueAt : d.doneAt;
     const errorMs = Math.round(d.doneAt - cueAt);
-    let result = fail || judge(errorMs);
+    const w = cook ? cook.span : Cook.span(hole);
+    let result = fail || judge(errorMs, w);
     const deg = Math.round(Math.abs(d.deg));
 
     // 2차: 각속도 미달이면 실패가 아니라 한 단계 강등 (퍼펙트→굿, 굿→느림=미스). 2단계 인터뷰 #5
@@ -141,7 +142,7 @@ const Flip = (() => {
     Log.add({
       step: `뒤집기 ${phase}차`, hole: hole.id + 1, cueAt: Math.round(cueAt), inputAt: Math.round(d.doneAt), errorMs, result, deg,
       ...(phase === 2 ? { dps: d.dps, demoted, final: hole.final } : {}),
-      line: `뒤집기 ${phase}차 #${hole.id + 1} | 큐 ${Math.round(cueAt)} | 입력 ${Math.round(d.doneAt)} | ${sign}${errorMs}ms | ${result} | ${deg}°${speed}`,
+      line: `뒤집기 ${phase}차 #${hole.id + 1} | 큐 ${Math.round(cueAt)} | 입력 ${Math.round(d.doneAt)} | ${sign}${errorMs}ms | ${result} | ${deg}°${speed}${w.mult !== 1 ? ` | 창 ×${+w.mult.toFixed(2)} (${Math.round(w.perfect)} ms)` : ''}`,
     });
     if (phase === 1 && Board.holes.every((h) => h.flip1)) {
       Stage.complete('flip1', Board.holes.map((h) => SCORE[h.flip1.result] || 0)); // 등급 → ④ 2차 뒤집기
