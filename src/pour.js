@@ -31,6 +31,7 @@ const Pour = (() => {
     });
     if (hole.id === 0) { roundStart = e.timeStamp; Customer.shrinkBubble(); }
     active = { hole, downAt: e.timeStamp, sound };
+    Dispenser.show(hole, e.timeStamp); // 반죽통 눈금 (T31)
     Face.clear(hole);
     requestAnimationFrame(tick);
   }
@@ -69,6 +70,7 @@ const Pour = (() => {
     if (!active) return;
     const { hole, downAt, sound } = active;
     active = null;
+    Dispenser.hide();
     next = hole.id + 1;
     if (autoStopped) sound.gurgle(); else sound.release();
 

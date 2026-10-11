@@ -7,8 +7,8 @@ const Config = (() => {
   const DEFAULTS = {
     timing: {
       pour: {
-        targetMs: 1000, perfectMs: 50, goodMs: 120, autoStopMs: 120,
-        holdBeats: 2, soundSet: 1,
+        targetMs: 1500, perfectMs: 50, goodMs: 120, autoStopMs: 120,
+        holdBeats: 3, soundSet: 1,
       },
       octopus: { legRatio: 0.6, perfectRatio: 0.3 },
       fill: { limitMs: [60000, 20000], endOnOctopusDays: [1] },
