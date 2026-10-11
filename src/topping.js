@@ -234,6 +234,7 @@ const Topping = (() => {
     const boat = Box.g.cloneNode(true);
     const faces = Board.holes.map((h) => h.final);
     const ings = Board.holes.map((h) => [...h.ings]); // 알별 재료 (T29 메뉴 판정)
+    const cook = Board.holes.map((h) => ({ f1: h.flip1 ? h.flip1.result : null, f2: h.flip2 ? h.flip2.result : null })); // 알별 뒤집기 결과 (T43 후기 원인)
     const sp = Customer.spot;
     const to = { x: sp.x, y: sp.y + 25, z: 0.35 };
     const t0 = performance.now();
@@ -244,7 +245,7 @@ const Topping = (() => {
       Box.setOpacity(1 - u * u);
       if (u < 1) { requestAnimationFrame(step); return; }
       Box.g.setAttribute('display', 'none');
-      Customer.serve({ faces, ings, sauceLen: Math.round(sauceLen), flakes: flakes.length, boat });
+      Customer.serve({ faces, ings, cook, sauceLen: Math.round(sauceLen), flakes: flakes.length, boat });
       Stage.complete('topping', null);
     };
     requestAnimationFrame(step);

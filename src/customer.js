@@ -98,7 +98,7 @@ const Customer = (() => {
   }
 
   // 건넨 후네를 받는다. 알마다 메뉴·값을 매기고 (Menu.price) 반응을 고른다
-  function serve({ faces, ings, sauceLen, flakes, boat }) {
+  function serve({ faces, ings, cook, sauceLen, flakes, boat }) {
     const balls = faces.map((face, i) => ({ face, ...Menu.price({ ings: ings[i] || [], face }, current) }));
     const sales = balls.reduce((s, b) => s + b.value, 0);
     const pick = judge(balls, current);
@@ -116,7 +116,7 @@ const Customer = (() => {
     if (sales > 0) Sfx.coin(); else Sfx.hmm();
     const fresh = Menu.learn(balls.map((b) => b.menu));
     if (fresh.length) note(`${CFG.letters.menu.fresh} ${fresh.map((id) => CFG.menus[id].name).join(' · ')}`);
-    records.push({ day: Flow.day(), customer: current, faces, ings, balls, fresh, line, sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, sauceLen, flakes, boat });
+    records.push({ day: Flow.day(), customer: current, faces, ings, cook, balls, fresh, line, sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, sauceLen, flakes, boat });
 
     const counts = {};
     for (const b of balls) counts[b.menu] = (counts[b.menu] || 0) + 1;

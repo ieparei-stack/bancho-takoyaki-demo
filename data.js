@@ -200,16 +200,17 @@ window.DATA = {
       // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
       //   when 조건 대사 (T36, 7단계 인터뷰): 위에서부터 처음 맞는 줄이 반응 대사를 덮는다(표정은 그대로).
       //     if 조건 — noFav: 좋아하는 메뉴 알이 0개 / not: 이 반응이면 제외 / day: 이 일차에만. clue 로그용 단서 태그
-      sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
+      //   handle 후기 게시물 아이디 (T43, Claude 초안)
+      sparrow: { emoji: '🐦', name: '참새', handle: '@chamsae_jjak', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
                  likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'],
                  when: [{ if: { noFav: true, not: ['flop'] }, line: '음~ 잣 넣으면 더 맛있을 것 같은데~ 짹!', clue: '고소함' }],
                  gift: 'pinenut_pack' },
-      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_A', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button' },
-      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!',
+      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_B', order: '나도 하나! 까악!', again: '하나 더! 까악!',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button' },
       // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. lines는 임시 문구(사용자가 나중에 작성, 8단계 인터뷰)
-      tanuki:  { emoji: '🦝', name: '너구리', order: '…하나.', again: '한 판 더. 이번엔 제대로.',
+      tanuki:  { emoji: '🦝', name: '너구리', handle: '@neoguri_gourmet', order: '…하나.', again: '한 판 더. 이번엔 제대로.',
                  likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['shrimp_scallion'],
                  lines: {
                    flop: '(임시) …이걸 팔겠다고?',
@@ -282,6 +283,29 @@ window.DATA = {
       flip2:   '눈이 커지다 **김이 오르면**, 한 바퀴 휙 돌리고 떼요',
       box:     '구멍을 누른 채 **후네 쪽으로 휙** 튕겨요',
       topping: '소스·가쓰오부시를 뿌리고, 후네를 **위로 끌어** 손님에게 건네요',
+    },
+    // 손님 후기 게시물 (T43, T30 성적표를 바꿈): 폰 SNS 게시물 + 옆 영수증. 본문은 손님 리뷰 말투 — 굽기는 원인이 드러나게, 맛은 시식평으로만,
+    //   팁 없음 (사용자 결정 2026-10-11). stars 반응별 별점. say.cause 뒤집기 결과별 문장 ({n} = "두 알은" / "여섯 알 다"). 문구 Claude 초안
+    review: {
+      maxLines: 2, // 시식평 아래 리뷰 문장 최대 줄 수 — 좋았던 것 1 + 가장 큰 문제 1 (사용자 피드백 "글 양이 많다")
+      app: 'Takogram', place: '반쵸네 포장마차', when: '{n}일차', likes: '좋아요 {n}개', receiptTitle: '영 수 증', total: '합계',
+      stars: { flop: 1, dislike: 2, lack: 2, good: 3, best: 4, love: 5 },
+      say: {
+        likedIng: '타코야키에 {재료} 들어가 있어서 좋았어요!',
+        allPerfect: '겉은 바삭, 속은 촉촉! 굽기가 완벽해요 👍',
+        somePerfect: '{n} 겉바속촉 완벽했어요',
+        cause: {
+          '이름': '{n} 반죽이 흐물흐물했어요 😢',
+          '늦음': '{n} 살짝 탄 맛이 났어요',
+          '미달': '{n} 덜 뒤집혀서 한쪽이 납작했어요',
+          '과회전': '{n} 모양이 찌그러져 있었어요',
+          '느림': '{n} 겉이 고르게 안 익었어요',
+          '굿': '조금만 더 바삭했으면 좋겠어요',
+        },
+        blankOne: '재료가 없는 알이 있었어요!',
+        blankMany: '{n} 속이 텅 비어 있었어요!',
+        disliked: '{n} 제 입맛엔 좀 안 맞았어요',
+      },
     },
     // 판 성적표 (T30)
     receipt: { title: '{손님}의 한 판', close: '클릭해서 닫기 ▶', like: '좋아하는 맛', dislike: '싫은 맛', fav: '좋아하는 메뉴', fresh: '새!' },
