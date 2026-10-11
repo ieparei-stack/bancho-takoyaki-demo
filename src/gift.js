@@ -110,5 +110,5 @@ const Gift = (() => {
     });
   }
 
-  return { receive, choose, carry: () => carry.slice(), pending: () => today.length };
+  return { receive, choose, carry: () => carry.slice(), pending: () => today.length, today: () => today.slice() };
 })();

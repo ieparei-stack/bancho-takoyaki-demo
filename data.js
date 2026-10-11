@@ -153,14 +153,17 @@ window.DATA = {
     bancho: { name: '반쵸', color: '#e07a2c', mark: '…', icon: '' },
     letter: { name: '편지', color: '#8a7460', mark: '✉', icon: '' },
   },
-  // 장면별 대사 [{ who, text, mark? }]. text 안의 \n은 줄바꿈. 밤 대화 = night + 일차. 문구는 자리 (7단계에 힌트 곡선으로 채움)
+  // 장면별 대사 [{ who, text, mark? }]. text 안의 \n은 줄바꿈. 밤 대화 = night + 일차 — 정산 카드 뒤 (T38)
+  //   힌트 곡선 (SPEC 11절): 1일차 밤 = 방향(달고 시원한 것), 2일차 밤 = 거의 없음. 문구 Claude 초안 → 플레이 후 수정
   dialogue: {
     night1: [
-      { who: 'sparrow', text: '(1일차 밤 대화 — 7단계: 참새가 내일 손님 힌트를 흘림)' },
+      { who: 'sparrow', text: '오늘 고마웠어~ 또 먹으러 올게. 짹!' },
+      { who: 'sparrow', text: '아, 내일은 까마귀들이 올 것 같은데.\n걔들은 달고 시원한 걸 좋아하더라~' },
       { who: 'bancho', text: '…', mark: '…' },
     ],
     night2: [
-      { who: 'crow_b', text: '(2일차 밤 대화 — 7단계: 까마귀의 한마디)' },
+      { who: 'crow_b', text: '까악. 오늘 잘 먹었어.' },
+      { who: 'crow_b', text: '내일 오는 녀석은… 입맛이 까다로워. 까악.' },
       { who: 'bancho', text: '음.', mark: '음.' },
     ],
   },
@@ -241,6 +244,8 @@ window.DATA = {
     ],
     // 편지 동봉 카드 (T24)
     enclosed: { title: '동봉', items: '(준비물)', kept: '(어제 남긴 선물)' },
+    // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
+    settle: { title: '{n}일차 끝', sales: '오늘 매출', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', fresh: '처음 만든 메뉴', found: '숨은 요리', foundVal: '발견 {n}/{all}', gifts: '받은 선물', none: '없음', close: '클릭해서 밤으로 ▶' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다
     gift: { got: '🎁', from: '{손님}의 선물', sell: '팔기 {값}', sellSub: '지금 돈으로', keep: '남기기' },
     // ② 재료 넣기 버튼 (T27)

@@ -92,7 +92,8 @@ const Flow = (() => {
       Receipt.show(recs[recs.length - 1], () => setTimeout(reacted, CFG.customers.receiptGapMs));
     },
     DAY_END_TALK() {
-      Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE'));
+      // 정산 카드 → 밤 대화 (T38). 밤 대화는 다음 날 손님 힌트 (SPEC 11절 힌트 곡선)
+      Settle.show(dayIdx + 1, () => Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE')));
     },
     GIFT_CHOICE() {
       // 받은 선물마다 팔기 / 남기기 (T37). 없으면 바로 넘어간다
