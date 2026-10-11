@@ -76,8 +76,8 @@ const Config = (() => {
       giftMs: 900,
       cast: {
         sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!', likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
-        crow_a: { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
-        crow_b: { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'] },
+        crow_a: { emoji: '🐦‍⬛', name: '까마귀 형님', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
+        crow_b: { emoji: '🐦‍⬛', name: '까마귀 동생', order: '나도 하나! 까악!', again: '하나 더! 까악!', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'] },
       },
       value: { like: 20, dislike: 40, favorite: 30, faceMult: { perfect: 1.2, tasty: 1.0, meh: 0.7, raw: 0, burnt: 0, blank: 0 } },
       react: { failBalls: 3, bestBalls: 4, saucePx: 2500 },
@@ -91,7 +91,7 @@ const Config = (() => {
       },
     },
     day: {
-      resultDelayMs: 1200, replyGreat: 4000, replyOk: 2000,
+      resultDelayMs: 1200, settleStepMs: 700, replyGreat: 4000, replyOk: 2000,
       days: [
         { shop: false, enclosed: { money: 0, items: ['octopus', 'pinenut'] }, guests: [{ id: 'sparrow', orders: 2 }] },
         { shop: true, enclosed: { money: 500, items: [] }, guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },

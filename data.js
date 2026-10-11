@@ -246,7 +246,7 @@ window.DATA = {
                  },
                  gift: 'pinenut_pack', giftAlways: true }, // giftAlways: 1일차 밤엔 만족과 상관없이 잣 꾸러미 (T45 사용자)
       // 까마귀 형제 — A 형님(과묵), B 동생(촐싹)
-      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_hyung', order: '…예약한 거. 하나. 까악.', again: '…하나 더.',
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀 형님', handle: '@kkamagwi_hyung', order: '…예약한 거. 하나. 까악.', again: '…하나 더.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button',
                  lines: {
                    flop: '…까악. 이건 못 본 걸로 하지.',
@@ -256,7 +256,7 @@ window.DATA = {
                    good: '나쁘지 않다. {빠진 맛} 조금 더 있었으면.',
                    best: '…괜찮군. 동생 놈한테도 알려 주지.',
                  } },
-      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_dongsaeng', order: '나도 예약했지?! 시원~한 걸로 하나! 까악!', again: '하나 더! 하나 더! 까악!',
+      crow_b:  { emoji: '🐦‍⬛', name: '까마귀 동생', handle: '@kkamagwi_dongsaeng', order: '나도 예약했지?! 시원~한 걸로 하나! 까악!', again: '하나 더! 하나 더! 까악!',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button',
                  lines: {
                    flop: '까아악?! 이거 먹는 거 맞아?!',
@@ -320,6 +320,7 @@ window.DATA = {
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
+    settleStepMs: 700,   // 하루 정산 카드 항목이 하나씩 나오는 간격, ms. 제안 (T48)
     replyGreat: 4000,    // 매출이 이 이상이면 답장 great. 제안 (T29 가격 기준으로 낮춤)
     replyOk: 2000,       // 이 이상이면 ok, 아래면 bad. 제안
   },
@@ -346,7 +347,8 @@ window.DATA = {
     reserve: { title: '오늘의 예약', close: '클릭해서 장보러 가기 ▶' },
     discover: { recipe: '새 레시피!', title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
-    settle: { title: '{n}일차 끝', sales: '오늘 매출', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', fresh: '처음 만든 메뉴', found: '숨은 요리', foundVal: '발견 {n}/{all}', gifts: '받은 선물', none: '없음', close: '클릭해서 밤으로 ▶' },
+    //   T48: 방문한 손님 → 판매 수익 → 추가된 레시피 → 받은 선물 → 오늘의 한 접시(판매가가 가장 높은 알의 후네 사진)
+    settle: { title: '{n}일차 끝', guests: '방문한 손님', sales: '판매 수익', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', recipes: '추가된 레시피', newRecipe: '새 레시피', hiddenRecipe: '숨은 요리!', gifts: '받은 선물', best: '오늘의 한 접시', bestNone: '오늘은 쉬어 가는 날', none: '없음', close: '클릭해서 밤으로 ▶', stamp: '다음날로!', stampLast: '영업 끝!' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다
     gift: { got: '🎁', from: '{손님}의 선물', sell: '팔기 {값}', sellSub: '지금 돈으로', keep: '남기기' },
     // ② 재료 넣기 버튼 (T27)

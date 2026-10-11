@@ -232,6 +232,15 @@ const Sfx = (() => {
     [0.07, 0.12, 0.16].forEach((d, i) => tone(ctx, master, t + d, { freq: 900 - i * 60, type: 'triangle', gain: 0.07 - i * 0.015, decay: 0.03 }));
   }
 
+  // 도장 "쾅" (T48) — 낮게 떨어지는 쿵 + 종이 탁
+  function stamp() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    tone(ctx, master, t, { freq: 150, toFreq: 55, type: 'sine', gain: 0.6, decay: 0.22 });
+    tone(ctx, master, t, { freq: 320, toFreq: 120, type: 'triangle', gain: 0.25, decay: 0.08 });
+    tone(ctx, master, t + 0.005, { freq: 1400, toFreq: 700, type: 'square', gain: 0.05, decay: 0.03 });
+  }
+
   // 소스 "쭉" — 걸쭉한 잡음이 짧게 아래로
   function squirt() {
     if (!ctx) return;
@@ -316,6 +325,7 @@ const Sfx = (() => {
     finish,
     plop,
     boxLand,
+    stamp,
     squirt,
     flake,
     coin,
