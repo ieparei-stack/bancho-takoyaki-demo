@@ -84,6 +84,8 @@ const Pour = (() => {
     hole.hasBatter = true;
     hole.pourAt = upAt; // 굽기는 뒤집기 단계에서 시작한다 (T11). 짠 간격은 큐 간격으로 쓴다
     showFace(hole, result, size(hole, held));
+    Face.spill(hole, size(hole, held), result === '넘침' ? 6 : 0); // 번진 반죽 (T35)
+    Face.sprinkle(hole, Math.min(hole.r, size(hole, held)));       // 텐카스·파 (T35)
     log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
 
     if (next === Board.holes.length) {

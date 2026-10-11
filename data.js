@@ -104,7 +104,9 @@ window.DATA = {
     //   T32 (실제 타코야키처럼): 윗면은 반죽색, 바닥 색은 테두리 링으로 — ringMax 링 최대 두께 / rawBand 1차 반구 아래 안 익은 띠 색
     //   jiggle 큐 순간 들썩(px 세로, deg 흔들림, hz) / dots·dotColor 다 익은 공의 갈색 점
     cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35,
-            ringMax: 7, rawBand: '#f1dfb4', jiggle: { px: 2.5, deg: 4, hz: 6 }, dots: 4, dotColor: '#9a5a26' },
+            ringMax: 7, rawBand: '#f1dfb4', jiggle: { px: 2.5, deg: 4, hz: 6 }, dots: 4, dotColor: '#9a5a26',
+            // T35: spillPad 구멍 둘레로 번진 반죽 폭 / tenkasu·scallion 짜기 직후 뿌려지는 조각 / shade 공 입체 음영 진하기(반구·공 / 반죽)
+            spillPad: 6, tenkasu: { n: 5, color: '#f2dc8e' }, scallion: { n: 3, color: '#5aa33a' }, shade: { dome: 1, batter: 0.35 } },
     // 짜기 결과 반응 (놓는 순간 반죽이 눌렸다 펴진다). 제안
     //   squash 눌림 세로 비율 / stretch 펴짐 세로 비율 / ms 길이 / bounces 횟수 / shine 윤기 점 남김
     react: {
@@ -126,6 +128,7 @@ window.DATA = {
     },
     awning: ['#c8372d', '#f3e6d6'],  // 천막 줄무늬 두 색
     flame: { color: '#4aa8ff', count: 9 },  // 불판 아래 가스불 (T32)
+    plate: { iron: ['#2a2725', '#141312'], rim: '#34302d', rimHi: '#5a5550' }, // 검은 무쇠 불판 (T35)
     wood: '#3b2a1f',                  // 작업대
     counter: '#8a5a34',               // 카운터 앞턱
   },

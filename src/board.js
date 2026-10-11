@@ -28,10 +28,21 @@ const Board = (() => {
     }, container);
 
     const defs = el('defs', {}, svg);
-    const grad = el('radialGradient', { id: 'hole-shade', cx: '50%', cy: '42%', r: '60%' }, defs);
-    el('stop', { offset: '0%', 'stop-color': '#3a3633' }, grad);
-    el('stop', { offset: '70%', 'stop-color': '#1e1c1b' }, grad);
-    el('stop', { offset: '100%', 'stop-color': '#0d0c0c' }, grad);
+    const grad = el('radialGradient', { id: 'hole-shade', cx: '50%', cy: '38%', r: '62%' }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#2a2725' }, grad);
+    el('stop', { offset: '70%', 'stop-color': '#121110' }, grad);
+    el('stop', { offset: '100%', 'stop-color': '#050505' }, grad);
+    // 무쇠 불판 (T35)
+    const P = CFG.scene.plate;
+    const iron = el('linearGradient', { id: 'plate-iron', x1: 0, y1: 0, x2: 0.3, y2: 1 }, defs);
+    el('stop', { offset: '0%', 'stop-color': P.iron[0] }, iron);
+    el('stop', { offset: '100%', 'stop-color': P.iron[1] }, iron);
+    // 공 입체 음영 (T35): 왼쪽 위 반사광 → 투명 → 오른쪽 아래 그림자
+    const ball = el('radialGradient', { id: 'ball-shade', cx: '34%', cy: '30%', r: '78%' }, defs);
+    el('stop', { offset: '0%', 'stop-color': '#ffffff', 'stop-opacity': 0.55 }, ball);
+    el('stop', { offset: '28%', 'stop-color': '#ffffff', 'stop-opacity': 0 }, ball);
+    el('stop', { offset: '70%', 'stop-color': '#000000', 'stop-opacity': 0 }, ball);
+    el('stop', { offset: '100%', 'stop-color': '#000000', 'stop-opacity': 0.38 }, ball);
 
     layers.bg = el('g', {}, svg);       // 포장마차 배경 (scene.js)
     layers.guest = el('g', {}, svg);    // 손님 (카운터 너머)
@@ -40,8 +51,12 @@ const Board = (() => {
     plate = el('rect', {
       x: PLATE.cx - PLATE.w / 2, y: PLATE.cy - PLATE.h / 2,
       width: PLATE.w, height: PLATE.h, rx: PLATE.r,
-      fill: '#4a4744', stroke: '#2b2927', 'stroke-width': 6,
+      fill: 'url(#plate-iron)', stroke: '#0b0a0a', 'stroke-width': 6,
     }, svg);
+    // 판면 기름 윤기 (아주 옅게)
+    for (const [dx, dy, w] of [[-190, -120, 60], [120, 130, 80], [200, -135, 40], [-60, 140, 50]]) {
+      el('ellipse', { cx: PLATE.cx + dx, cy: PLATE.cy + dy, rx: w, ry: 5, fill: '#ffffff', opacity: 0.06, 'pointer-events': 'none' }, svg);
+    }
 
     const holeLayer = el('g', {}, svg);
     const bridgeLayer = el('g', {}, svg);
@@ -60,10 +75,12 @@ const Board = (() => {
         const cx = x0 + col * HOLE.gapX;
         const cy = y0 + row * HOLE.gapY;
 
-        el('circle', { cx, cy, r: HOLE.r + 4, fill: '#5c5855' }, holeLayer);
+        el('circle', { cx, cy, r: HOLE.r + 4, fill: CFG.scene.plate.rim }, holeLayer);
         el('circle', { cx, cy, r: HOLE.r, fill: 'url(#hole-shade)' }, holeLayer);
+        el('path', { d: `M ${cx - (HOLE.r + 2) * 0.8} ${cy - (HOLE.r + 2) * 0.6} A ${HOLE.r + 2} ${HOLE.r + 2} 0 0 1 ${cx + (HOLE.r + 2) * 0.8} ${cy - (HOLE.r + 2) * 0.6}`, fill: 'none', stroke: CFG.scene.plate.rimHi, 'stroke-width': 2, opacity: 0.7 }, holeLayer); // 테두리 위쪽 하이라이트
 
         const bridge = el('rect', { rx: 18, visibility: 'hidden' }, bridgeLayer);
+        const spill = el('path', { visibility: 'hidden', 'stroke-width': 1.5 }, bridgeLayer); // 구멍 둘레로 번진 반죽 (T35)
 
         const batter = el('ellipse', { cx, cy, rx: 0, ry: 0, 'stroke-width': 2 }, batterLayer);
         // 노릇한 테두리 링 (T32): 바닥이 익는 정도가 구멍 가장자리로 올라온다 — 뒤집을 때를 알리는 신호
@@ -88,6 +105,8 @@ const Board = (() => {
         const rawBand = el('path', { fill: 'none', 'stroke-width': 8, 'stroke-linecap': 'round', visibility: 'hidden' }, batterLayer); // 1차 반구 아래 아직 안 익은 반죽 띠 (T32)
         const shine = el('ellipse', { fill: '#fff', opacity: 0.55, visibility: 'hidden' }, batterLayer); // 잘 짠 윤기
         const face = el('g', { visibility: 'hidden' }, batterLayer);
+        // 공 입체 음영 (T35): 얼굴 그룹 맨 아래 — 기울기·들썩·뒤집기 연출을 같이 따라간다
+        const shade = el('ellipse', { fill: 'url(#ball-shade)', 'pointer-events': 'none' }, face);
         // 다 익은 공의 갈색 점 (T32). 눈보다 먼저 = 아래
         const dots = el('g', { display: 'none' }, face);
         for (let k = 0; k < 6; k++) el('circle', {}, dots);
@@ -110,7 +129,7 @@ const Board = (() => {
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, ring, core, bubbles, bubbleSlots, octo, rim, rawBand, shine, face, dots, eyes, mouth, sweat, xeyes, spots, smoke, steam, steamPaths, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, spill, shade, batter, ring, core, bubbles, bubbleSlots, octo, rim, rawBand, shine, face, dots, eyes, mouth, sweat, xeyes, spots, smoke, steam, steamPaths, bridge, hit });
       }
     }
     return svg;

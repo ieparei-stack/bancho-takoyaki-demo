@@ -31,7 +31,7 @@ const Config = (() => {
       raw: { color: '#efe3c4', squashY: 1, sagY: 2, eyeRx: 5, eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 0, forceColor: true, wobble: true },
       burnt: { color: '#5a3418', squashY: 1, sagY: 0, eyeRx: 6, eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, eyes: 'x', sweat: 0, forceColor: true, smoke: 2, spots: 4, spotColor: '#1a120c' },
       blank: { color: '#e0a457', squashY: 1, sagY: 0, eyeRx: 3, eyeRy: 3, eyeGap: 26, eyeY: -4, lookX: 0, mouth: 'flat', sweat: 0 },
-      cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35, ringMax: 7, rawBand: '#f1dfb4', jiggle: { px: 2.5, deg: 4, hz: 6 }, dots: 4, dotColor: '#9a5a26' },
+      cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35, ringMax: 7, rawBand: '#f1dfb4', jiggle: { px: 2.5, deg: 4, hz: 6 }, dots: 4, dotColor: '#9a5a26', spillPad: 6, tenkasu: { n: 5, color: '#f2dc8e' }, scallion: { n: 3, color: '#5aa33a' }, shade: { dome: 1, batter: 0.35 } },
       react: {
         perfect: { squash: 0.82, stretch: 1.08, ms: 320, bounces: 2, shine: true },
         good: { squash: 0.92, stretch: 1.03, ms: 200, bounces: 1, shine: false },
@@ -44,7 +44,7 @@ const Config = (() => {
         open: { skyTop: '#3a2a5c', skyBottom: '#d47a5a', city: '#3a2f4a', lamp: 1, dark: 0 },
         night: { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
       },
-      awning: ['#c8372d', '#f3e6d6'], flame: { color: '#4aa8ff', count: 9 }, wood: '#3b2a1f', counter: '#8a5a34',
+      awning: ['#c8372d', '#f3e6d6'], flame: { color: '#4aa8ff', count: 9 }, plate: { iron: ['#2a2725', '#141312'], rim: '#34302d', rimHi: '#5a5550' }, wood: '#3b2a1f', counter: '#8a5a34',
     },
     art: { background: '' },
     ingredients: {

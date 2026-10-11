@@ -97,6 +97,10 @@ const Face = (() => {
       hole.rim.setAttribute('visibility', 'hidden');
     }
 
+    // 공 입체 음영 (T35): 반구·공은 진하게, 반죽(납작한 액체)은 약한 윤기만
+    const K0 = CFG.faces.cook;
+    set(hole.shade, { cx: hole.cx, cy, rx: size, ry: hole.baseRy, opacity: hole.dome ? K0.shade.dome : K0.shade.batter });
+
     // 1차 반구: 아래쪽에 아직 안 익은 반죽 띠 ("반은 노릇·반은 반죽", T32)
     const K = CFG.faces.cook;
     if (hole.dome && !hole.ball) {
@@ -220,6 +224,44 @@ const Face = (() => {
     hole.reactRaf = requestAnimationFrame(step);
   }
 
+  // 구멍 둘레로 번진 반죽 자국 (T35): 반죽 크기 + spillPad, 살짝 울퉁불퉁
+  function spill(hole, size, extra = 0) {
+    const K = CFG.faces.cook;
+    const R = Math.max(hole.r, size) + K.spillPad + extra;
+    const pts = [];
+    for (let k = 0; k < 28; k++) {
+      const a = (k / 28) * Math.PI * 2;
+      const h = Math.sin((hole.id + 1) * 37.1 + k * 11.3) * 4371.7;
+      const w = 1 + 0.035 * ((h - Math.floor(h)) * 2 - 1);
+      pts.push([hole.cx + Math.cos(a) * R * w, hole.cy + Math.sin(a) * R * w]);
+    }
+    const d = pts.map(([x, y], i) => `${i ? 'L' : 'M'} ${x.toFixed(1)} ${y.toFixed(1)}`).join(' ') + ' Z';
+    set(hole.spill, { d, fill: K.raw, stroke: shade(K.raw), visibility: 'visible', 'stroke-linejoin': 'round' });
+  }
+
+  // 텐카스·파 (T35): 실제 공정의 "텐카스·파"를 시각으로만. data-chunk라 1차 뒤집기 때 숨는다
+  function sprinkle(hole, size) {
+    const K = CFG.faces.cook;
+    const g = Board.el('g', { 'data-chunk': '1' }, hole.octo);
+    const bits = [];
+    for (let k = 0; k < K.tenkasu.n; k++) bits.push(['t', k]);
+    for (let k = 0; k < K.scallion.n; k++) bits.push(['s', k]);
+    bits.forEach(([kind, k], i) => {
+      const h = Math.sin((hole.id + 1) * 53.7 + i * 17.9) * 7919.3;
+      const f = h - Math.floor(h);
+      const a = f * Math.PI * 2;
+      const r = size * (0.25 + 0.55 * ((f * 7) % 1));
+      const x = hole.cx + Math.cos(a) * r;
+      const y = hole.cy + Math.sin(a) * r;
+      const rot = (f * 360).toFixed(0);
+      if (kind === 't') {
+        Board.el('path', { d: `M ${x - 4} ${y - 2} L ${x + 3} ${y - 3} L ${x + 4} ${y + 2} L ${x - 3} ${y + 3} Z`, fill: K.tenkasu.color, stroke: '#c9a960', 'stroke-width': 0.8, transform: `rotate(${rot} ${x} ${y})` }, g);
+      } else {
+        Board.el('rect', { x: x - 4, y: y - 1.6, width: 8, height: 3.2, rx: 1.5, fill: K.scallion.color, transform: `rotate(${rot} ${x} ${y})` }, g);
+      }
+    });
+  }
+
   // 넘친 반죽이 옆 구멍까지 이어진 다리
   function bridge(from, to) {
     const f = CFG.faces.over;
@@ -244,6 +286,7 @@ const Face = (() => {
     hole.shine.setAttribute('visibility', 'hidden');
     hole.rim.setAttribute('visibility', 'hidden');
     hole.rawBand.setAttribute('visibility', 'hidden');
+    hole.spill.setAttribute('visibility', 'hidden');
     hole.dots.setAttribute('display', 'none');
     hole.offDy = 0;
     hole.offDeg = 0;
@@ -275,5 +318,5 @@ const Face = (() => {
     return `rgb(${d(r)},${d(g)},${d(b)})`;
   }
 
-  return { apply, react, flipAnim, setTilt, setOffset, bridge, clear, shade };
+  return { apply, react, flipAnim, setTilt, setOffset, bridge, spill, sprinkle, clear, shade };
 })();

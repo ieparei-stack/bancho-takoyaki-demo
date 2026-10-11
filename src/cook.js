@@ -89,6 +89,11 @@ const Cook = (() => {
       s.hole.batter.setAttribute('stroke', Face.shade(color));
     }
     ring(s, now, color);
+    if (s.phase === 1 && s.hole.spill.getAttribute('visibility') === 'visible') {
+      const sp = mix(CFG.faces.cook.raw, color, 0.75); // 판 위 얇은 반죽은 바닥처럼 익는다 (T35)
+      s.hole.spill.setAttribute('fill', sp);
+      s.hole.spill.setAttribute('stroke', Face.shade(sp));
+    }
     jiggle(s, now);
     if (s.phase === 1) hint(s, now); else hint2(s, now);
   }
