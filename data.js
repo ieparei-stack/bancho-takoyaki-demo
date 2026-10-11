@@ -166,6 +166,10 @@ window.DATA = {
       { who: 'crow_b', text: '내일 오는 녀석은… 입맛이 까다로워. 까악.' },
       { who: 'bancho', text: '음.', mark: '음.' },
     ],
+    // 3일차 밤 = 장인의 편지 (T40, 8단계 인터뷰). 문구는 사용자가 직접 작성 — 지금은 기획서 문구를 자리로
+    night3: [
+      { who: 'letter', text: '(장인의 편지 — 나중에 작성)\n자네만의 타코야키를 보여주게. 내일은 내가 직접 가지.' },
+    ],
   },
   // 메뉴 (T29, Claude 초안 — 플레이 후 조정). requires 필요 재료(전부 들어야 함) · price 기본가 · known 처음부터 메뉴판에 있음
   //   알의 메뉴 = 필요 재료가 모두 든 메뉴 중 기본가가 가장 높은 것 (6단계 인터뷰). 재료 0개 = plain, 문어 없이 맞는 메뉴가 없으면 odd
@@ -186,8 +190,8 @@ window.DATA = {
     shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true, desc: '탱글한 새우에 파 향을 얹은 감칠맛 덩어리.' },
   },
   customers: {
-    receiptGapMs: 400,
-    giftMs: 900,         // 선물을 두고 간 손님이 떠나기 전 기다림, ms (T37). 제안  // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
+    receiptGapMs: 400,   // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
+    giftMs: 900,         // 선물을 두고 간 손님이 떠나기 전 기다림, ms (T37). 제안
     cast: {
       // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
       //   when 조건 대사 (T36, 7단계 인터뷰): 위에서부터 처음 맞는 줄이 반응 대사를 덮는다(표정은 그대로).
@@ -200,6 +204,17 @@ window.DATA = {
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button' },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button' },
+      // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. lines는 임시 문구(사용자가 나중에 작성, 8단계 인터뷰)
+      tanuki:  { emoji: '🦝', name: '너구리', order: '…하나.', again: '한 판 더. 이번엔 제대로.',
+                 likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['shrimp_scallion'],
+                 lines: {
+                   flop: '(임시) …이걸 팔겠다고?',
+                   love: '(임시) …그래, 이 맛이야.',
+                   dislike: '(임시) 달아. 난 단 건 별로야.',
+                   lack: '(임시) 흠… 뭔가 깊은 맛이 빠졌어.',
+                   good: '(임시) 나쁘지 않네. 좀 더 깊었으면.',
+                   best: '(임시) …괜찮군. 또 오지.',
+                 } },
     },
     // 알 값 (T29, 6단계 인터뷰): (메뉴 기본가 + 좋아하는 맛 태그 × like − 싫어하는 맛 태그 × dislike + 좋아하는 메뉴면 favorite) × 표정 배수
     //   표정 배수: 실패(덜 익음·탐·문어 없음) 0 = 실패 0원 (2026-10-10 사용자). 나머지 수치는 제안
@@ -224,11 +239,12 @@ window.DATA = {
   },
   // 하루 (후속 확장용). 1일차 결산
   day: {
-    // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수. 3일차는 8단계
+    // 일차 구성 (SPEC 2절, 기획서 시작값). shop: 장보기 여부 / guests: 차례로 오는 손님과 주문 판 수
     //   enclosed: 편지에 동봉된 것 — money 송금(돈), items 준비물(재료 id → 오늘 가진 재료)
     days: [
       { shop: false, enclosed: { money: 0, items: ['octopus', 'pinenut'] }, guests: [{ id: 'sparrow', orders: 2 }] },
       { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
+      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'tanuki', orders: 2 }] }, // 3일차 (T40): 2일차와 같은 규칙
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
@@ -242,6 +258,7 @@ window.DATA = {
     days: [
       '(1일차 편지 — 나중에 작성)',
       '(2일차 편지 — 나중에 작성)',
+      '(3일차 편지 — 나중에 작성)',
     ],
     // 편지 동봉 카드 (T24)
     enclosed: { title: '동봉', items: '(준비물)', kept: '(어제 남긴 선물)' },
