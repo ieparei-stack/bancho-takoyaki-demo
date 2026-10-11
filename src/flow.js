@@ -41,6 +41,7 @@ const Flow = (() => {
     Scene.setTime(TIME[state]);
     hud.textContent = `${dayIdx + 1}일차 · ${NAME[state]}`;
     Log.add({ step: '흐름', day: dayIdx + 1, state, line: `── ${dayIdx + 1}일차 · ${state}` });
+    Discover.onState(state); // 굽는 동안 도감 버튼 숨김 (T39)
     ENTER[state]();
   }
 
@@ -89,7 +90,9 @@ const Flow = (() => {
     REACTION() {
       // 판 성적표 (T30): 건네면 바로, 클릭하면 닫히고 잠깐 뒤 다음으로
       const recs = Customer.getRecords();
-      Receipt.show(recs[recs.length - 1], () => setTimeout(reacted, CFG.customers.receiptGapMs));
+      // 성적표 → 숨은 요리를 새로 발견했으면 이름 카드 (T39) → 다음
+      const rec = recs[recs.length - 1];
+      Receipt.show(rec, () => Discover.card(Discover.check(rec), () => setTimeout(reacted, CFG.customers.receiptGapMs)));
     },
     DAY_END_TALK() {
       // 정산 카드 → 밤 대화 (T38). 밤 대화는 다음 날 손님 힌트 (SPEC 11절 힌트 곡선)

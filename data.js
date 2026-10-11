@@ -180,9 +180,10 @@ window.DATA = {
     tako_radish:     { name: '무 타코야키',   requires: ['octopus', 'radish'],   price: 120 },
     tako_shrimp:     { name: '새우 타코야키', requires: ['octopus', 'shrimp'],   price: 160 },
     tako_scallion:   { name: '파 타코야키',   requires: ['octopus', 'scallion'], price: 120 },
-    octopus_ginger:  { name: '생강 타코야키', requires: ['octopus', 'ginger'],   price: 180, hidden: true },
-    pear_pinenut:    { name: '배잣 타코야키', requires: ['pear', 'pinenut'],     price: 240, hidden: true },
-    shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true },
+    //   desc 숨은 요리 이름 카드·도감 한 줄 (T39, Claude 초안)
+    octopus_ginger:  { name: '생강 타코야키', requires: ['octopus', 'ginger'],   price: 180, hidden: true, desc: '새콤 매콤한 생강절임이 문어 맛을 깨운다.' },
+    pear_pinenut:    { name: '배잣 타코야키', requires: ['pear', 'pinenut'],     price: 240, hidden: true, desc: '시원한 배와 고소한 잣. 달콤한 디저트 같은 한 알.' },
+    shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true, desc: '탱글한 새우에 파 향을 얹은 감칠맛 덩어리.' },
   },
   customers: {
     receiptGapMs: 400,
@@ -244,6 +245,8 @@ window.DATA = {
     ],
     // 편지 동봉 카드 (T24)
     enclosed: { title: '동봉', items: '(준비물)', kept: '(어제 남긴 선물)' },
+    // 숨은 요리 발견 (T39): 이름 카드·도감
+    discover: { title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
     settle: { title: '{n}일차 끝', sales: '오늘 매출', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', fresh: '처음 만든 메뉴', found: '숨은 요리', foundVal: '발견 {n}/{all}', gifts: '받은 선물', none: '없음', close: '클릭해서 밤으로 ▶' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다

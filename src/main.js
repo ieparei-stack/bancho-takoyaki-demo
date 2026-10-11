@@ -16,6 +16,7 @@
   Customer.init();
   Dialogue.init();
   Hint.init();
+  Discover.init(document.getElementById('book-toggle'));
   Flow.start();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();

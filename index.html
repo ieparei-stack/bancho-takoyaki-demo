@@ -16,6 +16,12 @@
     background: #2a211b; color: #f3e6d6; font: inherit; font-size: 13px; cursor: pointer; opacity: .75;
   }
   #log-toggle:hover { opacity: 1; }
+  #book-toggle {
+    position: fixed; right: 100px; bottom: 14px; z-index: 10;
+    padding: 6px 12px; border: 1px solid #c0661c; border-radius: 6px;
+    background: #4a3020; color: #ffd34d; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  }
+  #book-toggle[hidden] { display: none; }
   #log-panel {
     position: fixed; right: 14px; bottom: 52px; z-index: 10;
     width: 420px; max-height: 45vh; overflow-y: auto;
@@ -47,6 +53,7 @@
   <ul></ul>
   <button type="button" title="닫기">✕</button>
 </div>
+<button id="book-toggle" type="button"></button>
 <button id="log-toggle" type="button">📋 로그</button>
 <div id="log-panel" hidden></div>
 
@@ -76,6 +83,7 @@
 <script src="src/receipt.js"></script>
 <script src="src/gift.js"></script>
 <script src="src/settle.js"></script>
+<script src="src/discover.js"></script>
 <script src="src/customer.js"></script>
 <script src="src/result.js"></script>
 <script src="src/dialogue.js"></script>
