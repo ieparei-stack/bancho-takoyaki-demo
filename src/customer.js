@@ -52,47 +52,81 @@ const Customer = (() => {
     return `₩${n.toLocaleString('ko-KR')}`;
   }
 
-  // 표정 6개 → 반응 키 (위에서부터 처음 맞는 것). 문구·이모지·임계는 data.js
-  function pickReaction(faces, sauceLen, sales) {
-    const r = CFG.customers.rules;
-    const n = (k) => faces.filter((f) => f === k).length;
-    const fails = faces.filter((f) => FAIL.includes(f)).length;
-    if (n('blank') >= 1) return 'noOcto';
-    if (n('burnt') >= r.burnt) return 'burnt';
-    if (fails >= r.fails) return 'raw';
-    if (n('perfect') >= r.perfect) return 'great';
-    if (sauceLen > r.saucePx) return 'sauce';
-    if (sales >= r.goodSales) return 'good';
-    return 'meh';
+  // 반응 고르기 (T29, 위에서부터 처음 맞는 것). balls = Menu.price 결과 + face
+  //   망함(실패 알 많음) → 반함(좋아하는 메뉴) → 싫은 맛 → 아쉬움(좋아하는 알 0, 단서) → 맛있다(일부, 단서) → 최고
+  function judge(balls, guest) {
+    const R = CFG.customers.react;
+    const say = (t) => CFG.letters.tagSay[t] || t;
+    const fails = balls.filter((b) => FAIL.includes(b.face)).length;
+    if (fails >= R.failBalls) return { key: 'flop', vars: {} };
+    const fav = balls.find((b) => b.fav);
+    if (fav) return { key: 'love', vars: { '메뉴': CFG.menus[fav.menu].name } };
+    const bad = balls.find((b) => b.dislikeN > 0);
+    if (bad) {
+      const tag = (guest.dislikes || []).find((t) => bad.tags.includes(t));
+      return { key: 'dislike', vars: { '싫은 맛': say(tag) }, clue: tag };
+    }
+    // 좋아하는 맛 중 이번 판에 가장 적게 든 맛 = 단서
+    const likes = guest.likes || [];
+    let missing = likes[0];
+    let least = Infinity;
+    for (const t of likes) {
+      const n = balls.filter((b) => b.tags.includes(t)).length;
+      if (n < least) { least = n; missing = t; }
+    }
+    const liked = balls.filter((b) => b.likeN > 0).length;
+    if (liked === 0) return { key: 'lack', vars: { '빠진 맛': say(missing) }, clue: missing };
+    if (liked < R.bestBalls) return { key: 'good', vars: { '빠진 맛': say(missing) }, clue: missing };
+    return { key: 'best', vars: {} };
   }
 
-  function price(faces) {
-    const p = CFG.customers.price;
-    return faces.reduce((sum, f) => sum + (p[f] || 0), 0);
+  function fill(line, vars) {
+    return line.replace(/\{([^}]+)\}/g, (m, k) => (k in vars ? vars[k] : m));
   }
 
-  // 건넨 후네를 받는다
-  function serve({ faces, sauceLen, flakes, boat }) {
-    const sales = price(faces);
-    const key = pickReaction(faces, sauceLen, sales);
-    const react = CFG.customers.reactions[key];
+  // 건넨 후네를 받는다. 알마다 메뉴·값을 매기고 (Menu.price) 반응을 고른다
+  function serve({ faces, ings, sauceLen, flakes, boat }) {
+    const balls = faces.map((face, i) => ({ face, ...Menu.price({ ings: ings[i] || [], face }, current) }));
+    const sales = balls.reduce((s, b) => s + b.value, 0);
+    const pick = judge(balls, current);
+    const react = CFG.customers.reactions[pick.key];
+    const line = fill((current.lines && current.lines[pick.key]) || react.line, pick.vars); // 손님별 대사가 있으면 그걸로
     total += sales;           // 결산용 매출 합 (송금 제외)
     Wallet.add(sales, '매출');
     emoji.textContent = react.emoji;
-    bubble.text.textContent = react.line;
+    bubble.text.textContent = line;
     bubble.g.removeAttribute('transform');
     showBubble();
     popup(sales);
     if (sales > 0) Sfx.coin(); else Sfx.hmm();
-    records.push({ day: Flow.day(), customer: current, faces, sales, reaction: key, satisfied: react.satisfied, sauceLen, flakes, boat });
+    const fresh = Menu.learn(balls.map((b) => b.menu));
+    if (fresh.length) note(`${CFG.letters.menu.fresh} ${fresh.map((id) => CFG.menus[id].name).join(' · ')}`);
+    records.push({ day: Flow.day(), customer: current, faces, ings, balls, sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, sauceLen, flakes, boat });
 
-    const NAME = { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' };
-    const tally = Object.keys(NAME).map((k) => [NAME[k], faces.filter((f) => f === k).length]).filter(([, c]) => c).map(([k, c]) => `${k} ${c}`).join(' · ');
+    const counts = {};
+    for (const b of balls) counts[b.menu] = (counts[b.menu] || 0) + 1;
+    const menus = Object.entries(counts).map(([id, n]) => `${CFG.menus[id].name}×${n}`).join(' ');
     Log.add({
-      step: '서빙', day: Flow.day(), customer: current.id, faces, sales, reaction: key, satisfied: react.satisfied, total,
-      line: `서빙 | ${Flow.day()}일차 ${current.name} ${current.emoji} | ${tally} | ${won(sales)} | 반응 ${key}(${react.satisfied ? '만족' : '불만'}) | 누적 ${won(total)}`,
+      step: '서빙', day: Flow.day(), customer: current.id, faces, ings, values: balls.map((b) => b.value), sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, total,
+      line: `서빙 | ${Flow.day()}일차 ${current.name} ${current.emoji} | ${menus} | ${won(sales)} (${balls.map((b) => b.value).join('+')}) | 반응 ${pick.key}${pick.clue ? ` (단서: ${pick.clue})` : ''} | 누적 ${won(total)}`,
     });
     Flow.served();
+  }
+
+  // 손님 옆에 잠깐 떠오르는 알림 (새 메뉴!)
+  function note(str) {
+    const t = Board.el('text', {
+      x: SPOT.x + 80, y: SPOT.y + 60, 'font-size': 24, 'font-weight': 900, fill: '#ffd34d', stroke: '#1b1512', 'stroke-width': 5, 'paint-order': 'stroke',
+    }, Board.layer('top'));
+    t.textContent = str;
+    const t0 = performance.now();
+    const step = (now) => {
+      const u = Math.min(1, (now - t0) / 1500);
+      t.setAttribute('transform', `translate(0 ${(-16 * u).toFixed(1)})`);
+      t.setAttribute('opacity', (u < 0.7 ? 1 : 1 - (u - 0.7) / 0.3).toFixed(2));
+      if (u < 1) requestAnimationFrame(step); else t.remove();
+    };
+    requestAnimationFrame(step);
   }
 
   // 손님 옆에 "+₩" 이 떠오르며 흐려진다
@@ -179,5 +213,5 @@ const Customer = (() => {
     bubble.g.setAttribute('display', 'none');
   }
 
-  return { init, arrive, stay, leave, shrinkBubble, reset, serve, pickReaction, getRecords: () => records, get total() { return total; }, get spot() { return SPOT; } };
+  return { init, arrive, stay, leave, shrinkBubble, reset, serve, judge, getRecords: () => records, get total() { return total; }, get spot() { return SPOT; } };
 })();

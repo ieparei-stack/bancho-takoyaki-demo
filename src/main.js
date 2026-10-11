@@ -12,6 +12,7 @@
   Box.init();
   Topping.init();
   Wallet.init();
+  Menu.init();
   Customer.init();
   Dialogue.init();
   Flow.start();

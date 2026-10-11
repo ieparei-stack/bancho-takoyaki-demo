@@ -28,7 +28,7 @@ const Result = (() => {
 
   // 가장 웃긴 실패: 실패 가중치 + 소스 과다가 가장 큰 후네. 하나도 없으면 매출이 가장 큰 후네 = 오늘의 에이스
   function funniest(records) {
-    const saucePx = CFG.customers.rules.saucePx;
+    const saucePx = CFG.customers.react.saucePx;
     const score = (r) => r.faces.reduce((s, f) => s + (FAIL_WEIGHT[f] || 0), 0) + (r.sauceLen > saucePx ? 2 : 0);
     let best = records[0];
     for (const r of records) if (score(r) > score(best)) best = r;

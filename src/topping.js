@@ -233,6 +233,7 @@ const Topping = (() => {
     // 결산(T20) "웃긴 실패 후네 통째로"용 복제
     const boat = Box.g.cloneNode(true);
     const faces = Board.holes.map((h) => h.final);
+    const ings = Board.holes.map((h) => [...h.ings]); // 알별 재료 (T29 메뉴 판정)
     const sp = Customer.spot;
     const to = { x: sp.x, y: sp.y + 25, z: 0.35 };
     const t0 = performance.now();
@@ -243,7 +244,7 @@ const Topping = (() => {
       Box.setOpacity(1 - u * u);
       if (u < 1) { requestAnimationFrame(step); return; }
       Box.g.setAttribute('display', 'none');
-      Customer.serve({ faces, sauceLen: Math.round(sauceLen), flakes: flakes.length, boat });
+      Customer.serve({ faces, ings, sauceLen: Math.round(sauceLen), flakes: flakes.length, boat });
       Stage.complete('topping', null);
     };
     requestAnimationFrame(step);

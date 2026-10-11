@@ -155,27 +155,47 @@ window.DATA = {
       { who: 'bancho', text: '음.', mark: '음.' },
     ],
   },
+  // 메뉴 (T29, Claude 초안 — 플레이 후 조정). requires 필요 재료(전부 들어야 함) · price 기본가 · known 처음부터 메뉴판에 있음
+  //   알의 메뉴 = 필요 재료가 모두 든 메뉴 중 기본가가 가장 높은 것 (6단계 인터뷰). 재료 0개 = plain, 문어 없이 맞는 메뉴가 없으면 odd
+  //   hidden 숨은 요리(기획서) — 이름 카드·도감·최소 굽기는 7단계(T33)
+  menus: {
+    plain:           { name: '빈 타코야키',   requires: [],                      price: 0 },
+    odd:             { name: '별난 타코야키', requires: [],                      price: 80 },
+    tako:            { name: '타코야키',      requires: ['octopus'],             price: 100, known: true },
+    tako_pinenut:    { name: '잣 타코야키',   requires: ['octopus', 'pinenut'],  price: 150 },
+    tako_pear:       { name: '배 타코야키',   requires: ['octopus', 'pear'],     price: 140 },
+    tako_apple:      { name: '사과 타코야키', requires: ['octopus', 'apple'],    price: 130 },
+    tako_radish:     { name: '무 타코야키',   requires: ['octopus', 'radish'],   price: 120 },
+    tako_shrimp:     { name: '새우 타코야키', requires: ['octopus', 'shrimp'],   price: 160 },
+    tako_scallion:   { name: '파 타코야키',   requires: ['octopus', 'scallion'], price: 120 },
+    octopus_ginger:  { name: '생강 타코야키', requires: ['octopus', 'ginger'],   price: 180, hidden: true },
+    pear_pinenut:    { name: '배잣 타코야키', requires: ['pear', 'pinenut'],     price: 240, hidden: true },
+    shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true },
+  },
   customers: {
     leaveMs: 2000,  // 반응을 보여준 뒤 다음으로 넘어가기까지, ms. 제안
     cast: {
-      sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!' },
-      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.' },
-      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!' },
+      // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
+      sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
+                 likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
+      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'] },
     },
-    // 표정별 개당 가격(원). 실패(덜 익음·탐·문어 없음)는 0원 (2026-10-10 사용자). 나머지 수치는 제안
-    price: { perfect: 800, tasty: 600, meh: 300, raw: 0, burnt: 0, blank: 0 },
-    // 반응 고르는 임계 (위에서부터 처음 맞는 반응). 제안
-    //   burnt 탐 개수 / fails 실패 개수 / perfect 완벽 개수 / saucePx 소스 많이(그린 거리) / goodSales 그 밖에 '맛있네요'가 되는 매출
-    rules: { burnt: 2, fails: 3, perfect: 4, saucePx: 2500, goodSales: 2400 },
-    // 반응 이모지·대사 (Claude 초안 → 플레이 후 수정). satisfied = 결산 '만족'
+    // 알 값 (T29, 6단계 인터뷰): (메뉴 기본가 + 좋아하는 맛 태그 × like − 싫어하는 맛 태그 × dislike + 좋아하는 메뉴면 favorite) × 표정 배수
+    //   표정 배수: 실패(덜 익음·탐·문어 없음) 0 = 실패 0원 (2026-10-10 사용자). 나머지 수치는 제안
+    value: { like: 20, dislike: 40, favorite: 30, faceMult: { perfect: 1.2, tasty: 1.0, meh: 0.7, raw: 0, burnt: 0, blank: 0 } },
+    // 반응 기준: failBalls 실패 알 이 이상 → 망함 / bestBalls 좋아하는 맛이 든 알 이 이상 → 최고 (아니면 맛있다 + 단서). saucePx 결산 '소스 과다'
+    react: { failBalls: 3, bestBalls: 4, saucePx: 2500 },
+    // 반응 6종 (위에서부터 처음 맞는 것). {메뉴} {싫은 맛} {빠진 맛} 자리는 채워진다. 문구 Claude 초안 → 플레이 후 수정. satisfied = 결산 '만족'
     reactions: {
-      noOcto: { emoji: '🤨', line: '어… 이건 문어가 어디 갔죠?', satisfied: false },
-      burnt:  { emoji: '😵', line: '음… 숯불 향이 진하네요…', satisfied: false },
-      raw:    { emoji: '😰', line: '이거… 다 익은 거 맞죠?', satisfied: false },
-      great:  { emoji: '😋', line: '와, 겉바속촉! 또 올게요!', satisfied: true },
-      sauce:  { emoji: '😅', line: '소스… 좋아하시나 봐요?', satisfied: true },
-      good:   { emoji: '🙂', line: '맛있네요, 잘 먹을게요!', satisfied: true },
-      meh:    { emoji: '😐', line: '음, 잘 먹을게요.', satisfied: false },
+      flop:    { emoji: '😵', line: '이건… 먹어도 되는 거 맞지?', satisfied: false },
+      love:    { emoji: '😍', line: '바로 이거야! {메뉴} 최고!', satisfied: true },
+      dislike: { emoji: '😖', line: '으, {싫은 맛}… 이건 좀.', satisfied: false },
+      lack:    { emoji: '😐', line: '음… {빠진 맛} 좀 아쉽네.', satisfied: false },
+      good:    { emoji: '🙂', line: '맛있네! {빠진 맛} 더 있었으면 좋겠다.', satisfied: true },
+      best:    { emoji: '😋', line: '최고야! 또 올게!', satisfied: true },
     },
   },
   // 하루 (후속 확장용). 1일차 결산
@@ -188,8 +208,8 @@ window.DATA = {
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
-    replyGreat: 8000,    // 매출이 이 이상이면 답장 great. 제안
-    replyOk: 4000,       // 이 이상이면 ok, 아래면 bad. 제안
+    replyGreat: 4000,    // 매출이 이 이상이면 답장 great. 제안 (T29 가격 기준으로 낮춤)
+    replyOk: 2000,       // 이 이상이면 ok, 아래면 bad. 제안
   },
   letters: {
     // 단계 끝 등급 글자 (4단계, 사용자 결정 2026-10-10)
@@ -203,6 +223,13 @@ window.DATA = {
     enclosed: { title: '동봉', items: '(준비물)' },
     // ② 재료 넣기 버튼 (T27)
     fill: { done: '모두 완료!' },
+    // 메뉴판 (T29)
+    menu: { title: '메뉴', fresh: '새 메뉴!' },
+    // 맛 태그를 대사에 넣을 때 말투 (반응 {빠진 맛} {싫은 맛})
+    tagSay: {
+      고소함: '고소한 게', 짭조름: '짭짤한 게', 단맛: '단 게', 시원함: '시원한 게', 새콤함: '새콤한 게',
+      매콤함: '매운 게', 감칠맛: '감칠맛이', 향긋함: '향긋한 게', 쫄깃함: '쫄깃한 게',
+    },
     // 준비 (T26). max = 재료판 추가 칸 수 (문어 1 + 추가 3, 사용자 결정 2026-10-10)
     prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },
     // 장보기 (T25)
