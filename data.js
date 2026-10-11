@@ -173,7 +173,7 @@ window.DATA = {
     shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true },
   },
   customers: {
-    leaveMs: 2000,  // 반응을 보여준 뒤 다음으로 넘어가기까지, ms. 제안
+    receiptGapMs: 400,  // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
     cast: {
       // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
       sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
@@ -223,6 +223,9 @@ window.DATA = {
     enclosed: { title: '동봉', items: '(준비물)' },
     // ② 재료 넣기 버튼 (T27)
     fill: { done: '모두 완료!' },
+    // 판 성적표 (T30)
+    receipt: { title: '{손님}의 한 판', close: '클릭해서 닫기 ▶', like: '좋아하는 맛', dislike: '싫은 맛', fav: '좋아하는 메뉴', fresh: '새!' },
+    faceName: { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' },
     // 메뉴판 (T29)
     menu: { title: '메뉴', fresh: '새 메뉴!' },
     // 맛 태그를 대사에 넣을 때 말투 (반응 {빠진 맛} {싫은 맛})

@@ -71,7 +71,7 @@ const Config = (() => {
       tako: { name: '타코야키', requires: ['octopus'], price: 100, known: true },
     },
     customers: {
-      leaveMs: 2000,
+      receiptGapMs: 400,
       cast: {
         sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!', likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
         crow_a: { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
@@ -101,6 +101,8 @@ const Config = (() => {
       days: ['(1일차 편지 — 나중에 작성)', '(2일차 편지 — 나중에 작성)'],
       enclosed: { title: '동봉', items: '(준비물)' },
       fill: { done: '모두 완료!' },
+      receipt: { title: '{손님}의 한 판', close: '클릭해서 닫기 ▶', like: '좋아하는 맛', dislike: '싫은 맛', fav: '좋아하는 메뉴', fresh: '새!' },
+      faceName: { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' },
       menu: { title: '메뉴', fresh: '새 메뉴!' },
       tagSay: { 고소함: '고소한 게', 짭조름: '짭짤한 게', 단맛: '단 게', 시원함: '시원한 게', 새콤함: '새콤한 게', 매콤함: '매운 게', 감칠맛: '감칠맛이', 향긋함: '향긋한 게', 쫄깃함: '쫄깃한 게' },
       prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },

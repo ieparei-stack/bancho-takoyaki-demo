@@ -86,7 +86,9 @@ const Flow = (() => {
       // 굽기 모듈(Stage ①~⑥)이 입력을 받는다. 건네면 Customer.serve → served()
     },
     REACTION() {
-      setTimeout(reacted, CFG.customers.leaveMs);
+      // 판 성적표 (T30): 건네면 바로, 클릭하면 닫히고 잠깐 뒤 다음으로
+      const recs = Customer.getRecords();
+      Receipt.show(recs[recs.length - 1], () => setTimeout(reacted, CFG.customers.receiptGapMs));
     },
     DAY_END_TALK() {
       Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE'));

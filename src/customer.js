@@ -101,7 +101,7 @@ const Customer = (() => {
     if (sales > 0) Sfx.coin(); else Sfx.hmm();
     const fresh = Menu.learn(balls.map((b) => b.menu));
     if (fresh.length) note(`${CFG.letters.menu.fresh} ${fresh.map((id) => CFG.menus[id].name).join(' · ')}`);
-    records.push({ day: Flow.day(), customer: current, faces, ings, balls, sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, sauceLen, flakes, boat });
+    records.push({ day: Flow.day(), customer: current, faces, ings, balls, fresh, line, sales, reaction: pick.key, clueTag: pick.clue || null, satisfied: react.satisfied, sauceLen, flakes, boat });
 
     const counts = {};
     for (const b of balls) counts[b.menu] = (counts[b.menu] || 0) + 1;
