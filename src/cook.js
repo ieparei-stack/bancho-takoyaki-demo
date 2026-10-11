@@ -82,11 +82,46 @@ const Cook = (() => {
     }
     // 시작 색이 이미 더 탔으면 밝아지지 않는다
     if (lum(s.from) < lum(color)) color = s.from;
+    // T32: color = "바닥 색"(익는 면). 1차는 윗면이 반죽색 그대로이고, 바닥 색은 테두리 링으로만 보인다 → 뒤집으면 드러남
     s.hole.cookColor = color;
-    s.hole.batter.setAttribute('fill', color);
-    s.hole.batter.setAttribute('stroke', Face.shade(color));
-    if (s.hole.bridge.getAttribute('visibility') === 'visible') s.hole.bridge.setAttribute('fill', color);
+    if (s.phase === 2) {
+      s.hole.batter.setAttribute('fill', color);
+      s.hole.batter.setAttribute('stroke', Face.shade(color));
+    }
+    ring(s, now, color);
+    jiggle(s, now);
     if (s.phase === 1) hint(s, now); else hint2(s, now);
+  }
+
+  // 노릇한 테두리 링 (T32): 큐까지 두꺼워지고, 색은 바닥 색 (늦으면 진한 갈색 → 거의 검정)
+  function ring(s, now, color) {
+    const h = s.hole;
+    const K = CFG.faces.cook;
+    const u = Math.min(1, Math.max(0, (now - s.startAt) / (s.cueAt - s.startAt)));
+    const w = K.ringMax * u;
+    const size = h.size || h.r;
+    const cy = h.cy + (!h.dome && h.state === 'under' ? CFG.faces.under.sagY : 0);
+    h.ring.setAttribute('cx', h.cx);
+    h.ring.setAttribute('cy', cy.toFixed(1));
+    h.ring.setAttribute('r', Math.max(0, size - w / 2).toFixed(1));
+    h.ring.setAttribute('stroke', color);
+    h.ring.setAttribute('stroke-width', w.toFixed(1));
+    h.ring.setAttribute('visibility', w > 0.3 ? 'visible' : 'hidden');
+  }
+
+  // 큐 순간 들썩 (T32, "이제 돌려도 돼"): 퍼펙트 구간 동안 세로로 통통 + 살짝 흔들림
+  function jiggle(s, now) {
+    const h = s.hole;
+    const J = CFG.faces.cook.jiggle;
+    const since = now - s.cueAt;
+    if (since >= 0 && since < s.span.perfect) {
+      const t = since / 1000;
+      Face.setOffset(h, -Math.abs(Math.sin(t * Math.PI * J.hz)) * J.px, Math.sin(t * Math.PI * J.hz * 0.5) * J.deg);
+      h.jiggling = true;
+    } else if (h.jiggling) {
+      Face.setOffset(h, 0, 0);
+      h.jiggling = false;
+    }
   }
 
   // 1차 굽기 힌트 (실제 타코야키의 판단 기준을 그대로):
@@ -193,6 +228,8 @@ const Cook = (() => {
   }
 
   function hideHint(h) {
+    h.ring.setAttribute('visibility', 'hidden');
+    if (h.jiggling) { Face.setOffset(h, 0, 0); h.jiggling = false; }
     h.core.setAttribute('visibility', 'hidden');
     h.bubbles.setAttribute('display', 'none');
     h.steam.setAttribute('display', 'none');

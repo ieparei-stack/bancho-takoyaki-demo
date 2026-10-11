@@ -73,6 +73,7 @@ const Pour = (() => {
     Dispenser.hide();
     next = hole.id + 1;
     if (autoStopped) sound.gurgle(); else sound.release();
+    Sfx.sizzle(); // 반죽이 뜨거운 불판에 닿는 "치익" (T32, 붓는 순간만)
 
     const held = upAt - downAt;
     const { targetMs, soundSet } = CFG.timing.pour;

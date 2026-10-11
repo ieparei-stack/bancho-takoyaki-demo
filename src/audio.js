@@ -287,6 +287,24 @@ const Sfx = (() => {
     marimba(ctx, master, ctx.currentTime, NOTE.E5, false);
   }
 
+  // "치익" — 반죽이 뜨거운 불판에 닿는 짧은 소리 (T32). 계속 깔리지 않게 0.3 s만
+  function sizzle() {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const src = ctx.createBufferSource();
+    src.buffer = noise(ctx);
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 2400;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.09, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+    src.connect(hp).connect(g).connect(master);
+    src.start(t, Math.random() * 0.5);
+    src.stop(t + 0.32);
+  }
+
   function pourStart(opts) {
     if (!ctx) return { release() {}, gurgle() {} };
     return schedulePour(ctx, master, ctx.currentTime, opts);
@@ -303,6 +321,7 @@ const Sfx = (() => {
     coin,
     hmm,
     tick,
+    sizzle,
     flipOk,
     flipFail,
     flip2Ok,

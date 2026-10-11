@@ -55,11 +55,11 @@ const Face = (() => {
       hole.mouth.setAttribute('visibility', 'hidden');
     }
 
-    // 얼룩 (어설픔): 구멍마다 고정된 자리에 어두운 점
+    // 얼룩 (어설픔 = 갈색, 탐 = 검은 반점 — T32): 구멍마다 고정된 자리
     if (f.spots) {
       Array.from(hole.spots.children).forEach((c, k) => {
-        const ang = (k / 3) * Math.PI * 2 + hole.id * 0.7 + 0.9;
-        set(c, { cx: hole.cx + Math.cos(ang) * size * 0.55, cy: cy + Math.sin(ang) * size * 0.55, r: size * 0.1, display: k < f.spots ? 'inline' : 'none' });
+        const ang = (k / f.spots) * Math.PI * 2 + hole.id * 0.7 + 0.9;
+        set(c, { cx: hole.cx + Math.cos(ang) * size * 0.55, cy: cy + Math.sin(ang) * size * 0.55, r: size * 0.11, fill: f.spotColor || '#8a5a2e', opacity: f.spotColor ? 0.8 : 0.45, display: k < f.spots ? 'inline' : 'none' });
       });
       hole.spots.setAttribute('display', 'inline');
     } else {
@@ -97,15 +97,48 @@ const Face = (() => {
       hole.rim.setAttribute('visibility', 'hidden');
     }
 
+    // 1차 반구: 아래쪽에 아직 안 익은 반죽 띠 ("반은 노릇·반은 반죽", T32)
+    const K = CFG.faces.cook;
+    if (hole.dome && !hole.ball) {
+      const rx = size;
+      const ry = hole.baseRy;
+      set(hole.rawBand, { d: `M ${hole.cx - rx * 0.8} ${cy + ry * 0.55} A ${rx} ${ry} 0 0 0 ${hole.cx + rx * 0.8} ${cy + ry * 0.55}`, stroke: K.rawBand, visibility: 'visible' });
+    } else {
+      hole.rawBand.setAttribute('visibility', 'hidden');
+    }
+    // 다 익은 공: 작은 갈색 점 (맛있어 보이게). 표정 색을 강제하는 실패 공에는 없다
+    if (hole.ball && !f.forceColor) {
+      Array.from(hole.dots.children).forEach((c, k) => {
+        const h = Math.sin((hole.id + 1) * 91.7 + k * 47.3) * 9871.3;
+        const fr = h - Math.floor(h);
+        const ang = fr * Math.PI * 2;
+        const rr = size * (0.35 + 0.45 * ((fr * 7) % 1));
+        set(c, { cx: hole.cx + Math.cos(ang) * rr, cy: cy + Math.sin(ang) * rr, r: 2 + ((fr * 13) % 1) * 2, fill: K.dotColor, opacity: 0.6, display: k < K.dots ? 'inline' : 'none' });
+      });
+      hole.dots.setAttribute('display', 'inline');
+    } else {
+      hole.dots.setAttribute('display', 'none');
+    }
+
     setTilt(hole, hole.tilt || 0);
     hole.face.setAttribute('visibility', 'visible');
   }
 
-  // 어설프게 뒤집힌 반구는 비스듬하다
+  // 어설프게 뒤집힌 반구는 비스듬하다. 큐 순간 들썩(T32)은 기울기 위에 더한다
   function setTilt(hole, deg) {
     hole.tilt = deg;
-    const t = deg ? `rotate(${deg} ${hole.cx} ${hole.cy})` : '';
-    for (const n of [hole.batter, hole.face, hole.rim, hole.octo]) {
+    applyTransform(hole);
+  }
+  function setOffset(hole, dy, deg) {
+    hole.offDy = dy;
+    hole.offDeg = deg;
+    applyTransform(hole);
+  }
+  function applyTransform(hole) {
+    const rot = (hole.tilt || 0) + (hole.offDeg || 0);
+    const dy = hole.offDy || 0;
+    const t = (rot || dy) ? `translate(0 ${dy.toFixed(1)}) rotate(${rot.toFixed(1)} ${hole.cx} ${hole.cy})` : '';
+    for (const n of [hole.batter, hole.face, hole.rim, hole.rawBand, hole.octo]) {
       if (t) n.setAttribute('transform', t); else n.removeAttribute('transform');
     }
   }
@@ -210,6 +243,10 @@ const Face = (() => {
     hole.bridge.setAttribute('visibility', 'hidden');
     hole.shine.setAttribute('visibility', 'hidden');
     hole.rim.setAttribute('visibility', 'hidden');
+    hole.rawBand.setAttribute('visibility', 'hidden');
+    hole.dots.setAttribute('display', 'none');
+    hole.offDy = 0;
+    hole.offDeg = 0;
     Cook.hideHint(hole);
     hole.mouth.setAttribute('visibility', 'hidden');
     hole.sweat.forEach((s) => s.setAttribute('visibility', 'hidden'));
@@ -238,5 +275,5 @@ const Face = (() => {
     return `rgb(${d(r)},${d(g)},${d(b)})`;
   }
 
-  return { apply, react, flipAnim, setTilt, bridge, clear, shade };
+  return { apply, react, flipAnim, setTilt, setOffset, bridge, clear, shade };
 })();

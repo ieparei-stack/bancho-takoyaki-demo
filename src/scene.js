@@ -24,6 +24,8 @@ const Scene = (() => {
   let now = null;     // 지금 보이는 값
   let raf = 0;
   let time = null;
+  let gas = null;       // 불판 아래 가스불 (T32)
+  let shimmer = [];     // 불판 위 아지랑이 (T32)
 
   function el(tag, attrs, parent) {
     return Board.el(tag, attrs, parent);
@@ -99,6 +101,23 @@ const Scene = (() => {
     el('rect', { x: 0, y: COUNTER.y, width: W, height: 5, fill: '#b07a4c' }, counter);
     el('rect', { x: 0, y: COUNTER.y + COUNTER.h - 4, width: W, height: 4, fill: '#4a2f1c' }, counter);
 
+    // 불판이 굽고 있다는 느낌 (T32, F4): 불판 아래 파란 가스불 + 위쪽 옅은 아지랑이. 영업 시간대에만
+    const pl = Board.plate;
+    const px = +pl.getAttribute('x');
+    const pw = +pl.getAttribute('width');
+    const pb = +pl.getAttribute('y') + +pl.getAttribute('height');
+    const pt = +pl.getAttribute('y');
+    gas = Board.el('g', { display: 'none' }, counter);
+    const F = S.flame;
+    for (let i = 0; i < F.count; i++) {
+      const fx = px + pw * ((i + 0.5) / F.count);
+      const fl = Board.el('path', { fill: F.color, opacity: 0.85 }, gas);
+      fl.dataset.x = fx;
+      fl.dataset.y = pb + 2;
+    }
+    for (let i = 0; i < 3; i++) shimmer.push(Board.el('path', { fill: 'none', stroke: '#ffffff', 'stroke-width': 2, opacity: 0, 'pointer-events': 'none' }, counter));
+    shimmer.forEach((p, i) => { p.dataset.x = px + pw * (0.25 + i * 0.25); p.dataset.y = pt - 4; });
+
     now = { ...S.times.morning };
     paint(performance.now());
     time = 'morning';
@@ -111,6 +130,7 @@ const Scene = (() => {
   function setTime(next) {
     if (next === time) return;
     time = next;
+    paint(performance.now()); // 가스불 켜고 끄기를 바로
     blend = { from: { ...now }, to: CFG.scene.times[next], t0: performance.now() };
     if (!raf) raf = requestAnimationFrame(loop);
   }
@@ -129,6 +149,27 @@ const Scene = (() => {
   }
 
   function paint(t) {
+    // 가스불·아지랑이: 영업 시간대에만 일렁인다
+    const open = time === 'open';
+    gas.setAttribute('display', open ? 'inline' : 'none');
+    if (open) {
+      Array.from(gas.children).forEach((f, i) => {
+        const x = +f.dataset.x;
+        const y = +f.dataset.y;
+        const h = 14 + 5 * Math.sin(t / 90 + i * 1.7) + 3 * Math.sin(t / 37 + i);
+        f.setAttribute('d', `M ${x - 7} ${y} Q ${x - 6} ${y + h * 0.6} ${x} ${y + h} Q ${x + 6} ${y + h * 0.6} ${x + 7} ${y} Z`);
+      });
+      shimmer.forEach((p, i) => {
+        const x = +p.dataset.x;
+        const y = +p.dataset.y;
+        const ph = ((t / 1400) + i / 3) % 1;
+        const w = Math.sin(t / 160 + i) * 5;
+        p.setAttribute('d', `M ${x} ${y - ph * 18} q ${w} -5 0 -10 q ${-w} -5 0 -10`);
+        p.setAttribute('opacity', (0.18 * Math.sin(ph * Math.PI)).toFixed(2));
+      });
+    } else {
+      shimmer.forEach((p) => p.setAttribute('opacity', 0));
+    }
     skyTop.setAttribute('stop-color', now.skyTop);
     skyBottom.setAttribute('stop-color', now.skyBottom);
     for (const c of city) c.setAttribute('fill', now.city);

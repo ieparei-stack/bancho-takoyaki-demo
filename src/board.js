@@ -66,6 +66,8 @@ const Board = (() => {
         const bridge = el('rect', { rx: 18, visibility: 'hidden' }, bridgeLayer);
 
         const batter = el('ellipse', { cx, cy, rx: 0, ry: 0, 'stroke-width': 2 }, batterLayer);
+        // 노릇한 테두리 링 (T32): 바닥이 익는 정도가 구멍 가장자리로 올라온다 — 뒤집을 때를 알리는 신호
+        const ring = el('circle', { cx, cy, r: 0, fill: 'none', 'stroke-width': 0, visibility: 'hidden' }, batterLayer);
         // 1차 굽기 힌트: 아직 안 굳은 가운데 반죽 + 굳은 테두리 경계의 기포
         const core = el('ellipse', { cx, cy, rx: 0, ry: 0, visibility: 'hidden' }, batterLayer);
         const bubbles = el('g', { display: 'none' }, batterLayer);
@@ -83,8 +85,12 @@ const Board = (() => {
         }
         const octo = el('g', {}, batterLayer);
         const rim = el('path', { fill: 'none', 'stroke-width': 3, visibility: 'hidden' }, batterLayer); // 뒤집힌 반구 아래 테두리
+        const rawBand = el('path', { fill: 'none', 'stroke-width': 8, 'stroke-linecap': 'round', visibility: 'hidden' }, batterLayer); // 1차 반구 아래 아직 안 익은 반죽 띠 (T32)
         const shine = el('ellipse', { fill: '#fff', opacity: 0.55, visibility: 'hidden' }, batterLayer); // 잘 짠 윤기
         const face = el('g', { visibility: 'hidden' }, batterLayer);
+        // 다 익은 공의 갈색 점 (T32). 눈보다 먼저 = 아래
+        const dots = el('g', { display: 'none' }, face);
+        for (let k = 0; k < 6; k++) el('circle', {}, dots);
         const eyes = [0, 1].map(() => ({
           white: el('ellipse', { fill: '#fffaf0' }, face),
           pupil: el('ellipse', { fill: '#2a1d14' }, face),
@@ -94,7 +100,7 @@ const Board = (() => {
         // 최종 표정용: X 눈(탐), 얼룩(어설픔). display로 끈다 (visibility는 자식이 부모를 덮어쓴다)
         const xeyes = el('path', { fill: 'none', stroke: '#1a1210', 'stroke-width': 3, 'stroke-linecap': 'round', display: 'none' }, face);
         const spots = el('g', { display: 'none' }, face);
-        for (let k = 0; k < 3; k++) el('circle', { fill: '#8a5a2e', opacity: 0.45 }, spots);
+        for (let k = 0; k < 4; k++) el('circle', { fill: '#8a5a2e', opacity: 0.45 }, spots);
         // 연기(탐): 기울기와 무관하게 위로 올라가므로 face 그룹 밖
         const smoke = [0, 1].map(() => el('path', { fill: 'none', stroke: '#9c9c9c', 'stroke-width': 3, 'stroke-linecap': 'round', opacity: 0.7, display: 'none' }, batterLayer));
         // 김(2차 큐 신호): 연기보다 가늘고 하얗다. face 그룹 밖
@@ -104,7 +110,7 @@ const Board = (() => {
         // 입력은 투명한 원이 받는다 (반죽이 넘쳐도 구멍 범위로 판정)
         const hit = el('circle', { cx, cy, r: HOLE.r + 4, fill: 'transparent' }, hitLayer);
 
-        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, core, bubbles, bubbleSlots, octo, rim, shine, face, eyes, mouth, sweat, xeyes, spots, smoke, steam, steamPaths, bridge, hit });
+        holes.push({ id, row, col, cx, cy, r: HOLE.r, batter, ring, core, bubbles, bubbleSlots, octo, rim, rawBand, shine, face, dots, eyes, mouth, sweat, xeyes, spots, smoke, steam, steamPaths, bridge, hit });
       }
     }
     return svg;

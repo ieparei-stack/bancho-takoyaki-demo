@@ -94,12 +94,15 @@ window.DATA = {
     tasty:   { color: '#e0a457', squashY: 1, sagY: 0, eyeRx: 5,   eyeRy: 7, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'smile', sweat: 0 },                                    // 합 3 맛있음: 노릇 + 작은 미소
     meh:     { color: '#d9a35e', squashY: 1, sagY: 0, eyeRx: 5,   eyeRy: 7, eyeRy2: 3, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 0, spots: 3 },                // 합 2 어설픔: 얼룩 + 물결 입 + 짝짝이 눈
     raw:     { color: '#efe3c4', squashY: 1, sagY: 2, eyeRx: 5,   eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, mouth: 'wave', sweat: 0, forceColor: true, wobble: true },     // 합 0~1 덜 익음: 창백 + 흐물
-    burnt:   { color: '#2a211b', squashY: 1, sagY: 0, eyeRx: 6,   eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, eyes: 'x', sweat: 0, forceColor: true, smoke: 2 },             // 합 0~1 + 늦은 미스 탐: 검정 + X 눈 + 연기
+    burnt:   { color: '#5a3418', squashY: 1, sagY: 0, eyeRx: 6,   eyeRy: 6, eyeGap: 24, eyeY: -6, lookX: 0, eyes: 'x', sweat: 0, forceColor: true, smoke: 2, spots: 4, spotColor: '#1a120c' }, // 합 0~1 + 늦은 미스 탐: 진한 갈색 + 검은 반점 + X 눈 + 연기 (2026-10-11 사용자)
     blank:   { color: '#e0a457', squashY: 1, sagY: 0, eyeRx: 3,   eyeRy: 3, eyeGap: 26, eyeY: -4, lookX: 0, mouth: 'flat', sweat: 0 },                                     // 문어 없음: 멍함 (굽기 결과 무관)
     // 굽기 색과 1차 굽기 힌트. 반죽(raw) → 테두리 굳음(set) → (큐) 황금 → 갈색 → 검정. 제안
     //   coreMin 큐 시점에 남는 가운데 반죽 반지름 비율(시작 0.95) / bubbles 큐 순간 올라오는 기포 수 (굿 창 동안 보임)
     //   2차 신호(T13): steam 큐부터 퍼펙트 구간 동안 오르는 김 줄 수(최대 3) / steamColor / anticipate 큐 직전 눈 배율(두근두근 예고)
-    cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35 },
+    //   T32 (실제 타코야키처럼): 윗면은 반죽색, 바닥 색은 테두리 링으로 — ringMax 링 최대 두께 / rawBand 1차 반구 아래 안 익은 띠 색
+    //   jiggle 큐 순간 들썩(px 세로, deg 흔들림, hz) / dots·dotColor 다 익은 공의 갈색 점
+    cook: { raw: '#f1dfb4', set: '#e9cf8e', golden: '#e0a457', brown: '#8a4a1f', burnt: '#2a211b', coreMin: 0.35, bubbles: 8, steam: 3, steamColor: '#ffffff', anticipate: 1.35,
+            ringMax: 7, rawBand: '#f1dfb4', jiggle: { px: 2.5, deg: 4, hz: 6 }, dots: 4, dotColor: '#9a5a26' },
     // 짜기 결과 반응 (놓는 순간 반죽이 눌렸다 펴진다). 제안
     //   squash 눌림 세로 비율 / stretch 펴짐 세로 비율 / ms 길이 / bounces 횟수 / shine 윤기 점 남김
     react: {
@@ -120,6 +123,7 @@ window.DATA = {
       night:   { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
     },
     awning: ['#c8372d', '#f3e6d6'],  // 천막 줄무늬 두 색
+    flame: { color: '#4aa8ff', count: 9 },  // 불판 아래 가스불 (T32)
     wood: '#3b2a1f',                  // 작업대
     counter: '#8a5a34',               // 카운터 앞턱
   },
