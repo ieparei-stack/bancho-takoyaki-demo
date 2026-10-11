@@ -113,5 +113,5 @@ const Stage = (() => {
     round++;
   }
 
-  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner || !!skipping, finished: () => finished, history: () => history };
+  return { is: (name) => !finished && is(name), current, complete, onEnter, reset, busy: () => !!banner || !!skipping, finished: () => finished, history: () => history, round: () => round };
 })();

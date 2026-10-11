@@ -15,6 +15,7 @@
   Menu.init();
   Customer.init();
   Dialogue.init();
+  Hint.init();
   Flow.start();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });
 })();
