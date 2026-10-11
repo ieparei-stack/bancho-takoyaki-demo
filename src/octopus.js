@@ -44,12 +44,14 @@ const Octopus = (() => {
     drag = { piece };
     Board.layer('drag').appendChild(piece.el);
     piece.el.setAttribute('cursor', 'grabbing');
+    DropGuide.show((h) => h.hasBatter && !h.hasOcto); // 놓을 자리 (T42)
     follow(e);
   }
 
   function follow(e) {
     const p = Board.toSvg(e);
     drag.piece.el.setAttribute('transform', `translate(${p.x} ${p.y}) scale(1.15)`);
+    DropGuide.move(p);
   }
 
   function move(e) {
@@ -60,6 +62,7 @@ const Octopus = (() => {
     if (!drag) return;
     const { piece } = drag;
     drag = null;
+    DropGuide.hide();
     dishG.appendChild(piece.el);
     piece.el.setAttribute('cursor', 'grab');
 
@@ -179,5 +182,11 @@ const Octopus = (() => {
     Tray.setVisible(on);
   }
 
-  return { init, clear, reset, setVisible, scores: () => scores.slice(), busy: () => !!drag };
+  // 아직 안 쓴 첫 조각 자리 (T42 유령 시범의 출발점)
+  function nextHome() {
+    const pc = pieces.find((k) => !k.used);
+    return pc ? pc.home : null;
+  }
+
+  return { init, clear, reset, setVisible, scores: () => scores.slice(), busy: () => !!drag, nextHome };
 })();

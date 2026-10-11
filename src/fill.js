@@ -67,7 +67,7 @@ const Fill = (() => {
     cancelAnimationFrame(running.raf);
     running = null;
     ui.setAttribute('display', 'none');
-    if (drag) { drag.el.remove(); drag = null; }
+    if (drag) { drag.el.remove(); drag = null; DropGuide.hide(); }
     const names = (h) => [...h.ings].map((id) => CFG.ingredients[id].name).join(' · ') || '(없음)';
     Log.add({
       step: '재료 끝', reason, ings: Board.holes.map((h) => [...h.ings]),
@@ -90,11 +90,13 @@ const Fill = (() => {
     const el = Board.el('g', {}, Board.layer('drag'));
     Shop.icon(id, el, 0, 0, ITEM_R * 1.3);
     drag = { id, el };
+    DropGuide.show((h) => h.hasBatter && !h.ings.has(id)); // 놓을 자리 (T42)
     follow(p);
   }
 
   function follow(p) {
     drag.el.setAttribute('transform', `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})`);
+    DropGuide.move(p);
   }
 
   function move(e) {
@@ -105,6 +107,7 @@ const Fill = (() => {
     if (!drag) return;
     const { id, el } = drag;
     drag = null;
+    DropGuide.hide();
     el.remove();
     const p = Board.toSvg(e);
     const hole = Board.holeAt(p.x, p.y);

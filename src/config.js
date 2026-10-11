@@ -10,7 +10,7 @@ const Config = (() => {
         targetMs: 1500, perfectMs: 50, goodMs: 120, autoStopMs: 120,
         holdBeats: 3, soundSet: 1,
       },
-      octopus: { legRatio: 0.6, perfectRatio: 0.3 },
+      octopus: { legRatio: 0.6, perfectRatio: 0.3, guide: { strong: [0.8, 0.55], faint: [0.25, 0.2] }, demo: { cycleMs: 1800, strong: 0.6, faint: 0.22 } },
       fill: { limitMs: [60000, 20000], endOnOctopusDays: [1] },
       box: { flickPx: 30, flickMs: 300, coneDeg: 60, flyMs: 350 },
       topping: { boatScale: 1.6, sauceWidth: 7, flakeEveryPx: 18, flakeMax: 400, handoffY: 170 },
