@@ -293,8 +293,8 @@ window.DATA = {
     prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },
     // 장보기 (T25)
     shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료' },
-    // 결산 화면 (T20, 8단계 결과 화면으로 교체 예정). 아래 문구는 전부 Claude 초안 → 플레이 후 수정
-    result: { title: '결산 (임시)', funnyTitle: '오늘의 가장 웃긴 한 접시', aceTitle: '오늘의 에이스 한 접시', sign: '— 사장 드림' },
+    // 결과 화면 ① 3일의 기록 (T41). Claude 초안
+    result: { title: '3일의 기록', day: '{n}일차', boards: '{n}판', fresh: '새 메뉴', found: '발견!', quiet: '새로 만든 메뉴 없음', pinenut: '잣 꾸러미', keep: '남겼다 → 다음 날 재료로', sell: '팔았다 ({값})', missed: '받지 못했다', book: '숨은 요리', total: '3일 매출', funnyTitle: '3일 중 가장 웃긴 한 접시', aceTitle: '3일 중 에이스 한 접시', funnyDay: '{n}일차 · {손님}의 한 판', next: '클릭해서 기획 노트 보기 ▶' },
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
     funny: {
       noOcto: '문어 실종 사건',
