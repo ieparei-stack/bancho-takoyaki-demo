@@ -31,6 +31,7 @@ const Flip = (() => {
     if (!phase) return;
     const p = Board.toSvg(e);
     drag = { hole, phase, lastAng: angle(hole, p), deg: 0, startAt: e.timeStamp, firstMoveT: null, lastT: e.timeStamp, doneAt: null, dps: 0 };
+    Guide.show(hole, phase, angle(hole, p)); // 회전 안내 화살표 (T34)
   }
 
   function angle(hole, p) {
@@ -47,6 +48,7 @@ const Flip = (() => {
     if (d === 0) return;
     drag.lastAng = a;
     drag.deg += d; // 부호 있게 누적 → 왔다 갔다는 상쇄
+    Guide.update(drag.deg);
     if (drag.firstMoveT === null) drag.firstMoveT = e.timeStamp;
     drag.lastT = e.timeStamp;
   }
@@ -56,6 +58,7 @@ const Flip = (() => {
     if (!drag) return;
     const d = drag;
     drag = null;
+    Guide.hide();
     const f = CFG.timing.flip;
     const deg = Math.abs(d.deg);
     if (deg < f.ignoreDeg) return; // 실수 클릭
