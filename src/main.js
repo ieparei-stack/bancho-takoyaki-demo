@@ -15,6 +15,7 @@
   Menu.init();
   Customer.init();
   Dialogue.init();
+  Letter.init(); // 화면 전체 편지 (T47)
   Hint.init();
   Demo.init(); // 첫 판 유령 시범 (T44)
   Discover.init(document.getElementById('book-toggle'));

@@ -132,7 +132,7 @@ const Receipt = (() => {
     text(x0 + inner - 16, y, '···', { 'text-anchor': 'end', 'font-size': 16, 'font-weight': 900 });
     y += 24;
     // 본문 줄 수를 먼저 세서 사진 크기를 정한다
-    const body = [rec.line, ...rv.lines];
+    const body = [rec.line, ...rv.lines]; // "**힌트**" 강조 유지 (T47)
     const tags = [...new Set(rec.balls.map((b) => b.menu))].map((id) => `#${CFG.menus[id].name.replace(/\s/g, '')}`).join(' ');
     const bodyLines = body.reduce((a, s) => a + wrap(s, MAX).length, 0) + wrap(tags, MAX + 4).length;
     const bottom = P.y + P.h - P.pad - 14;
@@ -172,7 +172,7 @@ const Receipt = (() => {
     const star = Board.el('tspan', { dx: 6, fill: '#f0b41c' }, head);
     star.textContent = '★'.repeat(rv.stars) + '☆'.repeat(5 - rv.stars);
     for (const [k, s] of body.entries()) {
-      for (const part of wrap(s, MAX)) { y += LINE; text(x0 + 14, y, part, { 'font-size': 13, 'font-weight': k === 0 ? 700 : 400 }); }
+      for (const part of wrap(s, MAX)) { y += LINE; Board.rich(text(x0 + 14, y, '', { 'font-size': 13, 'font-weight': k === 0 ? 700 : 400 }), part); }
     }
     for (const part of wrap(tags, MAX + 4)) { y += LINE; text(x0 + 14, y, part, { 'font-size': 13, fill: '#00376b' }); }
     y += LINE;
@@ -194,8 +194,7 @@ const Receipt = (() => {
       const f = CFG.faces[b.face] || CFG.faces.tasty;
       Board.el('circle', { cx: Q.x + 24, cy: yy - 5, r: 7, fill: f.color, stroke: '#00000033', 'stroke-width': 1.5 }, paper);
       const heart = b.likeN > 0 ? '♥' : '';
-      const fresh = (rec.fresh || []).includes(b.menu) ? ` ${L.fresh}` : '';
-      const nm = ptext(Q.x + 38, yy, `${heart}${CFG.menus[b.menu].name}${fresh}`, { 'font-size': 13, 'font-weight': 700 });
+      const nm = ptext(Q.x + 38, yy, `${heart}${CFG.menus[b.menu].name}`, { 'font-size': 13, 'font-weight': 700 });
       if (heart) nm.setAttribute('fill', '#c0392b');
       ptext(Q.x + 38, yy + 13, CFG.letters.faceName[b.face], { 'font-size': 10, fill: FAIL.includes(b.face) ? '#c0392b' : '#8a7460' });
       ptext(Q.x + Q.w - 16, yy, won(b.value), { 'text-anchor': 'end', 'font-size': 13, fill: b.value ? '#3a2a1e' : '#b0a090' });

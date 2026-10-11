@@ -53,6 +53,8 @@ const Dialogue = (() => {
   // lines: [{ who, text, mark? }]. 다 넘기면 then()
   function play(list, then) {
     lines = (list || []).filter((l) => l && typeof l.text === 'string');
+    // 편지만 있으면 대화창 대신 화면 전체 편지로 (T47)
+    if (lines.length && lines.every((l) => l.who === 'letter')) { Letter.play(lines.map((l) => l.text), then); return; }
     idx = 0;
     done = then;
     if (!lines.length) { finish(); return; }
@@ -77,47 +79,15 @@ const Dialogue = (() => {
       parts.iconMark.setAttribute('display', 'inline');
     }
     parts.more.setAttribute('display', 'none');
-    const full = wrap(line.text);
+    const full = Board.richLines(parts.text, line.text, TEXT.w); // \n·창 폭으로 줄 나눔, "**강조**" (T47)
     if (typing && typing.raf) cancelAnimationFrame(typing.raf);
-    typing = { full, total: full.join('').length, shown: -1, t0: performance.now(), raf: 0 };
+    typing = { full, total: full.reduce((a, ln) => a + ln.length, 0), shown: -1, t0: performance.now(), raf: 0 };
     typing.raf = requestAnimationFrame(type);
-    Log.add({ step: '대사', who: line.who, line: `대사 | ${s.name || line.who}: ${line.text.replace(/\n/g, ' ')}` });
-  }
-
-  // \n 과 창 폭으로 줄을 나눈다 (글자 단위 — 한국어는 띄어쓰기가 적어도 자연스럽다)
-  function wrap(str) {
-    const out = [];
-    const probe = parts.text;
-    probe.textContent = '';
-    for (const para of str.split('\n')) {
-      let cur = '';
-      for (const ch of para) {
-        probe.textContent = cur + ch;
-        if (cur && probe.getComputedTextLength() > TEXT.w) {
-          // 가능하면 마지막 띄어쓰기에서 끊는다
-          const sp = cur.lastIndexOf(' ');
-          if (sp > cur.length * 0.6) { out.push(cur.slice(0, sp)); cur = cur.slice(sp + 1) + ch; }
-          else { out.push(cur); cur = ch; }
-        } else {
-          cur += ch;
-        }
-      }
-      out.push(cur);
-    }
-    probe.textContent = '';
-    return out;
+    Log.add({ step: '대사', who: line.who, line: `대사 | ${s.name || line.who}: ${Board.plain(line.text).replace(/\n/g, ' ')}` });
   }
 
   function render(count) {
-    const t = parts.text;
-    t.replaceChildren();
-    let left = count;
-    typing.full.forEach((ln, i) => {
-      const span = el('tspan', { x: TEXT.x, dy: i ? TEXT.lineH : 0 }, t);
-      const n = Math.max(0, Math.min(ln.length, left));
-      span.textContent = ln.slice(0, n);
-      left -= ln.length;
-    });
+    Board.richRender(parts.text, typing.full, count, TEXT.x, TEXT.lineH);
   }
 
   function type(now) {

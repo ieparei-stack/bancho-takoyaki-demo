@@ -16,6 +16,7 @@ const Log = (() => {
   }
 
   function add(entry) {
+    if (typeof entry.line === 'string') entry.line = entry.line.replace(/\*\*/g, ''); // "**강조**" 표시는 로그에서 뺀다 (T47)
     entries.push(entry);
     const { line, ...data } = entry;
     console.log('[판정]', data);

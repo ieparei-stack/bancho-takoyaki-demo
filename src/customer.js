@@ -40,6 +40,12 @@ const Customer = (() => {
     bubble = { g: bg, text, box };
   }
 
+  // 말풍선 글자. "**잣**"은 강조 (T47)
+  function setLine(str) {
+    bubble.raw = str;
+    Board.rich(bubble.text, str);
+  }
+
   // 말풍선을 보이고 글자 길이에 맞춘다 (보이는 상태여야 길이를 잴 수 있다)
   function showBubble() {
     bubble.g.setAttribute('display', 'inline');
@@ -95,8 +101,9 @@ const Customer = (() => {
     return null;
   }
 
+  // {싫은 맛} {빠진 맛}은 재료 힌트라 강조 (T47)
   function fill(line, vars) {
-    return line.replace(/\{([^}]+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+    return line.replace(/\{([^}]+)\}/g, (m, k) => (k in vars ? (k === '메뉴' ? vars[k] : `**${vars[k]}**`) : m));
   }
 
   // 건넨 후네를 받는다. 알마다 메뉴·값을 매기고 (Menu.price) 반응을 고른다
@@ -111,7 +118,7 @@ const Customer = (() => {
     total += sales;           // 결산용 매출 합 (송금 제외)
     Wallet.add(sales, '매출');
     emoji.textContent = react.emoji;
-    bubble.text.textContent = line;
+    setLine(line);
     bubble.g.removeAttribute('transform');
     showBubble();
     popup(sales);
@@ -166,7 +173,7 @@ const Customer = (() => {
   function arrive(spec) {
     current = spec;
     emoji.textContent = current.emoji;
-    bubble.text.textContent = current.order;
+    setLine(current.order);
     bubble.g.setAttribute('display', 'none');
     bubble.g.removeAttribute('transform');
     g.setAttribute('display', 'inline');
@@ -201,13 +208,13 @@ const Customer = (() => {
   let sayTimer = 0;
   let saved = null;
   function say(line, ms = 1800) {
-    if (!saved) saved = { text: bubble.text.textContent, tf: bubble.g.getAttribute('transform') };
+    if (!saved) saved = { text: bubble.raw, tf: bubble.g.getAttribute('transform') };
     clearTimeout(sayTimer);
-    bubble.text.textContent = line;
+    setLine(line);
     bubble.g.removeAttribute('transform');
     showBubble();
     sayTimer = setTimeout(() => {
-      bubble.text.textContent = saved.text;
+      setLine(saved.text);
       if (saved.tf) bubble.g.setAttribute('transform', saved.tf);
       showBubble();
       saved = null;
@@ -216,7 +223,7 @@ const Customer = (() => {
 
   function stay(line) {
     emoji.textContent = current.emoji;
-    bubble.text.textContent = line;
+    setLine(line);
     bubble.g.removeAttribute('transform');
     showBubble();
   }

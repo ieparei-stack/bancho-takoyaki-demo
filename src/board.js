@@ -159,7 +159,77 @@ const Board = (() => {
     return Math.abs(x - PLATE.cx) <= PLATE.w / 2 && Math.abs(y - PLATE.cy) <= PLATE.h / 2;
   }
 
+  // "**강조**" 글자 (T47): 대사·말풍선에서 강조 부분만 색·굵기를 바꾼다
+  const EM = { fill: '#d2541c', 'font-weight': 900 };
+
+  function plain(str) {
+    return String(str).replace(/\*\*/g, '');
+  }
+
+  // 한 줄 문자열 → text 노드 안 tspan들 (줄바꿈 없음)
+  function rich(text, str, em = EM) {
+    text.replaceChildren();
+    String(str).split('**').forEach((part, i) => {
+      if (!part) return;
+      el('tspan', i % 2 ? em : {}, text).textContent = part;
+    });
+  }
+
+  // 여러 줄 + 타자용: 문자열 → 줄 배열 [[{ ch, em }...]...]. 줄바꿈 문자와 width(px)로 나눈다 (probe = 길이를 잴 text 노드)
+  function richLines(probe, str, width) {
+    const out = [];
+    let em = false;
+    const paras = [[]];
+    const src = String(str);
+    for (let i = 0; i < src.length; i++) {
+      if (src[i] === '*' && src[i + 1] === '*') { em = !em; i++; continue; }
+      if (src[i] === '\n') { paras.push([]); continue; }
+      paras[paras.length - 1].push({ ch: src[i], em });
+    }
+    const str_ = (cs) => cs.map((c) => c.ch).join('');
+    for (const para of paras) {
+      let cur = [];
+      for (const c of para) {
+        probe.textContent = str_(cur) + c.ch;
+        if (cur.length && probe.getComputedTextLength() > width) {
+          // 가능하면 마지막 띄어쓰기에서 끊는다
+          const sp = str_(cur).lastIndexOf(' ');
+          if (sp > cur.length * 0.6) { out.push(cur.slice(0, sp)); cur = cur.slice(sp + 1).concat(c); }
+          else { out.push(cur); cur = [c]; }
+        } else {
+          cur.push(c);
+        }
+      }
+      out.push(cur);
+    }
+    probe.textContent = '';
+    return out;
+  }
+
+  // richLines 결과를 앞에서 count 글자까지 그린다. 줄마다 첫 tspan이 x·dy를 가진다
+  function richRender(text, lines, count, x, lineH, em = EM, dy0 = 0) {
+    text.replaceChildren();
+    let left = count;
+    lines.forEach((ln, i) => {
+      const n = Math.max(0, Math.min(ln.length, left));
+      left -= ln.length;
+      const first = el('tspan', { x, dy: i ? lineH : dy0 }, text);
+      let span = null;
+      let spanEm = null;
+      for (let k = 0; k < n; k++) {
+        const c = ln[k];
+        if (!span || spanEm !== c.em) { span = el('tspan', c.em ? em : {}, first); spanEm = c.em; }
+        span.textContent += c.ch;
+      }
+    });
+  }
+
   return {
+    plain,
+    rich,
+    richLines,
+    richRender,
+    EM,
     create,
     onPlate,
     holes,

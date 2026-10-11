@@ -73,8 +73,8 @@ const Flow = (() => {
     },
     OPEN_BELL() {
       const cover = blocker();
-      const t = bigText('띵띵 ♪', 72);
-      Sfx.finish(); // 종소리 자리 (9단계에서 "띵띵")
+      const t = bigText('시작!', 72); // 영업 시작 (T47 사용자: 띵띵 → 시작!)
+      Sfx.finish(); // 종소리 자리 (9단계에서 다듬기)
       setTimeout(() => {
         t.remove();
         cover.remove();

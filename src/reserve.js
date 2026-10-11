@@ -37,7 +37,7 @@ const Reserve = (() => {
     Board.el('circle', { cx: x + w / 2, cy: y + 10, r: size * 0.32, fill: '#c0392b', stroke: '#7a2018', 'stroke-width': 1.5 }, g); // 압정
     const t = (tx, ty, str, attrs) => { const n = Board.el('text', { x: tx, y: ty, fill: '#3a2a1e', ...attrs }, g); n.textContent = str; return n; };
     t(x + 14, y + size * 2.2, `${c.emoji} ${c.name}`, { 'font-size': size * 1.05, 'font-weight': 900, 'font-family': EMOJI_FONT });
-    wrap(r.text, Math.floor(w / (size * 1.02))).forEach((ln, i) => t(x + 14, y + size * 3.7 + i * size * 1.45, ln, { 'font-size': size }));
+    wrap(r.text, Math.floor(w / (size * 1.02))).forEach((ln, i) => Board.rich(t(x + 14, y + size * 3.7 + i * size * 1.45, '', { 'font-size': size }), ln)); // "**힌트**" 강조 (T47)
   }
 
   // 아침 예약 카드. 예약이 없으면 바로 then
