@@ -60,7 +60,7 @@ const Flow = (() => {
       Shop.open(() => go('PREP'));
     },
     PREP() {
-      panel('준비', '오늘 쓸 재료를 고른다', '6단계: 고른 재료가 재료판(문어 1 + 추가 3) 칸에 나타남', () => go('OPEN_BELL'));
+      Prep.open(() => { Tray.set(Prep.chosen()); go('OPEN_BELL'); });
     },
     OPEN_BELL() {
       const cover = blocker();

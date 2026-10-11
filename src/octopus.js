@@ -1,11 +1,10 @@
-// 문어 넣기 (② 문어 단계): 접시의 문어 조각을 반죽이 든 구멍으로 끌어다 놓는다. 6개를 다 넣으면 단계가 끝난다.
+// 문어 넣기 (② 문어 단계): 재료판(tray.js) 문어 칸의 조각을 반죽이 든 구멍으로 끌어다 놓는다. 6개를 다 넣으면 단계가 끝난다.
 // 구멍 중심에서 벗어난 정도로 판정한다. 많이 벗어나면 다리가 삐져나온다.
-// 불판 밖(접시 제외)에 떨어뜨리면 잃어버린다 → 그 구멍은 문어 없는 타코야키가 된다. (사용자 결정 2026-10-10)
+// 불판 밖(재료판 제외)에 떨어뜨리면 잃어버린다 → 그 구멍은 문어 없는 타코야키가 된다. (사용자 결정 2026-10-10)
 const Octopus = (() => {
   // 배치·모양 상수
-  const DISH = { cx: 950, cy: 380, r: 95 };
   const PIECE = { r: 13, color: '#b9475a', dark: '#8e2f42', sucker: '#f0b9c0' };
-  const SLOTS = [[-38, -30], [0, -42], [38, -30], [-38, 22], [0, 34], [38, 22]];
+  const SLOTS = [[-32, -16], [0, -16], [32, -16], [-32, 16], [0, 16], [32, 16]]; // 문어 칸 안 2×3
 
   const pieces = []; // { el, home: {x, y}, used }
   let drag = null;   // { piece }
@@ -13,12 +12,11 @@ const Octopus = (() => {
   let scores = [];   // 단계 등급용: 중심 2 / 깔끔 1 / 다리 삐짐 0
 
   function init() {
-    const side = Board.el('g', {}, Board.layer('side')); // 접시 묶음 (⑤에서 숨긴다)
+    const side = Board.el('g', {}, Board.layer('side')); // 문어 조각 묶음 (재료판 위, ⑤에서 숨긴다)
     dishG = side;
-    Board.el('circle', { cx: DISH.cx, cy: DISH.cy, r: DISH.r, fill: '#f4efe6', stroke: '#cfc6b8', 'stroke-width': 4 }, side);
-    Board.el('circle', { cx: DISH.cx, cy: DISH.cy, r: DISH.r - 16, fill: 'none', stroke: '#e3dbcd', 'stroke-width': 2 }, side);
+    const c = Tray.cell(0);
     for (const [dx, dy] of SLOTS) {
-      const home = { x: DISH.cx + dx, y: DISH.cy + dy };
+      const home = { x: c.cx + dx, y: c.cy + dy };
       const el = Board.el('g', { cursor: 'grab' }, side);
       drawChunk(el, 0, 0, 1);
       el.setAttribute('transform', `translate(${home.x} ${home.y})`);
@@ -67,12 +65,12 @@ const Octopus = (() => {
 
     const p = Board.toSvg(e);
     const hole = Board.holeAt(p.x, p.y);
-    if (!hole && !Board.onPlate(p.x, p.y) && Math.hypot(p.x - DISH.cx, p.y - DISH.cy) > DISH.r) {
+    if (!hole && !Board.onPlate(p.x, p.y) && !Tray.contains(p.x, p.y)) {
       lose(piece, p, e.timeStamp);
       return;
     }
     if (!hole || !hole.hasBatter || hole.hasOcto) {
-      // 넣을 수 없는 곳 → 접시로 돌아간다
+      // 넣을 수 없는 곳 → 재료판으로 돌아간다
       piece.el.setAttribute('transform', `translate(${piece.home.x} ${piece.home.y})`);
       return;
     }
@@ -176,6 +174,7 @@ const Octopus = (() => {
 
   function setVisible(on) {
     dishG.setAttribute('display', on ? 'inline' : 'none');
+    Tray.setVisible(on);
   }
 
   return { init, clear, reset, setVisible, busy: () => !!drag };

@@ -5,6 +5,7 @@
   Scene.init();
   Log.init(document.getElementById('log-panel'), document.getElementById('log-toggle'));
   Pour.init();
+  Tray.init();
   Octopus.init();
   Flip.init();
   Box.init();
