@@ -347,8 +347,10 @@ window.DATA = {
     reserve: { title: '오늘의 예약', close: '클릭해서 장보러 가기 ▶' },
     discover: { recipe: '새 레시피!', title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
-    //   T48: 방문한 손님 → 판매 수익 → 추가된 레시피 → 받은 선물 → 오늘의 한 접시(판매가가 가장 높은 알의 후네 사진)
-    settle: { title: '{n}일차 끝', guests: '방문한 손님', sales: '판매 수익', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', recipes: '추가된 레시피', newRecipe: '새 레시피', hiddenRecipe: '숨은 요리!', gifts: '받은 선물', best: '오늘의 한 접시', bestNone: '오늘은 쉬어 가는 날', none: '없음', close: '클릭해서 밤으로 ▶', stamp: '다음날로!', stampLast: '영업 끝!' },
+    //   T49 영업 일지: 오늘의 손님(대사) → 판매 수익(판 내역) → 메뉴판에 추가 → 받은 선물 → 오늘의 한 접시 → 사흘 영업 칸에 도장. {n} {m} {값} 자리는 채워진다
+    settle: { title: '영업 일지', dayLabel: '{n}일차 · 밤', guests: '오늘의 손님', allHappy: '{n}판 모두 만족', oneHappy: '만족', someHappy: '{n}판 중 {m}판 만족', noneHappy: '아쉬워함',
+              sales: '판매 수익', boardPart: '{n}판 {값}', recipes: '메뉴판에 추가', newRecipe: '새 레시피', hiddenRecipe: '숨은 요리!', gifts: '받은 선물',
+              best: '오늘의 한 접시', bestNone: '오늘은 쉬어 가는 날', progress: '{n}일 영업', progress3: '사흘 영업', none: '없음', close: '클릭해서 도장 찍기 ▶', stamp: '다음날로!', stampLast: '영업 끝!' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다
     gift: { got: '🎁', from: '{손님}의 선물', sell: '팔기 {값}', sellSub: '지금 돈으로', keep: '남기기' },
     // ② 재료 넣기 버튼 (T27)
