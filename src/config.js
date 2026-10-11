@@ -12,7 +12,7 @@ const Config = (() => {
       },
       demo: { pour: { cycleMs: 2400, first: 0.6, later: 0 }, box: { cycleMs: 1500, first: 0.6, later: 0 }, topping: { cycleMs: 1800, first: 0.6, later: 0 } },
       octopus: { legRatio: 0.6, perfectRatio: 0.3, guide: { strong: [0.8, 0.55], faint: [0.25, 0.2] }, demo: { cycleMs: 1800, strong: 0.6, faint: 0.22 } },
-      fill: { limitMs: [60000, 20000], endOnOctopusDays: [1] },
+      fill: { limitMs: [60000, 20000] },
       box: { flickPx: 30, flickMs: 300, coneDeg: 60, flyMs: 350 },
       topping: { boatScale: 1.6, sauceWidth: 7, flakeEveryPx: 18, flakeMax: 400, handoffY: 170 },
       stage: { skipMs: 300, bannerMs: 1200, perfect: 11, great: 8, good: 4 },
@@ -105,7 +105,7 @@ const Config = (() => {
       fill: { done: '모두 완료!' },
       hints: {
         pour: '구멍을 누르고 있다가, 반죽이 **초록 눈금**에 닿으면 떼요. 도-미-솔-도!',
-        octopus: '재료판에서 문어를 끌어 **구멍 가운데**에 놓아요. 다른 재료도 넣을 수 있어요',
+        octopus: '문어를 끌어 **구멍 가운데**에 놓아요. 다른 재료도 넣고, 다 됐으면 **모두 완료!**',
         flip1: '**테두리가 노릇**해지고 알이 **들썩이면**, 누른 채 반 바퀴 돌리고 떼요',
         flip2: '눈이 커지다 **김이 오르면**, 한 바퀴 휙 돌리고 떼요',
         box: '구멍을 누른 채 **후네 쪽으로 휙** 튕겨요',

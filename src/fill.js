@@ -1,5 +1,5 @@
 // ② 재료 넣기 확장 (T27): 재료판의 추가 재료를 구멍마다 자유롭게 넣는다. 한 알에 여러 재료, 같은 재료는 한 번만, 재고 무한.
-// 끝나는 조건(먼저 오는 것): 시간 바가 다 줄어듦 / "모두 완료!" / 1일차만 문어 6개를 다 씀. (사용자 결정 2026-10-11)
+// 끝나는 조건(먼저 오는 것): 시간 바가 다 줄어듦 / "모두 완료!". 문어를 다 쓰면 버튼이 빛나기만 한다 (T50, 사용자 2026-10-11)
 // 넣은 재료는 hole.ings(Set)에 기록 — T29 메뉴 판정의 입력. 그림은 data-chunk라 1차 뒤집기 때 숨는다.
 const Fill = (() => {
   // 배치 상수
@@ -12,6 +12,9 @@ const Fill = (() => {
   let fillBar = null;
   let running = null;   // { t0, limit, raf }
   let drag = null;      // { id, el }
+  let btn = null;       // "모두 완료!" 버튼
+  let btnGlow = null;
+  let glow = null;      // { t0, raf } — 문어를 다 써서 버튼이 두근거리는 중
 
   function init() {
     for (const h of Board.holes) h.ings = new Set();
@@ -20,7 +23,9 @@ const Fill = (() => {
     Board.el('rect', { x: BAR.x - 4, y: BAR.y - 4, width: BAR.w + 8, height: BAR.h + 8, rx: 10, fill: '#5e3d22' }, ui);
     Board.el('rect', { x: BAR.x, y: BAR.y, width: BAR.w, height: BAR.h, rx: 7, fill: '#2c1f17' }, ui);
     fillBar = Board.el('rect', { x: BAR.x, y: BAR.y, width: BAR.w, height: BAR.h, rx: 7, fill: '#e0a457' }, ui);
-    const btn = Board.el('g', { cursor: 'pointer' }, ui);
+    btn = Board.el('g', { cursor: 'pointer' }, ui);
+    // 문어를 다 쓰면 켜지는 빛 테두리 (T50)
+    btnGlow = Board.el('rect', { x: BTN.cx - BTN.w / 2 - 10, y: BTN.cy - BTN.h / 2 - 10, width: BTN.w + 20, height: BTN.h + 20, rx: 22, fill: '#ffd34d', opacity: 0.8, stroke: '#fff6c8', 'stroke-width': 4, display: 'none' }, btn);
     Board.el('rect', { x: BTN.cx - BTN.w / 2, y: BTN.cy - BTN.h / 2, width: BTN.w, height: BTN.h, rx: 14, fill: '#c0661c', stroke: '#7a3e12', 'stroke-width': 2 }, btn);
     const t = Board.el('text', { x: BTN.cx, y: BTN.cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 22, 'font-weight': 900, fill: '#fffaf0' }, btn);
     t.textContent = CFG.letters.fill.done;
@@ -42,6 +47,7 @@ const Fill = (() => {
 
   function start() {
     ui.setAttribute('display', 'inline');
+    stopGlow();
     running = { t0: performance.now(), limit: limitMs(), raf: 0 };
     running.raf = requestAnimationFrame(tick);
   }
@@ -57,14 +63,29 @@ const Fill = (() => {
     running.raf = requestAnimationFrame(tick);
   }
 
-  // 1일차만 문어를 다 쓰면 끝 (octopus.js가 부른다)
+  // 문어를 다 쓰면: 끝내지 않고 "모두 완료!" 버튼이 빛나며 두근거린다 — 버튼을 눌러야 끝 (T50 사용자: 문어 → 잣 순서로도 넣을 수 있게)
   function octopusDone() {
-    if (CFG.timing.fill.endOnOctopusDays.includes(Flow.day())) finish('문어 다 씀');
+    if (!running || glow) return;
+    glow = { t0: performance.now(), raf: 0 };
+    btnGlow.setAttribute('display', 'inline');
+    Sfx.tick();
+    const step = (now) => {
+      if (!glow) return;
+      const u = ((now - glow.t0) % 900) / 900;
+      const k = 1 + 0.09 * Math.sin(u * Math.PI * 2);
+      btn.setAttribute('transform', `translate(${BTN.cx} ${BTN.cy}) scale(${k.toFixed(3)}) translate(${-BTN.cx} ${-BTN.cy})`);
+      btnGlow.setAttribute('opacity', (0.75 + 0.25 * Math.sin(u * Math.PI * 2)).toFixed(3));
+      glow.raf = requestAnimationFrame(step);
+    };
+    glow.raf = requestAnimationFrame(step);
+    Log.add({ step: '재료', line: '문어 다 씀 → "모두 완료!" 버튼 강조' });
   }
 
-  // 재료를 넣은 뒤: 문어를 다 써서 막혀 있던 판이면 다시 끝내 본다 (T45)
-  function retry() {
-    if (Flow.today().require && Octopus.allUsed() && CFG.timing.fill.endOnOctopusDays.includes(Flow.day())) finish('문어 다 씀');
+  function stopGlow() {
+    if (glow) cancelAnimationFrame(glow.raf);
+    glow = null;
+    btn.removeAttribute('transform');
+    btnGlow.setAttribute('display', 'none');
   }
 
   function finish(reason) {
@@ -81,6 +102,7 @@ const Fill = (() => {
     cancelAnimationFrame(running.raf);
     running = null;
     ui.setAttribute('display', 'none');
+    stopGlow();
     if (drag) { drag.el.remove(); drag = null; DropGuide.hide(); }
     const names = (h) => [...h.ings].map((id) => CFG.ingredients[id].name).join(' · ') || '(없음)';
     Log.add({
@@ -138,13 +160,13 @@ const Fill = (() => {
     const chunk = Board.el('g', { 'data-chunk': '1' }, hole.octo);
     Shop.icon(id, chunk, hole.cx + dx, hole.cy + dy, ITEM_R);
     Sfx.plop(false);
-    setTimeout(retry, 0);
     Log.add({ step: '재료', hole: hole.id + 1, id, ings: [...hole.ings], line: `재료 #${hole.id + 1} | ${name} 넣음 | ${[...hole.ings].map((x) => CFG.ingredients[x].name).join(' · ')}` });
   }
 
   function reset() {
     if (running) { cancelAnimationFrame(running.raf); running = null; }
     ui.setAttribute('display', 'none');
+    stopGlow();
     for (const h of Board.holes) h.ings.clear();
   }
 
