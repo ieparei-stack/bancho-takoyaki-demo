@@ -80,6 +80,19 @@ const Customer = (() => {
     return { key: 'best', vars: {} };
   }
 
+  // 조건 대사 (T36): cast[id].when 중 처음 맞는 줄
+  function pickWhen(guest, balls, pick) {
+    for (const w of guest.when || []) {
+      const c = w.if || {};
+      if (c.noFav && balls.some((b) => b.fav)) continue;
+      if (c.not && c.not.includes(pick.key)) continue;
+      if (c.day && c.day !== Flow.day()) continue;
+      if (typeof w.line !== 'string') { Config.warn(`customers.cast.${guest.id}.when 줄에 line이 없습니다`); continue; }
+      return w;
+    }
+    return null;
+  }
+
   function fill(line, vars) {
     return line.replace(/\{([^}]+)\}/g, (m, k) => (k in vars ? vars[k] : m));
   }
@@ -90,7 +103,9 @@ const Customer = (() => {
     const sales = balls.reduce((s, b) => s + b.value, 0);
     const pick = judge(balls, current);
     const react = CFG.customers.reactions[pick.key];
-    const line = fill((current.lines && current.lines[pick.key]) || react.line, pick.vars); // 손님별 대사가 있으면 그걸로
+    const cond = pickWhen(current, balls, pick);
+    if (cond && cond.clue) pick.clue = cond.clue;
+    const line = cond ? cond.line : fill((current.lines && current.lines[pick.key]) || react.line, pick.vars); // 조건 대사 > 손님별 대사 > 기본
     total += sales;           // 결산용 매출 합 (송금 제외)
     Wallet.add(sales, '매출');
     emoji.textContent = react.emoji;

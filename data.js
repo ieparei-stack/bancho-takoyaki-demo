@@ -185,8 +185,11 @@ window.DATA = {
     receiptGapMs: 400,  // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
     cast: {
       // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
+      //   when 조건 대사 (T36, 7단계 인터뷰): 위에서부터 처음 맞는 줄이 반응 대사를 덮는다(표정은 그대로).
+      //     if 조건 — noFav: 좋아하는 메뉴 알이 0개 / not: 이 반응이면 제외 / day: 이 일차에만. clue 로그용 단서 태그
       sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
-                 likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
+                 likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'],
+                 when: [{ if: { noFav: true, not: ['flop'] }, line: '음~ 잣 넣으면 더 맛있을 것 같은데~ 짹!', clue: '고소함' }] },
       crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!',
