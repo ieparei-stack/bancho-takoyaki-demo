@@ -74,7 +74,8 @@ const Shop = (() => {
     el('rect', { x: PANEL.x, y: PANEL.y, width: PANEL.w, height: PANEL.h, rx: 24, fill: '#fbf3e3', stroke: '#c9b89c', 'stroke-width': 5 }, root);
     const title = el('text', { x: PANEL.x + 40, y: PANEL.y + 52, 'font-size': 34, 'font-weight': 900, fill: INK }, root);
     title.textContent = T.title;
-    moneyText = el('text', { x: PANEL.x + PANEL.w - 40, y: PANEL.y + 52, 'text-anchor': 'end', 'font-size': 28, 'font-weight': 700, fill: '#c0661c' }, root);
+    moneyText = el('text', { x: PANEL.x + PANEL.w - 100, y: PANEL.y + 52, // 오른쪽 위는 예약 쪽지 자리 (T46)
+      'text-anchor': 'end', 'font-size': 28, 'font-weight': 700, fill: '#c0661c' }, root);
 
     const ids = Object.keys(CFG.ingredients);
     const rowW = COLS * CARD.w + (COLS - 1) * CARD.gap;
@@ -84,6 +85,8 @@ const Shop = (() => {
       const y = CARD.top + Math.floor(i / COLS) * (CARD.h + CARD.gap - 10);
       return card(id, x, y);
     });
+
+    Reserve.pin(root, Flow.day() - 1); // 오늘 예약 쪽지 (T46)
 
     // 장보기 끝 버튼
     const bx = PANEL.x + PANEL.w / 2;

@@ -164,28 +164,37 @@ window.DATA = {
     letter: { name: '편지', color: '#8a7460', mark: '✉', icon: '' },
   },
   // 장면별 대사 [{ who, text, mark? }]. text 안의 \n은 줄바꿈. 밤 대화 = night + 일차 — 정산 카드 뒤 (T38)
-  //   힌트 곡선 (SPEC 11절): 1일차 밤 = 방향(달고 시원한 것), 2일차 밤 = 거의 없음. 문구 Claude 초안 → 플레이 후 수정
+  //   힌트 곡선 (SPEC 11절): 1일차 밤 = 방향(배를 슬쩍), 2일차 밤 = 맛 정보 없음(표정을 보라는 말만).
+  //   손님 성격 (Claude 초안, 사용자 의도 2026-10-11): 참새 = 수다쟁이·참견쟁이, 반쵸를 아는 척 / 까마귀 = 형님(A, 과묵) · 동생(B, 촐싹)
+  //   너구리 = 까다로운 미식가, 말이 짧다. 반쵸는 "…", "음.", "?"만
   dialogue: {
-    // 1일차 1판 뒤 장면 (T45, 사용자 흐름 2026-10-11 — 사용자 문장을 뼈대로 Claude 초안). day.days[0].scenes가 부른다
+    // 1일차 1판 뒤 장면 (T45, 사용자 흐름 2026-10-11). day.days[0].scenes가 부른다. 망친 판이면 day1askFlop이 앞에 붙는다
     day1askFlop: [
-      { who: 'sparrow', text: '…좋아, 처음이니까 넘어가지.' },
+      { who: 'sparrow', text: '…뭐, 좋아. 첫날이니까 봐줄게. 짹.' },
     ],
     day1ask: [
-      { who: 'sparrow', text: '알다시피 난 잣을 좋아한다고.\n그럼~ 잣을 넣어서 다시 만들어 줘.' },
+      { who: 'sparrow', text: '타코야키는 고소해야 맛이라고~\n알잖아? 난 잣이 콕 박혀 있어야 먹은 것 같다니까.' },
+      { who: 'sparrow', text: '자, 잣 넣어서 다시! 빨리빨리~' },
       { who: 'bancho', text: '…', mark: '…' },
-      { who: 'sparrow', text: '뭐어~? 잣이 없다고?\n마침 내가 가져온 게 있으니, 자. 이걸 넣어서 해 봐. 짹!' },
+      { who: 'sparrow', text: '…뭐어~?! 잣이 없다고?\n가게를 이렇게 대충 열면 어떡해!' },
+      { who: 'sparrow', text: '할 수 없지. 아껴 둔 건데… 특별히 줄게.\n이걸로 다시 해 봐. 짹!' },
     ],
     night1: [
-      { who: 'sparrow', text: '오늘 고마웠어~ 짹.' },
-      { who: 'sparrow', text: '그런데 너, 이 포장마차에 특이한 손님들이 온다는 얘기는 못 들었어?\n그, 전에 있던 인간한테 말이야.' },
+      { who: 'sparrow', text: '오늘 꽤 괜찮았어~ 잣 타코야키, 동네에 소문내 줄게. 짹!' },
+      { who: 'sparrow', text: '근데 너… 이 포장마차엔 좀 "특이한" 손님들이 온다는 얘기,\n못 들었어? 전에 여기 있던 인간한테서 말이야.' },
       { who: 'bancho', text: '…', mark: '…' },
-      { who: 'sparrow', text: '들었는데 무슨 얘긴지는 몰랐다고~? 흐음.' },
-      { who: 'sparrow', text: '내일은 까마귀들이 올 거야! 걔네가 뭘 좋아하는지는 잘 모르는데~\n반짝이는 거랑… 아삭하고 달달한 배 같은 거? 짹.' },
+      { who: 'sparrow', text: '들은 것 같긴 한데 무슨 소린지 몰랐다고~?\n흐음. 그럼 직접 겪어 보는 수밖에 없겠네.' },
+      { who: 'sparrow', text: '아, 내일은 까마귀들이 올 거야.\n걔네 입맛은 나도 잘 모르는데~' },
+      { who: 'sparrow', text: '반짝이는 거라면 사족을 못 쓰고… 그러고 보니 지난가을엔\n배 과수원에서 한나절을 안 나오더라? 짹짹!' },
+      { who: 'sparrow', text: '아마 내일 아침에 걔네가 쪽지부터 보낼걸?\n까마귀들은 예약 없이는 안 움직이거든~ 짹!' },
+      { who: 'bancho', text: '음.', mark: '음.' },
     ],
     night2: [
-      { who: 'crow_b', text: '까악. 오늘 잘 먹었어.' },
-      { who: 'crow_b', text: '내일 오는 녀석은… 입맛이 까다로워. 까악.' },
-      { who: 'bancho', text: '음.', mark: '음.' },
+      { who: 'crow_b', text: '까악! 생각보다 맛있었어. 형님한텐 비밀이다?' },
+      { who: 'crow_a', text: '…다 들린다.' },
+      { who: 'crow_a', text: '내일 오는 녀석은 입맛이 까다롭다.\n쪽지에도 뭘 좋아하는지는 안 쓸 거다.' },
+      { who: 'crow_b', text: '맞아맞아, 대신 먹고 나서 하는 말을 잘 들어 봐.\n이것저것 넣어 보면 뭐가 맞는지 티가 나거든~ 까악!' },
+      { who: 'bancho', text: '…', mark: '…' },
     ],
     // 3일차 밤 = 장인의 편지 (T40, 8단계 인터뷰). 문구는 사용자가 직접 작성 — 지금은 기획서 문구를 자리로
     night3: [
@@ -218,28 +227,54 @@ window.DATA = {
       //   when 조건 대사 (T36, 7단계 인터뷰): 위에서부터 처음 맞는 줄이 반응 대사를 덮는다(표정은 그대로).
       //     if 조건 — noFav: 좋아하는 메뉴 알이 0개 / not: 이 반응이면 제외 / day: 이 일차에만. clue 로그용 단서 태그
       //   handle 후기 게시물 아이디 (T43, Claude 초안)
-      sparrow: { emoji: '🐦', name: '참새', handle: '@chamsae_jjak', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
+      //   lines 안 {메뉴} {싫은 맛} {빠진 맛} 자리는 채워진다 ({빠진 맛} = "단 게", "감칠맛이" 처럼 조사까지 — letters.tagSay)
+      sparrow: { emoji: '🐦', name: '참새', handle: '@chamsae_jjak', order: '어머, 새 사장님? 타코야키 하나 줘 봐~ 짹!', again: '이번엔 잣 듬뿍! 알지? 짹짹!',
                  likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'],
                  //   1일차 1판 = 정해진 장면의 첫 줄 (T45). round 그날 몇 번째 판 / react 이 반응일 때만
                  when: [
-                   { if: { day: 1, round: 1, react: ['flop'] }, line: '우웩, 이게 뭐야, 완전 이상하네. 너, 타코야키 만들 줄 아는 거 맞아?', clue: '고소함' },
-                   { if: { day: 1, round: 1 }, line: '흐음~ 맛있네. 그런데… 초심을 잃었네?', clue: '고소함' },
+                   { if: { day: 1, round: 1, react: ['flop'] }, line: '우웩! 이게 뭐야?! 너, 타코야키 만들 줄은 알아?', clue: '고소함' },
+                   { if: { day: 1, round: 1 }, line: '흐음~ 맛은 있네. 근데… 초심을 잃었네?', clue: '고소함' },
                  ],
+                 lines: {
+                   flop: '짹?! 이건 좀… 새 모이보다 못한데?',
+                   love: '바로 이 맛이야! 고소~한 게 딱 내 스타일! 짹!',
+                   dislike: '퉤퉤, {싫은 맛} 들었잖아! 혀가 얼얼해!',
+                   lack: '음… 나쁘진 않은데, {빠진 맛} 하나도 없네?',
+                   good: '맛있어! 근데 {빠진 맛} 조금만 더 있었으면~',
+                   best: '최고야! 내일 친구들 다 데려온다? 짹짹!',
+                 },
                  gift: 'pinenut_pack', giftAlways: true }, // giftAlways: 1일차 밤엔 만족과 상관없이 잣 꾸러미 (T45 사용자)
-      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_A', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button' },
-      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_B', order: '나도 하나! 까악!', again: '하나 더! 까악!',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button' },
-      // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. lines는 임시 문구(사용자가 나중에 작성, 8단계 인터뷰)
-      tanuki:  { emoji: '🦝', name: '너구리', handle: '@neoguri_gourmet', order: '…하나.', again: '한 판 더. 이번엔 제대로.',
+      // 까마귀 형제 — A 형님(과묵), B 동생(촐싹)
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_hyung', order: '…예약한 거. 하나. 까악.', again: '…하나 더.',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button',
+                 lines: {
+                   flop: '…까악. 이건 못 본 걸로 하지.',
+                   love: '…! {메뉴}. 이건… 인정한다.',
+                   dislike: '케엑. {싫은 맛} 들었군. 질색이다.',
+                   lack: '…밍밍하다. {빠진 맛} 하나도 없어.',
+                   good: '나쁘지 않다. {빠진 맛} 조금 더 있었으면.',
+                   best: '…괜찮군. 동생 놈한테도 알려 주지.',
+                 } },
+      crow_b:  { emoji: '🐦‍⬛', name: '까마귀', handle: '@kkamagwi_dongsaeng', order: '나도 예약했지?! 시원~한 걸로 하나! 까악!', again: '하나 더! 하나 더! 까악!',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button',
+                 lines: {
+                   flop: '까아악?! 이거 먹는 거 맞아?!',
+                   love: '까아악! {메뉴}! 반짝반짝한 맛이야!',
+                   dislike: '케엑! {싫은 맛} 들었잖아! 물, 물!',
+                   lack: '에이~ 밍밍해. {빠진 맛} 없으면 서운하지!',
+                   good: '오, 맛있다! {빠진 맛} 쪼끔만 더~ 까악!',
+                   best: '최고! 형님, 여기 단골 하자! 까악!',
+                 } },
+      // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. 맛 이름 대신 "바다", "깊이"로 돌려 말한다 (감칠맛·짭조름, 단맛 싫음)
+      tanuki:  { emoji: '🦝', name: '너구리', handle: '@neoguri_gourmet', order: '…쪽지 봤나. 하나.', again: '…다시. 이번엔 제대로.',
                  likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['shrimp_scallion'],
                  lines: {
-                   flop: '(임시) …이걸 팔겠다고?',
-                   love: '(임시) …그래, 이 맛이야.',
-                   dislike: '(임시) 달아. 난 단 건 별로야.',
-                   lack: '(임시) 흠… 뭔가 깊은 맛이 빠졌어.',
-                   good: '(임시) 나쁘지 않네. 좀 더 깊었으면.',
-                   best: '(임시) …괜찮군. 또 오지.',
+                   flop: '…이걸 돈 받고 팔 생각인가.',
+                   love: '…! 바다가 입 안에서 터지는군. 이거다.',
+                   dislike: '달다. 타코야키에서 과자 맛이 나면 곤란하지.',
+                   lack: '흠. 얌전하군. 바다 냄새가 하나도 안 나.',
+                   good: '괜찮군. 다만… 한 입 더 깊었으면.',
+                   best: '…좋아. 또 오지.',
                  } },
     },
     // 알 값 (T29, 6단계 인터뷰): (메뉴 기본가 + 좋아하는 맛 태그 × like − 싫어하는 맛 태그 × dislike + 좋아하는 메뉴면 favorite) × 표정 배수
@@ -272,9 +307,15 @@ window.DATA = {
       //   scenes: 1판 뒤 장면(잣 요구 → 잣 건네받음) / require: 2판은 잣을 한 알 이상 넣어야 진행
       { shop: false, prep: false, enclosed: { money: 0, items: ['octopus'] }, guests: [{ id: 'sparrow', orders: 2 }],
         scenes: [{ after: 1, dialogue: 'day1ask', flopDialogue: 'day1askFlop', give: ['pinenut'] }],
-        require: { round: 2, ing: 'pinenut', line: '잠깐! 잣! 잣 넣어야지~ 짹!' } },
-      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }] },
-      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'tanuki', orders: 2 }] }, // 3일차 (T40): 2일차와 같은 규칙
+        require: { round: 2, ing: 'pinenut', line: '잠깐잠깐! 잣은?! 잣 어디 갔어?! 짹!' } },
+      // reserve: 아침 예약 쪽지 (T46, 사용자 결정 2026-10-11 — 손님이 오기 전에 주문을 먼저). 2일차 = 맛 방향(가설), 3일차 = 맛 정보 없음
+      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'crow_a', orders: 1 }, { id: 'crow_b', orders: 1 }],
+        reserve: [
+          { who: 'crow_a', text: '…오후에 들르지. 달달한 걸로 준비해 둬. 까악.' },
+          { who: 'crow_b', text: '나도나도! 난 시원~한 거! 형님이랑 같이 간다! 까악!' },
+        ] },
+      { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'tanuki', orders: 2 }], // 3일차 (T40): 2일차와 같은 규칙
+        reserve: [{ who: 'tanuki', text: '…오후에 간다. 대충 만들 거면 문 닫아 둬.' }] },
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
@@ -298,6 +339,8 @@ window.DATA = {
     // 숨은 요리 발견 (T39): 이름 카드·도감
     // 타이틀 화면 (T45). 배경 이미지는 art.title (9단계)
     title: { sub: '반쵸 더 셰프', name: '타코야키 포장마차', start: '클릭해서 시작 ▶' },
+    // 아침 예약 카드 (T46)
+    reserve: { title: '오늘의 예약', close: '클릭해서 장보러 가기 ▶' },
     discover: { recipe: '새 레시피!', title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
     settle: { title: '{n}일차 끝', sales: '오늘 매출', boards: '구운 판', boardsVal: '{n}판 · 만족 {m}판', fresh: '처음 만든 메뉴', found: '숨은 요리', foundVal: '발견 {n}/{all}', gifts: '받은 선물', none: '없음', close: '클릭해서 밤으로 ▶' },

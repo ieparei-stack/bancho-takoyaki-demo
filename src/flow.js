@@ -136,7 +136,8 @@ const Flow = (() => {
     if (names.length) parts.push(`${names.join(' · ')} ${L.items}`);
     const keptNames = kept.filter((id) => !(e.items || []).includes(id)).map((id) => CFG.ingredients[id].name);
     if (keptNames.length) parts.push(`${keptNames.join(' · ')} ${L.kept || '(어제 선물)'}`);
-    if (!parts.length) { go('SHOP'); return; }
+    const toShop = () => Reserve.show(dayIdx, () => go('SHOP')); // 아침 예약 쪽지 → 장보기 (T46)
+    if (!parts.length) { toShop(); return; }
     const g = Board.el('g', { cursor: 'pointer' }, Board.layer('top'));
     Board.el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'transparent', 'pointer-events': 'all' }, g);
     Board.el('rect', { x: 400, y: 300, width: 480, height: 120, rx: 18, fill: '#fffdf6', stroke: '#c9b89c', 'stroke-width': 4 }, g);
@@ -147,7 +148,7 @@ const Flow = (() => {
     if (e.money) { Wallet.add(e.money, '송금'); Sfx.coin(); }
     Log.add({ step: '동봉', day: dayIdx + 1, money: e.money || 0, items: e.items || [], line: `동봉 | ${parts.join(' + ')}` });
     let gone = false;
-    const close = () => { if (gone) return; gone = true; g.remove(); go('SHOP'); };
+    const close = () => { if (gone) return; gone = true; g.remove(); toShop(); };
     g.addEventListener('pointerdown', (ev) => { ev.stopPropagation(); close(); }, { once: true });
     setTimeout(close, ENCLOSED_MS);
   }
