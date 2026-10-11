@@ -72,6 +72,7 @@ const Config = (() => {
     },
     customers: {
       receiptGapMs: 400,
+      giftMs: 900,
       cast: {
         sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!', likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
         crow_a: { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },

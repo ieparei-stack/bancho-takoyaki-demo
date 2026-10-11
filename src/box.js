@@ -174,6 +174,7 @@ const Box = (() => {
       ball.appendChild(hole[name].cloneNode(true));
       hole[name].setAttribute('display', 'none');
     }
+    hole.spill.setAttribute('visibility', 'hidden'); // 번진 반죽 테두리도 알과 같이 떠낸다 (T35 보완)
     hole.smokeOn = 0;
     hole.wobbleOn = false;
     hole.smoke.forEach((s) => s.setAttribute('display', 'none'));

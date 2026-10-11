@@ -95,7 +95,8 @@ const Flow = (() => {
       Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE'));
     },
     GIFT_CHOICE() {
-      panel('선물', '받은 선물을 팔지 / 남길지', '7단계: 잣 꾸러미 · 반짝이 단추', () => {
+      // 받은 선물마다 팔기 / 남기기 (T37). 없으면 바로 넘어간다
+      Gift.choose(() => {
         if (dayIdx + 1 < days().length) beginDay(dayIdx + 1);
         else go('DEMO_END');
       });
@@ -110,11 +111,14 @@ const Flow = (() => {
   function enclosed() {
     const e = today().enclosed || { money: 0, items: [] };
     const L = CFG.letters.enclosed;
-    Pantry.newDay(e.items); // 오늘 가진 재료 = 기본 재료 + 동봉 (T25)
+    const kept = Gift.carry(); // 어젯밤 남긴 재료 선물 (T37)
+    Pantry.newDay([...(e.items || []), ...kept]); // 오늘 가진 재료 = 기본 재료 + 동봉 (T25) + 남긴 선물
     const parts = [];
     if (e.money) parts.push(`₩${e.money.toLocaleString('ko-KR')}`);
     const names = (e.items || []).filter((id) => CFG.ingredients[id]).map((id) => CFG.ingredients[id].name);
     if (names.length) parts.push(`${names.join(' · ')} ${L.items}`);
+    const keptNames = kept.filter((id) => !(e.items || []).includes(id)).map((id) => CFG.ingredients[id].name);
+    if (keptNames.length) parts.push(`${keptNames.join(' · ')} ${L.kept || '(어제 선물)'}`);
     if (!parts.length) { go('SHOP'); return; }
     const g = Board.el('g', { cursor: 'pointer' }, Board.layer('top'));
     Board.el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'transparent', 'pointer-events': 'all' }, g);
@@ -160,7 +164,9 @@ const Flow = (() => {
       Pour.newRound();
       go('COOK');
     } else {
-      Customer.leave(nextGuest);
+      // 만족한 손님은 떠나며 선물을 두고 간다 (T37) — 떠오르는 글자를 볼 틈을 두고 걷는다
+      const got = Gift.receive(guest);
+      setTimeout(() => Customer.leave(nextGuest), got ? CFG.customers.giftMs : 0);
     }
   }
 

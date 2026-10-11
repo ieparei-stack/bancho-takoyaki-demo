@@ -182,18 +182,20 @@ window.DATA = {
     shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true },
   },
   customers: {
-    receiptGapMs: 400,  // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
+    receiptGapMs: 400,
+    giftMs: 900,         // 선물을 두고 간 손님이 떠나기 전 기다림, ms (T37). 제안  // 성적표를 닫은 뒤 다음(한 판 더 / 손님 퇴장)까지, ms. 제안
     cast: {
       // likes·dislikes 맛 태그(기획서 시작값) / favorites 특별히 좋아하는 메뉴 id(Claude 초안) / lines 반응 대사 덮어쓰기(선택)
       //   when 조건 대사 (T36, 7단계 인터뷰): 위에서부터 처음 맞는 줄이 반응 대사를 덮는다(표정은 그대로).
       //     if 조건 — noFav: 좋아하는 메뉴 알이 0개 / not: 이 반응이면 제외 / day: 이 일차에만. clue 로그용 단서 태그
       sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!',
                  likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'],
-                 when: [{ if: { noFav: true, not: ['flop'] }, line: '음~ 잣 넣으면 더 맛있을 것 같은데~ 짹!', clue: '고소함' }] },
+                 when: [{ if: { noFav: true, not: ['flop'] }, line: '음~ 잣 넣으면 더 맛있을 것 같은데~ 짹!', clue: '고소함' }],
+                 gift: 'pinenut_pack' },
       crow_a:  { emoji: '🐦‍⬛', name: '까마귀', order: '까악, 하나 부탁해.', again: '하나 더. 까악.',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button' },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀', order: '나도 하나! 까악!', again: '하나 더! 까악!',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'] },
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button' },
     },
     // 알 값 (T29, 6단계 인터뷰): (메뉴 기본가 + 좋아하는 맛 태그 × like − 싫어하는 맛 태그 × dislike + 좋아하는 메뉴면 favorite) × 표정 배수
     //   표정 배수: 실패(덜 익음·탐·문어 없음) 0 = 실패 0원 (2026-10-10 사용자). 나머지 수치는 제안
@@ -209,6 +211,12 @@ window.DATA = {
       good:    { emoji: '🙂', line: '맛있네! {빠진 맛} 더 있었으면 좋겠다.', satisfied: true },
       best:    { emoji: '😋', line: '최고야! 또 올게!', satisfied: true },
     },
+  },
+  // 선물 (T37, 7단계 인터뷰 2026-10-11): 손님이 떠날 때 그 손님 판 중 하나라도 만족이면 cast[id].gift를 두고 간다(결제와 별개).
+  //   밤에 선물마다 [팔기 sell] / [남기기]. ingredient 남기면 다음 날 그 재료를 공짜로 가진다. 값은 기획서 시작값, 문구 Claude 초안
+  gifts: {
+    pinenut_pack: { name: '잣 꾸러미',   icon: '🌰', sell: 300, keep: '내일 잣을 공짜로 쓴다', ingredient: 'pinenut' },
+    button:       { name: '반짝이 단추', icon: '🔘', sell: 400, keep: '쓸모는… 글쎄' },
   },
   // 하루 (후속 확장용). 1일차 결산
   day: {
@@ -232,7 +240,9 @@ window.DATA = {
       '(2일차 편지 — 나중에 작성)',
     ],
     // 편지 동봉 카드 (T24)
-    enclosed: { title: '동봉', items: '(준비물)' },
+    enclosed: { title: '동봉', items: '(준비물)', kept: '(어제 남긴 선물)' },
+    // 선물 (T37). {손님} {값} {선물} 자리는 채워진다
+    gift: { got: '🎁', from: '{손님}의 선물', sell: '팔기 {값}', sellSub: '지금 돈으로', keep: '남기기' },
     // ② 재료 넣기 버튼 (T27)
     fill: { done: '모두 완료!' },
     // 첫 판 안내 (T33): 1일차 첫 판에만 단계마다 한 줄. **강조**는 노란 글자. Claude 초안 → 플레이 후 수정
