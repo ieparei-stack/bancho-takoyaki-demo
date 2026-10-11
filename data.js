@@ -18,6 +18,12 @@ window.DATA = {
       soundSet: 1,
     },
 
+    // 첫 판 유령 시범 (T44): ① 짜기 · ⑤ 후네 · ⑥ 건네기. cycleMs 한 번 / first 1일차 첫 판 불투명도 / later 그 뒤(0 = 안 보임). 제안
+    demo: {
+      pour:    { cycleMs: 2400, first: 0.6, later: 0 },
+      box:     { cycleMs: 1500, first: 0.6, later: 0 },
+      topping: { cycleMs: 1800, first: 0.6, later: 0 },
+    },
     // 문어 넣기 (반죽이 든 구멍이면 언제든)
     octopus: {
       legRatio: 0.6,    // 구멍 중심에서 반지름의 이 비율보다 멀면 다리가 삐져나온다. 확정

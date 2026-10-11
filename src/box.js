@@ -238,7 +238,7 @@ const Box = (() => {
   }
 
   return {
-    init, reset, setPose, setOpacity, toBoat,
+    init, reset, setPose, setOpacity, toBoat, spotFor, busy: () => !!drag,
     get g() { return boat.g; },
     get pos() { return { ...pos, zoom }; },
     WORK, OUTLINE,

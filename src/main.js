@@ -16,6 +16,7 @@
   Customer.init();
   Dialogue.init();
   Hint.init();
+  Demo.init(); // 첫 판 유령 시범 (T44)
   Discover.init(document.getElementById('book-toggle'));
   Flow.start();
   window.addEventListener('pointerdown', Sfx.unlock, { once: true });

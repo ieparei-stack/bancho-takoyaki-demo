@@ -163,5 +163,5 @@ const Pour = (() => {
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }
 
-  return { init, newRound, busy: () => !!active, roundStart: () => roundStart };
+  return { init, newRound, busy: () => !!active, roundStart: () => roundStart, next: () => next };
 })();

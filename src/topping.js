@@ -266,5 +266,5 @@ const Topping = (() => {
     }
   }
 
-  return { init, reset };
+  return { init, reset, busy: () => !!(held || carry) };
 })();
