@@ -26,7 +26,7 @@
 
 ## 만든 방식
 
-- 바닐라 JavaScript + SVG, 빌드 없음. `index.html`을 더블클릭해도 실행됩니다
+- 바닐라 JavaScript + SVG, 빌드 없음. `반쵸 더 셰프 데모 실행.html`을 더블클릭해도 실행됩니다
 - 판정 값·재료·손님·대사는 모두 [`data.js`](data.js)에 있고, 게임이 이 파일을 읽어 동작합니다
 - 기획 문서: [SPEC.md](SPEC.md) · [TASKS.md](TASKS.md) · [결정 로그](docs/결정%20로그.md) · [체인지로그](docs/체인지로그.md)
 
