@@ -47,6 +47,12 @@ const Shop = (() => {
         el('line', { x1: 0, y1: -r * 0.6, x2: 0, y2: -r * 0.95, stroke: '#6b4a2a', 'stroke-width': 3, 'stroke-linecap': 'round' }, g);
         el('ellipse', { cx: r * 0.25, cy: -r * 0.85, rx: r * 0.25, ry: r * 0.12, fill: '#5aa03a' }, g);
         break;
+      case 'firefly': // 반딧불이 오징어 (T54): 세모 머리 + 몸통 + 다리, 푸른 빛 점
+        el('path', { d: `M 0 ${-r} L ${r * 0.55} ${-r * 0.35} L ${-r * 0.55} ${-r * 0.35} Z`, fill: c, stroke: '#2c3f8a', 'stroke-width': 2, 'stroke-linejoin': 'round' }, g);
+        el('ellipse', { cx: 0, cy: 0, rx: r * 0.42, ry: r * 0.5, fill: c, stroke: '#2c3f8a', 'stroke-width': 2 }, g);
+        for (const k of [-0.3, -0.1, 0.1, 0.3]) el('line', { x1: k * r, y1: r * 0.4, x2: k * r * 1.6, y2: r * 0.95, stroke: c, 'stroke-width': r * 0.14, 'stroke-linecap': 'round' }, g);
+        for (const [sx, sy] of [[-0.18, -0.05], [0.18, 0.12], [0, -0.55]]) el('circle', { cx: sx * r, cy: sy * r, r: r * 0.09, fill: '#bfefff' }, g);
+        break;
       case 'radish':
         el('ellipse', { cx: 0, cy: r * 0.2, rx: r * 0.55, ry: r * 0.75, fill: c, stroke: '#b8b0a0', 'stroke-width': 2 }, g);
         for (const a of [-25, 0, 25]) el('ellipse', { cx: 0, cy: -r * 0.65, rx: r * 0.12, ry: r * 0.35, fill: '#5aa03a', transform: `rotate(${a} 0 ${-r * 0.4})` }, g);

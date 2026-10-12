@@ -63,7 +63,7 @@ const Config = (() => {
       octopus: { name: '문어', price: 0, tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
       pinenut: { name: '잣', price: 180, tags: ['고소함'], flipWindow: 0.6, color: '#efe0a8' },
       pear: { name: '배', price: 150, tags: ['단맛', '시원함'], flipWindow: 1.0, color: '#d6e89a' },
-      apple: { name: '사과', price: 120, tags: ['단맛', '새콤함'], flipWindow: 1.0, color: '#d8433a' },
+      firefly: { name: '반딧불이 오징어', price: 220, tags: ['감칠맛', '짭조름'], flipWindow: 1.0, color: '#4a6fd6' },
       radish: { name: '무', price: 80, tags: ['시원함'], flipWindow: 1.0, color: '#f6f2e6' },
       shrimp: { name: '새우', price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b' },
       scallion: { name: '파', price: 60, tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a' },

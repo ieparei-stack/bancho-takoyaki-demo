@@ -31,6 +31,10 @@ const Gift = (() => {
     }
     const g = def(guest.gift);
     if (!g) return false;
+    if (today.some((x) => x.id === guest.gift)) { // 같은 선물은 하루에 한 번 (T54: 까마귀 형제가 같은 오징어를)
+      Log.add({ step: '선물', id: guest.gift, from: guest.id, got: false, line: `선물 | ${guest.name} → ${g.name} (오늘 이미 받음)` });
+      return false;
+    }
     today.push({ id: guest.gift, from: guest });
     note(g.name);
     Sfx.finish();

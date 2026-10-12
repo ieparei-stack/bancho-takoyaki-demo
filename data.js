@@ -166,7 +166,8 @@ window.DATA = {
     octopus:  { name: '문어',     price: 0,   tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
     pinenut:  { name: '잣',       price: 180, tags: ['고소함'],           flipWindow: 0.6, color: '#efe0a8' },
     pear:     { name: '배',       price: 150, tags: ['단맛', '시원함'],   flipWindow: 1.0, color: '#d6e89a' },
-    apple:    { name: '사과',     price: 120, tags: ['단맛', '새콤함'],   flipWindow: 1.0, color: '#d8433a' },
+    // 반딧불이 오징어 (T54, 사용자 2026-10-12): 사과 대신. 까마귀가 너구리 몫으로 선물로도 준다. 맛은 평범하게 바다 쪽(감칠맛·짭조름), 가격 제안
+    firefly:  { name: '반딧불이 오징어', price: 220, tags: ['감칠맛', '짭조름'], flipWindow: 1.0, color: '#4a6fd6' },
     radish:   { name: '무',       price: 80,  tags: ['시원함'],           flipWindow: 1.0, color: '#f6f2e6' },
     shrimp:   { name: '새우',     price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b' },
     scallion: { name: '파',       price: 60,  tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a' },
@@ -228,13 +229,15 @@ window.DATA = {
     tako:            { name: '타코야키',      requires: ['octopus'],             price: 100, known: true },
     tako_pinenut:    { name: '잣 타코야키',   requires: ['octopus', 'pinenut'],  price: 150 },
     tako_pear:       { name: '배 타코야키',   requires: ['octopus', 'pear'],     price: 140 },
-    tako_apple:      { name: '사과 타코야키', requires: ['octopus', 'apple'],    price: 130 },
+    tako_firefly:    { name: '반딧불이 오징어 타코야키', requires: ['octopus', 'firefly'], price: 170 }, // T54
     tako_radish:     { name: '무 타코야키',   requires: ['octopus', 'radish'],   price: 120 },
     tako_shrimp:     { name: '새우 타코야키', requires: ['octopus', 'shrimp'],   price: 160 },
     tako_scallion:   { name: '파 타코야키',   requires: ['octopus', 'scallion'], price: 120 },
     //   desc 숨은 요리 이름 카드·도감 한 줄 (T39, Claude 초안)
     octopus_ginger:  { name: '생강 타코야키', requires: ['octopus', 'ginger'],   price: 180, hidden: true, desc: '문어에 생강절임. 톡 쏘는 게 먼저 오고, 문어 맛이 뒤에 남는다.' },
     pear_pinenut:    { name: '배잣 타코야키', requires: ['pear', 'pinenut'],     price: 240, hidden: true, desc: '배 한 조각에 잣 몇 알. 타코야키인데 디저트 자리에 두고 싶어진다.' },
+    // T54 숨은 요리 — 너구리가 특히 좋아한다 (사용자). 설명 Claude 초안
+    firefly_scallion: { name: '반딧불 타코야키', requires: ['octopus', 'firefly', 'scallion'], price: 280, hidden: true, desc: '반딧불이 오징어에 파 한 줌. 바다 냄새가 진하게 올라온다.' },
     shrimp_scallion: { name: '새우파 타코야키', requires: ['shrimp', 'scallion'], price: 240, hidden: true, desc: '새우와 파. 국물도 없는데 국물 맛이 난다.' },
   },
   customers: {
@@ -264,7 +267,7 @@ window.DATA = {
                  gift: 'pinenut_pack', giftAlways: true }, // giftAlways: 1일차 밤엔 만족과 상관없이 잣 꾸러미 (T45 사용자)
       // 까마귀 형제 — A 형님(과묵), B 동생(촐싹)
       crow_a:  { emoji: '🐦‍⬛', name: '까마귀 형님', handle: '@karasu_ani', order: '…예약한 거. 하나.', again: '…하나 더.',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'button',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'firefly_pack',
                  lines: {
                    flop: '…이건 못 본 걸로 하지.',
                    love: '…{메뉴}. 인정한다.',
@@ -274,7 +277,7 @@ window.DATA = {
                    best: '…괜찮군. 동생 놈한테도 알려 주지.',
                  } },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀 동생', handle: '@karasu_otouto', order: '나도 예약했지?! 시원~한 걸로 하나!', again: '하나 더! 하나 더!',
-                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'button',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'firefly_pack', // 형님·동생 중 한 명이라도 만족하면 하나 (T54)
                  lines: {
                    flop: '이거 먹는 거 맞아?!',
                    love: '{메뉴}! 반짝반짝한 맛이야!',
@@ -285,7 +288,7 @@ window.DATA = {
                  } },
       // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. 맛 이름 대신 "바다", "깊이"로 돌려 말한다 (감칠맛·짭조름, 단맛 싫음)
       tanuki:  { emoji: '🦝', name: '너구리', handle: '@tanuki_gourmet', order: '…쪽지 봤나. 하나.', again: '…다시. 이번엔 제대로.',
-                 likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['shrimp_scallion'],
+                 likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['firefly_scallion'], // T54: 새우파 → 반딧불 타코야키 (사용자)
                  lines: {
                    flop: '…이걸 돈 받고 팔 생각인가.',
                    love: '…그래. 이 맛이 **바다**지.',
@@ -314,7 +317,8 @@ window.DATA = {
   //   밤에 선물마다 [팔기 sell] / [남기기]. ingredient 남기면 다음 날 그 재료를 공짜로 가진다. 값은 기획서 시작값, 문구 Claude 초안
   gifts: {
     pinenut_pack: { name: '잣 꾸러미',   icon: '🌰', sell: 300, keep: '내일 잣을 공짜로 쓴다', ingredient: 'pinenut' },
-    button:       { name: '반짝이 단추', icon: '🔘', sell: 400, keep: '쓸모는… 글쎄' },
+    // T54: 까마귀 선물 반짝이 단추 → 반딧불이 오징어 (다음 날 너구리에게 득이 되는 재료, 사용자). 문구 Claude 초안
+    firefly_pack: { name: '반딧불이 오징어', icon: '🦑', sell: 400, keep: '내일 반딧불이 오징어를 공짜로 쓴다', ingredient: 'firefly' },
   },
   // 하루 (후속 확장용). 1일차 결산
   day: {
