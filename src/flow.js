@@ -35,11 +35,16 @@ const Flow = (() => {
     DAY_END_TALK: 'night', GIFT_CHOICE: 'night', DEMO_END: 'night',
   };
 
-  // 오늘 영업 진행 0~1 = 오늘 건넨 판 수 / 오늘 전체 판 수
+  // 오늘 영업 진행 0~1 = 오늘 건넨 판 수 / 오늘 전체 판 수 (소문 손님 포함, T57)
+  //   여우처럼 영업 중에 손님이 붙어 전체가 늘어도 하늘이 되돌아가지 않게 오늘 가장 큰 값을 유지
+  let lastProgress = 0;
   function progress() {
-    const total = (today().guests || []).reduce((s, q) => s + (q.orders || 0), 0) || 1;
-    return Math.min(1, (round() - 1) / total);
+    const planned = (today().guests || []).reduce((s, q) => s + (q.orders || 0), 0);
+    const total = planned + extraOrders || 1;
+    lastProgress = Math.max(lastProgress, Math.min(1, (round() - 1) / total));
+    return lastProgress;
   }
+  let extraOrders = 0; // 오늘 소문 손님 판 수
 
   function go(next) {
     state = next;
@@ -94,6 +99,7 @@ const Flow = (() => {
             Config.warn(`day.days[${dayIdx}]의 손님 "${q.id}"가 customers.cast에 없어 건너뜁니다`);
             return false;
           }).map((q) => ({ ...q }));
+          for (const id of Rumor.guests(dayIdx)) addGuest({ id, orders: 1 }); // 어제 소문 듣고 예약한 손님은 줄 끝에 (T57)
           nextGuest();
         }, CFG.timing.ritual.startMs); // 종을 울린 뒤 "시작!" 글자
       });
@@ -128,7 +134,9 @@ const Flow = (() => {
     },
     DAY_END_TALK() {
       // 정산 카드 → 밤 대화 (T38). 밤 대화는 다음 날 손님 힌트 (SPEC 11절 힌트 곡선)
-      Settle.show(dayIdx + 1, () => Dialogue.play(CFG.dialogue[`night${dayIdx + 1}`] || [], () => go('GIFT_CHOICE')));
+      //   if: { rumor: 손님 id } 줄은 그 소문이 났을 때만 (T57)
+      const lines = (CFG.dialogue[`night${dayIdx + 1}`] || []).filter((ln) => !(ln.if && ln.if.rumor) || Rumor.has(ln.if.rumor));
+      Settle.show(dayIdx + 1, () => Dialogue.play(lines, () => go('GIFT_CHOICE')));
     },
     GIFT_CHOICE() {
       // 받은 선물마다 팔기 / 남기기 (T37). 없으면 바로 넘어간다
@@ -199,11 +207,20 @@ const Flow = (() => {
 
   function beginDay(i) {
     dayIdx = i;
+    extraOrders = 0;
+    lastProgress = 0;
     Ritual.reset(); // 가스 꺼짐, 종은 작업대 (T51)
     Reserve.setDay(i); // 메모판에 그날 예약 쪽지 (T52)
     const cover = blocker();
     const t = bigText(`${i + 1}일차`, 96);
     setTimeout(() => { t.remove(); cover.remove(); go('LETTER'); }, CARD_MS);
+  }
+
+  // 소문 손님을 오늘 줄 끝에 (T57)
+  function addGuest(q) {
+    if (!CFG.customers.cast[q.id]) { Config.warn(`소문 손님 "${q.id}"가 customers.cast에 없어 건너뜁니다`); return; }
+    queue.push(q);
+    extraOrders += q.orders;
   }
 
   function nextGuest() {
@@ -229,6 +246,9 @@ const Flow = (() => {
       Pour.newRound();
       go('COOK');
     } else {
+      // 제대로 대접했으면 소문이 난다 (T57) — 오늘 오는 손님(여우)은 줄 끝에, 내일 손님(토끼)은 Rumor가 기억
+      const rumor = Rumor.check(guest);
+      if (rumor) addGuest(rumor);
       // 만족한 손님은 떠나며 선물을 두고 간다 (T37) — 떠오르는 글자를 볼 틈을 두고 걷는다
       const got = Gift.receive(guest);
       setTimeout(() => Customer.leave(nextGuest), got ? CFG.customers.giftMs : 0);

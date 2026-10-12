@@ -20,8 +20,11 @@ const Reserve = (() => {
   let gate = null;      // 아침 관문 { block, then }
   let open = false;     // 예약 판이 펼쳐져 있나
 
+  // 그날 예약 + 어제 소문을 듣고 예약한 손님 쪽지 (T57, customers.cast[id].reserve)
   function list(dayIdx) {
-    return ((CFG.day.days[dayIdx] || {}).reserve || []).filter((r) => {
+    const rumor = Rumor.guests(dayIdx).filter((id) => CFG.customers.cast[id] && CFG.customers.cast[id].reserve)
+      .map((id) => ({ who: id, text: CFG.customers.cast[id].reserve }));
+    return [...((CFG.day.days[dayIdx] || {}).reserve || []), ...rumor].filter((r) => {
       if (CFG.customers.cast[r.who]) return true;
       Config.warn(`day.days[${dayIdx}].reserve의 손님 "${r.who}"가 customers.cast에 없어 건너뜁니다`);
       return false;

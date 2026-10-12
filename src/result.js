@@ -78,15 +78,19 @@ const Result = (() => {
       const y = DAY_ROW.top + i * DAY_ROW.h;
       text(g, LEFT.x, y, L.day.replace('{n}', d.day), { 'font-size': 24, 'font-weight': 900, fill: '#c0661c' });
       text(g, LEFT.right, y, won(d.sales), { 'text-anchor': 'end', 'font-size': 22, 'font-weight': 900 });
+      // 판이 셋 이상이면 (T57 소문 손님) 칸을 나눠 좁히고 별·아이콘을 작게 — 왼쪽 칸 안에
+      const cw = Math.min(240, (LEFT.right - LEFT.x) / Math.max(1, d.recs.length));
+      const small = cw < 200;
       d.recs.forEach((r, k) => {
-        const x = LEFT.x + k * 240;
+        const x = LEFT.x + k * cw;
         const yy = y + 42;
-        text(g, x, yy, r.customer.emoji, { 'font-size': 28, 'font-family': EMOJI_FONT });
+        text(g, x, yy, r.customer.emoji, { 'font-size': small ? 22 : 28, 'font-family': EMOJI_FONT });
         const n = stars(r);
-        const st = text(g, x + 40, yy - 3, '', { 'font-size': 20, 'letter-spacing': 1 });
+        const sx = x + (small ? 30 : 40);
+        const st = text(g, sx, yy - 3, '', { 'font-size': small ? 14 : 20, 'letter-spacing': small ? 0 : 1 });
         el('tspan', { fill: GOLD }, st).textContent = '★'.repeat(n);
         el('tspan', { fill: '#d8c7a6' }, st).textContent = '★'.repeat(5 - n);
-        text(g, x + 40, yy + 18, r.customer.name, { 'font-size': 13, fill: SUB });
+        text(g, sx, yy + 18, r.customer.name, { 'font-size': small ? 12 : 13, fill: SUB });
       });
       el('line', { x1: LEFT.x, y1: y + 70, x2: LEFT.right, y2: y + 70, stroke: '#e5d6b8', 'stroke-width': 2 }, g);
     });

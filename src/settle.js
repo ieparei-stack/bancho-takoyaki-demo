@@ -233,9 +233,10 @@ const Settle = (() => {
     let y = 196;
     const gl = label(y, L.guests || '오늘의 손님');
     add(500, (i) => appear(gl, i));
+    const tight = s.guests.length >= 3; // 소문 손님까지 셋 이상이면 줄 간격을 좁히고 대사는 한 줄만 (T57) — 왼쪽 장 아래로 넘치지 않게
     for (const gst of s.guests) {
       const row = hidden(Board.el('g', {}, book));
-      const cy = y + 40;
+      const cy = y + (tight ? 34 : 40);
       Board.el('circle', { cx: 232, cy, r: 25, fill: '#f3e3c3', stroke: '#e0c99a', 'stroke-width': 2 }, row);
       text(232, cy + 1, gst.emoji, { 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 28, 'font-family': EMOJI_FONT }, row);
       const nm = text(270, cy - 6, gst.name, { 'font-size': 22, 'font-weight': 900 }, row);
@@ -254,10 +255,10 @@ const Settle = (() => {
       const hp = hidden(text(fx + 8, cy - 7, happyText, { 'font-size': 15, 'font-weight': 700, fill: gst.happy ? '#4c8a3a' : '#a0522d' }));
       add(stepMs * 0.35, (i) => appear(hp, i));
       // 대사: 따옴표 안, 두 줄까지, 한 글자씩
-      let qy = cy + 22;
+      let qy = cy + (tight ? 20 : 22);
       if (gst.quote) {
         const q = Board.el('text', { 'font-family': SERIF, 'font-size': 16, fill: '#5a4636', y: qy }, book);
-        const lines = Board.richLines(q, `“${gst.quote}”`, RIGHT_EDGE - 270).slice(0, 2);
+        const lines = Board.richLines(q, `“${gst.quote}”`, RIGHT_EDGE - 270).slice(0, tight ? 1 : 2);
         const total = lines.reduce((a, ln) => a + ln.length, 0);
         Board.richRender(q, lines, 0, 270, 21);
         add(stepMs * 0.3, (i) => {
@@ -274,7 +275,7 @@ const Settle = (() => {
         // 바로 다 보이기(클릭)용: 진행 중 타자도 끝 글자까지
         steps[steps.length - 1].finish = () => Board.richRender(q, lines, total, 270, 21);
       }
-      y = qy + 12;
+      y = qy + (tight ? 6 : 12);
     }
     rule(y + 6);
 
@@ -284,6 +285,7 @@ const Settle = (() => {
     const money = hidden(text(LEFT, y + 52, won(0), { 'font-size': 48, 'font-weight': 900, fill: ORANGE }));
     const parts = s.recs.map((r, k) => (L.boardPart || '{n}판 {값}').replace('{n}', k + 1).replace('{값}', won(r.sales)));
     const detail = hidden(text(LEFT + 2, y + 82, parts.join('  +  '), { 'font-size': 16, fill: SUB }));
+    for (let f = 16; f > 11 && detail.getComputedTextLength() > RIGHT_EDGE - LEFT - 2; f -= 0.5) detail.setAttribute('font-size', f); // 판이 많으면 (T57) 글자를 줄여 장 안에
     let counting = 0;
     add(stepMs, (i) => appear(sl, i));
     add(stepMs * 0.4, (i) => {

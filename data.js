@@ -215,6 +215,9 @@ window.DATA = {
       { who: 'crow_a', text: '내일 오는 놈은… 까다롭다.\n뭘 좋아하는지 물어봐도 대답을 안 해.' },
       { who: 'crow_b', text: '맞아맞아. 대신 먹고 나서는 꼭 한마디씩 투덜대더라~' },
       { who: 'crow_a', text: '…항구 쪽 놈들한테 말해 뒀다.\n내일부터 시장에 **새우**랑 **반딧불이 오징어**가 들어올 거다.' }, // T56 입고 (Claude 초안)
+      // T57: 까마귀를 배 든 판으로 제대로 대접했을 때만 (if.rumor) — 내일 토끼가 예약
+      { who: 'crow_b', if: { rumor: 'rabbit' }, text: '아 맞다! 아까 토끼한테 자랑했더니,\n내일 **배** 넣은 타코야키 먹으러 온대!' },
+      { who: 'crow_a', if: { rumor: 'rabbit' }, text: '…입이 가볍군.' },
       { who: 'bancho', text: '…', mark: '…' },
     ],
     // 3일차 밤 = 장인의 편지 (T40, 8단계 인터뷰). 문구는 사용자가 직접 작성 — 지금은 기획서 문구를 자리로
@@ -272,6 +275,7 @@ window.DATA = {
       // 까마귀 형제 — A 형님(과묵), B 동생(촐싹)
       crow_a:  { emoji: '🐦‍⬛', name: '까마귀 형', handle: '@karasu_ani', order: '…예약한 거. 하나.', again: '…하나 더.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'firefly_pack',
+                 rumor: { guest: 'rabbit', ings: ['pear'], reacts: ['love', 'best'], next: true }, // T57: 배 든 판으로 최고·반함 → 내일 토끼
                  lines: {
                    flop: '…이건 못 본 걸로 하지.',
                    love: '…{메뉴}. 인정한다.',
@@ -282,6 +286,7 @@ window.DATA = {
                  } },
       crow_b:  { emoji: '🐦‍⬛', name: '까마귀 동생', handle: '@karasu_otouto', order: '나도 예약했지?! 시원~한 걸로 하나!', again: '하나 더! 하나 더!',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'], gift: 'firefly_pack', // 형님·동생 중 한 명이라도 만족하면 하나 (T54)
+                 rumor: { guest: 'rabbit', ings: ['pear'], reacts: ['love', 'best'], next: true }, // 형제 중 한 명만 성공해도 토끼 하나
                  lines: {
                    flop: '이거 먹는 거 맞아?!',
                    love: '{메뉴}! 반짝반짝한 맛이야!',
@@ -293,6 +298,7 @@ window.DATA = {
       // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. 맛 이름 대신 "바다", "깊이"로 돌려 말한다 (감칠맛·짭조름, 단맛 싫음)
       tanuki:  { emoji: '🦝', name: '너구리 영감', handle: '@tanuki_gourmet', order: '…쪽지 봤나. 하나.', again: '…다시. 이번엔 제대로.',
                  likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['firefly_scallion'], // T54: 새우파 → 반딧불 타코야키 (사용자)
+                 rumor: { guest: 'fox', ings: ['shrimp', 'firefly'], reacts: ['love', 'best'] }, // T57: 새우·오징어 든 판으로 최고·반함 → 오늘 여우
                  lines: {
                    flop: '…이걸 돈 받고 팔 생각인가.',
                    love: '…그래. 이 맛이 **바다**지.',
@@ -300,6 +306,31 @@ window.DATA = {
                    lack: '흠. 얌전하군. **바다** 냄새가 안 나.',
                    good: '괜찮군. 다만… 한 입 더 **깊었으면**.',
                    best: '…좋아. 또 오지.',
+                 } },
+      // 소문 손님 (T57, 사용자 2026-10-12): 제대로 대접받은 손님의 소문을 듣고 온다. 1판, 선물 없음. 문구 Claude 초안
+      //   reserve = 다음 날 예약 손님이면 메모판 쪽지 (Rumor가 붙인다)
+      //   토끼 — 까마귀 형제에게 배 타코야키 소문을 듣고 3일차에 예약. 수줍고 말을 더듬는다
+      rabbit:  { emoji: '🐇', name: '토끼', handle: '@usagi_mochi', order: '소문 듣고 왔어! 그… 그 **배** 넣은 타코야키 줘!', again: '하, 하나 더…!',
+                 reserve: '까마귀 형제한테 들었어! 그… **배** 넣은 타코야키, 나도 먹으러 갈게!',
+                 likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear', 'pear_pinenut'],
+                 lines: {
+                   flop: '으앗… 이, 이게 소문의 그거야…?',
+                   love: '이거야! {메뉴}! 소문 그대로야!',
+                   dislike: '히익, {싫은 맛} 들었어… 귀가 다 쫑긋해졌잖아.',
+                   lack: '어… 소문이랑 달라. {빠진 맛} 하나도 없는걸?',
+                   good: '맛있다…! 그래도 {빠진 맛} 조금만 더 있었으면.',
+                   best: '와아… 달님한테도 자랑해야지!',
+                 } },
+      //   여우 — 너구리 영감이 칭찬하는 걸 듣고 3일차에 예약 없이. 너구리와 티격태격하는 사이, 능청스럽다
+      fox:     { emoji: '🦊', name: '여우', handle: '@kitsune_konkon', order: '너구리 영감이 웬일로 칭찬을 하더라? **바다** 맛 나는 거, 그거 하나.', again: '한 판 더.',
+                 likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['tako_shrimp', 'tako_firefly', 'shrimp_scallion', 'firefly_scallion'],
+                 lines: {
+                   flop: '어머, 영감이 나한테 장난친 건가?',
+                   love: '{메뉴}… 영감이 칭찬할 만하네. 분하지만.',
+                   dislike: '{싫은 맛}? 이건 영감 입맛도, 내 입맛도 아닌데.',
+                   lack: '흐응, **바다** 냄새는 어디 갔어? {빠진 맛} 하나도 없잖아.',
+                   good: '나쁘지 않아. {빠진 맛} 조금만 더 있었으면 완벽했을 텐데.',
+                   best: '좋아. 이 집은 영감한테 비밀로 해야겠다.',
                  } },
     },
     // 알 값 (T29, 6단계 인터뷰): (메뉴 기본가 + 좋아하는 맛 태그 × like − 싫어하는 맛 태그 × dislike + 좋아하는 메뉴면 favorite) × 표정 배수
