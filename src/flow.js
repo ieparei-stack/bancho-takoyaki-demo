@@ -3,7 +3,7 @@
 // 아직 내용이 없는 상태는 "무엇을 할 자리인지" 보여주는 빈 패널(클릭하면 넘어감)이다. 일차 구성은 data.js day.days.
 const Flow = (() => {
   const NAME = {
-    TITLE: '타이틀', LETTER: '편지', SHOP: '장보기', PREP: '준비', OPEN_BELL: '개점', ORDER: '주문', COOK: '굽기',
+    TITLE: '타이틀', LETTER: '편지', MEMO: '메모판', SHOP: '장보기', PREP: '준비', OPEN_BELL: '개점', ORDER: '주문', COOK: '굽기',
     REACTION: '반응', CLOSE: '마감', DAY_END_TALK: '밤 대화', GIFT_CHOICE: '선물', DEMO_END: '데모 끝',
   };
   const CARD_MS = 1000;   // 일차 카드
@@ -30,7 +30,7 @@ const Flow = (() => {
 
   // 상태 → 배경 시간대 (T22, 제안). 영업 중(null)은 건넨 판 수로 흐른다 — Scene.setOpen (T51)
   const TIME = {
-    TITLE: 'morning', LETTER: 'morning', SHOP: 'morning', PREP: 'morning',
+    TITLE: 'morning', LETTER: 'morning', MEMO: 'morning', SHOP: 'morning', PREP: 'morning',
     OPEN_BELL: null, ORDER: null, COOK: null, REACTION: null, CLOSE: null,
     DAY_END_TALK: 'night', GIFT_CHOICE: 'night', DEMO_END: 'night',
   };
@@ -59,6 +59,10 @@ const Flow = (() => {
       const raw = (CFG.letters.days || [])[dayIdx];
       const pages = Array.isArray(raw) ? raw : (raw ? [raw] : []);
       Dialogue.play(pages.map((text) => ({ who: 'letter', text: String(text) })), enclosed);
+    },
+    MEMO() {
+      // 코르크 메모판 (T52): 예약 쪽지를 직접 눌러 읽어야 장보기로. 예약이 없는 날은 바로
+      Reserve.morning(dayIdx, () => go('SHOP'));
     },
     SHOP() {
       if (!today().shop) {
@@ -151,7 +155,7 @@ const Flow = (() => {
     if (names.length) parts.push(`${names.join(' · ')} ${L.items}`);
     const keptNames = kept.filter((id) => !(e.items || []).includes(id)).map((id) => CFG.ingredients[id].name);
     if (keptNames.length) parts.push(`${keptNames.join(' · ')} ${L.kept || '(어제 선물)'}`);
-    const toShop = () => Reserve.show(dayIdx, () => go('SHOP')); // 아침 예약 쪽지 → 장보기 (T46)
+    const toShop = () => go('MEMO'); // 메모판에서 예약을 읽고 → 장보기 (T46 → T52)
     if (!parts.length) { toShop(); return; }
     const g = Board.el('g', { cursor: 'pointer' }, Board.layer('top'));
     Board.el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'transparent', 'pointer-events': 'all' }, g);
@@ -196,6 +200,7 @@ const Flow = (() => {
   function beginDay(i) {
     dayIdx = i;
     Ritual.reset(); // 가스 꺼짐, 종은 작업대 (T51)
+    Reserve.setDay(i); // 메모판에 그날 예약 쪽지 (T52)
     const cover = blocker();
     const t = bigText(`${i + 1}일차`, 96);
     setTimeout(() => { t.remove(); cover.remove(); go('LETTER'); }, CARD_MS);

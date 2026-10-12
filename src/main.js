@@ -12,6 +12,7 @@
   Box.init();
   Topping.init();
   Ritual.init(); // 개점·마감 의식 — 가스 손잡이·종 (T51)
+  Reserve.init(); // 코르크 메모판 (T52)
   Wallet.init();
   Menu.init();
   Customer.init();

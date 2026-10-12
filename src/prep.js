@@ -34,6 +34,7 @@ const Prep = (() => {
 
     preview = el('g', {}, root);
     drawPreview();
+    Reserve.pin(root, Flow.day() - 1); // 오늘 예약 쪽지 사본 — 장보기와 같게 (T52)
 
     const bx = PANEL.x + PANEL.w - 150;
     const by = PANEL.y + PANEL.h - 50;

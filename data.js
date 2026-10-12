@@ -351,7 +351,8 @@ window.DATA = {
     // 타이틀 화면 (T45). 배경 이미지는 art.title (9단계)
     title: { sub: '반쵸 더 셰프', name: '타코야키 포장마차', start: '클릭해서 시작 ▶' },
     // 아침 예약 카드 (T46)
-    reserve: { title: '오늘의 예약', close: '클릭해서 장보러 가기 ▶' },
+    //   T52 메모판: board 메모판 아래 글씨 / hint 아침 안내(불판 아래) / reread 다시 볼 때 닫기. Claude 초안
+    reserve: { title: '오늘의 예약', close: '클릭해서 장보러 가기 ▶', board: '메모판', hint: '오른쪽 **메모판**을 눌러 오늘의 예약을 확인해요', reread: '클릭해서 닫기 ▶' },
     discover: { recipe: '새 레시피!', title: '숨은 요리 발견!', close: '클릭해서 닫기 ▶', book: '📖 도감', bookTitle: '숨은 요리 도감', count: '발견 {n}/{all}', unknown: '???', foundOn: '{n}일차 발견' },
     // 하루 끝 정산 카드 (T38). {n} {m} {all} 자리는 채워진다
     //   T49 영업 일지: 오늘의 손님(대사) → 판매 수익(판 내역) → 메뉴판에 추가 → 받은 선물 → 오늘의 한 접시 → 사흘 영업 칸에 도장. {n} {m} {값} 자리는 채워진다
