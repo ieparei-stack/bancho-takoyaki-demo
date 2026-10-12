@@ -19,7 +19,7 @@ const Dispenser = (() => {
 
   function show(hole, downAt) {
     hideNow();
-    const P = CFG.timing.pour;
+    const P = Pour.timing(); // 도구로 박자가 바뀔 수 있다 (T53)
     const beats = P.holdBeats;                      // 눈금 = 박 수 + 1 (마지막이 큰 눈금)
     const x = hole.cx + BODY.dx;
     const y = hole.cy + BODY.dy;
@@ -66,7 +66,7 @@ const Dispenser = (() => {
 
   function tick(now) {
     if (!st) return;
-    const P = CFG.timing.pour;
+    const P = Pour.timing(); // 도구로 박자가 바뀔 수 있다 (T53)
     const held = now - st.downAt;
     const beatMs = P.targetMs / st.beats;
     // 박자를 넘으면 움찔

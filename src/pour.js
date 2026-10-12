@@ -1,11 +1,12 @@
 // 반죽 짜기: 1→6 순서대로 구멍을 누르고 있다가 "탁!"에 놓는다. 누른 시간으로 판정한다.
 // 판정은 화면에 글자로 띄우지 않고 판정 로그와 표정으로만 보여준다. (설계 원칙 2·3)
+// 도구 (T53): 빠른 짜기 = 박자가 도-솔-도 1 s(Pour.timing) / 한 줄 짜기 = 지금 줄의 아무 구멍이나 누르면 세 구멍이 같이, 같은 판정
 const Pour = (() => {
   const RESULT_FACE = { 퍼펙트: 'batter', 굿: 'batter', 부족: 'under', 넘침: 'over' };
   const SCORE = { 퍼펙트: 2, 굿: 1 }; // 단계 등급용, 그 외 0
 
   let next = 0;          // 다음 차례 구멍 id
-  let active = null;     // { hole, downAt, sound }
+  let active = null;     // { hole, holes, downAt, sound } — holes = 같이 차오르는 구멍들 (한 줄 짜기면 셋)
   let roundStart = null; // 1번 구멍을 누른 시각
   let results = [];
   const glanceAt = {};   // 구멍 id → 곁눈질 방향 (넘친 옆 구멍이 있을 때)
@@ -18,39 +19,54 @@ const Pour = (() => {
     window.addEventListener('pointercancel', (e) => finish(e.timeStamp, false));
   }
 
+  // 지금 짜기 박자 (도구를 샀으면 덮어쓴다, T53)
+  function timing() {
+    const base = CFG.timing.pour;
+    return Tools.has('pourFast') ? { ...base, ...CFG.tools.pourFast.pour } : base;
+  }
+
+  // 한 줄 짜기면 지금 줄(1~3 / 4~6)의 남은 구멍들
+  function rowOf(id) {
+    const row = Math.floor(id / 3) * 3;
+    return Board.holes.filter((h) => h.id >= next && h.id >= row && h.id < row + 3);
+  }
+
   function start(hole, e) {
     if (active || e.button !== 0 || !Stage.is('pour')) return;
     if (next >= Board.holes.length) return; // 다 짰다. 새 판은 손님이 떠날 때 (T19)
-    if (hole.id !== next) return; // 순서가 아닌 구멍은 반응하지 않는다
+    const row = Tools.has('pourRow');
+    // 순서가 아닌 구멍은 반응하지 않는다 (한 줄 짜기면 지금 줄의 아무 구멍이나)
+    if (row ? Math.floor(hole.id / 3) !== Math.floor(next / 3) : hole.id !== next) return;
+    const holes = row ? rowOf(next) : [hole];
 
     // 첫 클릭이 바로 짜기여도 소리가 나도록 여기서도 연다
     Sfx.unlock();
-    const p = CFG.timing.pour;
+    const p = timing();
     const sound = Sfx.pourStart({
       soundSet: p.soundSet, targetMs: p.targetMs, autoStopMs: p.autoStopMs, holdBeats: p.holdBeats,
     });
-    if (hole.id === 0) { roundStart = e.timeStamp; Customer.shrinkBubble(); }
-    active = { hole, downAt: e.timeStamp, sound };
-    Dispenser.show(hole, e.timeStamp); // 반죽통 눈금 (T31)
-    Face.clear(hole);
+    if (next === 0) { roundStart = e.timeStamp; Customer.shrinkBubble(); }
+    active = { hole: holes[Math.floor(holes.length / 2)], holes, downAt: e.timeStamp, sound };
+    Dispenser.show(active.hole, e.timeStamp); // 반죽통 눈금 (T31) — 한 줄이면 가운데 구멍 위
+    for (const h of holes) Face.clear(h);
     requestAnimationFrame(tick);
   }
 
   function tick() {
     if (!active) return;
-    const { targetMs, autoStopMs } = CFG.timing.pour;
+    const { targetMs, autoStopMs } = timing();
     const held = performance.now() - active.downAt;
     if (held >= targetMs + autoStopMs) {
       finish(active.downAt + targetMs + autoStopMs, true);
       return;
     }
-    setFill(active.hole, held);
+    for (const h of active.holes) setFill(h, held);
     requestAnimationFrame(tick);
   }
 
   // 누른 시간 / 목표 = 반지름 비율. 1.0이면 구멍에 딱 맞고, 넘으면 테두리 밖으로 넘친다.
   function size(hole, held) {
-    return hole.r * held / CFG.timing.pour.targetMs;
+    return hole.r * held / timing().targetMs;
   }
   function setFill(hole, held) {
     const s = size(hole, held).toFixed(1);
@@ -60,7 +76,7 @@ const Pour = (() => {
   }
 
   function judge(errorMs) {
-    const { perfectMs, goodMs } = CFG.timing.pour;
+    const { perfectMs, goodMs } = timing();
     if (Math.abs(errorMs) <= perfectMs) return '퍼펙트';
     if (Math.abs(errorMs) <= goodMs) return '굿';
     return errorMs < 0 ? '부족' : '넘침';
@@ -68,25 +84,28 @@ const Pour = (() => {
 
   function finish(upAt, autoStopped) {
     if (!active) return;
-    const { hole, downAt, sound } = active;
+    const { holes, downAt, sound } = active;
     active = null;
     Dispenser.hide();
-    next = hole.id + 1;
+    next = holes[holes.length - 1].id + 1;
     if (autoStopped) sound.gurgle(); else sound.release();
     Sfx.sizzle(); // 반죽이 뜨거운 불판에 닿는 "치익" (T32, 붓는 순간만)
 
     const held = upAt - downAt;
-    const { targetMs, soundSet } = CFG.timing.pour;
+    const { targetMs, soundSet } = timing();
     const errorMs = Math.round(held - targetMs);
     const result = autoStopped ? '넘침' : judge(errorMs);
-    results.push(result);
 
-    hole.hasBatter = true;
-    hole.pourAt = upAt; // 굽기는 뒤집기 단계에서 시작한다 (T11). 짠 간격은 큐 간격으로 쓴다
-    showFace(hole, result, size(hole, held));
-    Face.spill(hole, size(hole, held), result === '넘침' ? 6 : 0); // 번진 반죽 (T35)
-    Face.sprinkle(hole, Math.min(hole.r, size(hole, held)));       // 텐카스·파 (T35)
-    log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
+    // 한 줄 짜기면 세 구멍이 같은 판정 (T53)
+    for (const hole of holes) {
+      results.push(result);
+      hole.hasBatter = true;
+      hole.pourAt = upAt; // 굽기는 뒤집기 단계에서 시작한다 (T11)
+      showFace(hole, result, size(hole, held));
+      Face.spill(hole, size(hole, held), result === '넘침' ? 6 : 0); // 번진 반죽 (T35)
+      Face.sprinkle(hole, Math.min(hole.r, size(hole, held)));       // 텐카스·파 (T35)
+      log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet);
+    }
 
     if (next === Board.holes.length) {
       logRound(upAt);
@@ -114,7 +133,7 @@ const Pour = (() => {
   }
 
   function log(hole, downAt, upAt, errorMs, result, autoStopped, soundSet) {
-    const cueAt = Math.round(downAt + CFG.timing.pour.targetMs);
+    const cueAt = Math.round(downAt + timing().targetMs);
     const inputAt = Math.round(upAt);
     const sign = errorMs > 0 ? '+' : '';
     // 출력 지연: 스피커에서 소리가 실제로 나기까지 걸리는 시간. 튜닝 참고용
@@ -128,7 +147,7 @@ const Pour = (() => {
   function logRound(endAt) {
     const totalMs = Math.round(endAt - roundStart);
     const count = (r) => results.filter((x) => x === r).length;
-    const { targetMs, holdBeats } = CFG.timing.pour;
+    const { targetMs, holdBeats } = timing();
     const bpm = Math.round(60000 / (targetMs / holdBeats));
     Log.add({
       step: '짜기 한 판', totalMs, targetMs, bpm,
@@ -163,5 +182,5 @@ const Pour = (() => {
     Log.add({ step: '새 판', line: '── 새 판 ──' });
   }
 
-  return { init, newRound, busy: () => !!active, roundStart: () => roundStart, next: () => next };
+  return { init, newRound, timing, busy: () => !!active, roundStart: () => roundStart, next: () => next };
 })();

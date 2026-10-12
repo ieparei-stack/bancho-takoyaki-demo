@@ -78,12 +78,22 @@ const Octopus = (() => {
       return;
     }
 
-    piece.used = true;
-    piece.el.setAttribute('visibility', 'hidden');
-    place(hole, p.x, p.y, e.timeStamp);
+    // 한꺼번에 넣기 (T53): 놓은 구멍 기준 어긋난 정도를 문어 없는 모든 구멍에 똑같이 — 조각을 그 수만큼 쓰고, 점수도 같다
+    const targets = Fill.massOn()
+      ? [hole, ...Board.holes.filter((h) => h !== hole && h.hasBatter && !h.hasOcto)]
+      : [hole];
+    const dx = p.x - hole.cx;
+    const dy = p.y - hole.cy;
+    for (const h of targets) {
+      const pc = h === hole ? piece : pieces.find((k) => !k.used);
+      if (!pc) break;
+      pc.used = true;
+      pc.el.setAttribute('visibility', 'hidden');
+      place(h, h.cx + dx, h.cy + dy, e.timeStamp, h !== hole);
+    }
   }
 
-  function place(hole, x, y, inputAt) {
+  function place(hole, x, y, inputAt, quiet) {
     const dx = x - hole.cx;
     const dy = y - hole.cy;
     const dist = Math.hypot(dx, dy);
@@ -107,7 +117,7 @@ const Octopus = (() => {
     drawChunk(chunk, px, py, 0.85);
     if (leg) drawLeg(hole.octo, px, py, ang, hole);
 
-    Sfx.plop(leg);
+    if (!quiet) Sfx.plop(leg); // 한꺼번에 넣을 땐 소리는 한 번
     Log.add({
       step: '문어', hole: hole.id + 1, inputAt: Math.round(inputAt), distPx: Math.round(dist), ratio: +ratio.toFixed(2), result,
       line: `문어 #${hole.id + 1} | 입력 ${Math.round(inputAt)} | 중심 거리 ${Math.round(dist)}px (${ratio.toFixed(2)}r) | ${result}`,

@@ -15,6 +15,9 @@ const Fill = (() => {
   let btn = null;       // "모두 완료!" 버튼
   let btnGlow = null;
   let glow = null;      // { t0, raf } — 문어를 다 써서 버튼이 두근거리는 중
+  let mass = true;      // 한꺼번에 넣기 스위치 (T53, 도구를 샀을 때만 보인다. 켜고 끈 상태는 다음 판에도)
+  let massG = null;
+  let massText = null;
 
   function init() {
     for (const h of Board.holes) h.ings = new Set();
@@ -29,6 +32,18 @@ const Fill = (() => {
     Board.el('rect', { x: BTN.cx - BTN.w / 2, y: BTN.cy - BTN.h / 2, width: BTN.w, height: BTN.h, rx: 14, fill: '#c0661c', stroke: '#7a3e12', 'stroke-width': 2 }, btn);
     const t = Board.el('text', { x: BTN.cx, y: BTN.cy, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 22, 'font-weight': 900, fill: '#fffaf0' }, btn);
     t.textContent = CFG.letters.fill.done;
+    // 한꺼번에 넣기 스위치 (T53): "모두 완료!" 아래
+    massG = Board.el('g', { cursor: 'pointer', display: 'none' }, ui);
+    Board.el('rect', { x: BTN.cx - BTN.w / 2, y: BTN.cy + BTN.h / 2 + 10, width: BTN.w, height: 34, rx: 17, fill: 'rgba(15,10,8,0.55)', stroke: '#e0a457', 'stroke-width': 2 }, massG);
+    massText = Board.el('text', { x: BTN.cx, y: BTN.cy + BTN.h / 2 + 28, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 15, 'font-weight': 700, fill: '#f3e6d6' }, massG);
+    massG.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      Sfx.unlock();
+      mass = !mass;
+      Sfx.tick();
+      paintMass();
+      Log.add({ step: '재료', line: `한꺼번에 넣기 ${mass ? '켬' : '끔'}` });
+    });
     btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); if (Stage.is('octopus')) finish('완료'); });
 
     // 재료판 추가 칸에서 조각 집기 (무한)
@@ -45,8 +60,20 @@ const Fill = (() => {
     return L[Math.min(Flow.day(), L.length) - 1];
   }
 
+  function massOn() {
+    return Tools.has('fillAll') && mass;
+  }
+
+  function paintMass() {
+    const T = CFG.letters.tools;
+    massG.setAttribute('display', Tools.has('fillAll') ? 'inline' : 'none');
+    massText.textContent = mass ? T.massOn : T.massOff;
+    massText.setAttribute('fill', mass ? '#ffd34d' : '#b9a88a');
+  }
+
   function start() {
     ui.setAttribute('display', 'inline');
+    paintMass();
     stopGlow();
     running = { t0: performance.now(), limit: limitMs(), raf: 0 };
     running.raf = requestAnimationFrame(tick);
@@ -154,12 +181,19 @@ const Fill = (() => {
       Log.add({ step: '재료', hole: hole.id + 1, id, refused: true, line: `재료 #${hole.id + 1} | ${name} 이미 있음` });
       return;
     }
+    addTo(hole, id);
+    // 한꺼번에 넣기 (T53): 반죽 있고 그 재료가 없는 나머지 구멍에도
+    if (massOn()) for (const h of Board.holes) if (h !== hole && h.hasBatter && !h.ings.has(id)) addTo(h, id, true);
+  }
+
+  function addTo(hole, id, quiet) {
+    const name = CFG.ingredients[id].name;
     hole.ings.add(id);
     const extras = [...hole.ings].filter((x) => x !== 'octopus').length;
     const [dx, dy] = SPOTS[(extras - 1) % SPOTS.length];
     const chunk = Board.el('g', { 'data-chunk': '1' }, hole.octo);
     Shop.icon(id, chunk, hole.cx + dx, hole.cy + dy, ITEM_R);
-    Sfx.plop(false);
+    if (!quiet) Sfx.plop(false);
     Log.add({ step: '재료', hole: hole.id + 1, id, ings: [...hole.ings], line: `재료 #${hole.id + 1} | ${name} 넣음 | ${[...hole.ings].map((x) => CFG.ingredients[x].name).join(' · ')}` });
   }
 
@@ -170,5 +204,5 @@ const Fill = (() => {
     for (const h of Board.holes) h.ings.clear();
   }
 
-  return { init, finish, octopusDone, reset, busy: () => !!drag };
+  return { init, finish, octopusDone, reset, massOn, busy: () => !!drag };
 })();

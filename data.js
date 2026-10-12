@@ -154,6 +154,14 @@ window.DATA = {
   // 재료 (6단계, 기획서 시작값). name · price 장보기 가격 · tags 맛 태그 · flipWindow 뒤집기 성공 구간 배율(잣 0.6 = 빨리 탄다)
   //   color 도형 아이콘 색(제안) · base 기본 재료(늘 있음, 무료). 반죽에 영향을 주는 재료는 없다 (2026-10-10 사용자: pourTarget 삭제)
   //   장보기: 날마다 다시 사고, 산 날에는 무한 (2026-10-10 사용자)
+  // 도구 = 인게임 성장 (T53, 사용자 2026-10-12): 아침 장보기에서 산다, 한 번 사면 끝까지. 이름·설명 Claude 초안
+  //   price 제안 — "2일차에 재료 2종 + 강화 1개를 고를 수 있는 정도"(사용자). 1일차 끝 돈 ≈ ₩2,000 + 송금 ₩500
+  //   pourFast.pour = 산 뒤의 짜기 박자 (도-솔-도, 박 간격 0.5 s 그대로) / icon 장보기 카드 그림 글자
+  tools: {
+    pourFast: { name: '빠른 짜기 병', price: 1500, icon: '⏱', desc: '반죽을 더 빠르게 짤 수 있다', pour: { targetMs: 1000, holdBeats: 2 } },
+    fillAll:  { name: '한꺼번에 집게', price: 1800, icon: '🥢', desc: '재료를 한 번에 넣을 수 있다' },
+    pourRow:  { name: '세 구멍 짜는 병', price: 2000, icon: '🧴', desc: '여러 구멍을 한 번에 짤 수 있다' },
+  },
   ingredients: {
     octopus:  { name: '문어',     price: 0,   tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
     pinenut:  { name: '잣',       price: 180, tags: ['고소함'],           flipWindow: 0.6, color: '#efe0a8' },
@@ -418,7 +426,9 @@ window.DATA = {
     // 준비 (T26). max = 재료판 추가 칸 수 (문어 1 + 추가 3, 사용자 결정 2026-10-10)
     prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },
     // 장보기 (T25)
-    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료' },
+    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료 · 오늘 하루', toolTitle: '도구 · 한 번 사면 계속', bought: '✓ 샀음' },
+    // 한꺼번에 넣기 스위치 (T53, 재료 넣기 단계 "모두 완료!" 아래)
+    tools: { massOn: '여섯 알 한꺼번에 ● 켜짐', massOff: '여섯 알 한꺼번에 ○ 꺼짐' },
     // 결과 화면 ① 3일의 기록 (T41). Claude 초안
     result: { title: '3일의 기록', day: '{n}일차', boards: '{n}판', fresh: '새 메뉴', found: '발견!', quiet: '새로 만든 메뉴 없음', pinenut: '잣 꾸러미', keep: '남겼다 → 다음 날 재료로', sell: '팔았다 ({값})', missed: '받지 못했다', book: '숨은 요리', total: '3일 매출', funnyTitle: '3일 중 가장 웃긴 한 접시', aceTitle: '3일 중 에이스 한 접시', funnyDay: '{n}일차 · {손님}의 한 판', next: '클릭해서 기획 노트 보기 ▶' },
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)

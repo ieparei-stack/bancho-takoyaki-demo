@@ -1,9 +1,12 @@
 // 장보기 (T25): 재료 카드를 눌러 산다(다시 누르면 무른다). 산 재료는 오늘 하루 무한. 문어는 기본 재료.
 // 인벤토리 UI 클릭으로 처리 (사용자 결정 2026-10-10). 재료 아이콘(도형)은 재료판·굽기에서도 같이 쓴다.
+// T53: 아래에 "도구" 줄 — 같은 돈으로 사는 인게임 성장(tools.js). 한 번 사면 계속, 그날 산 건 다시 누르면 무름.
 const Shop = (() => {
   // 배치 상수
   const PANEL = { x: 130, y: 70, w: 1020, h: 600 };
-  const CARD = { w: 210, h: 210, gap: 30, top: 150 };
+  const CARD = { w: 210, h: 150, gap: 30, top: 162, rowGap: 12 };
+  const TOOL = { w: 300, h: 74, gap: 20, top: 514 };
+  const EMOJI_FONT = 'Segoe UI Emoji, Apple Color Emoji, Noto Color Emoji, Malgun Gothic, sans-serif';
   const COLS = 4;
   const INK = '#3a2a1e';
   const SUB = '#8a7460';
@@ -12,6 +15,8 @@ const Shop = (() => {
   let cards = [];      // { id, g, bg, badge }
   let moneyText = null;
   let bought = new Set();
+  let tools = [];      // { id, g, bg, badge }
+  let toolsToday = new Set(); // 이번 장보기에서 산 도구 (무를 수 있음)
 
   function el(tag, attrs, parent) {
     return Board.el(tag, attrs, parent);
@@ -80,17 +85,27 @@ const Shop = (() => {
     const ids = Object.keys(CFG.ingredients);
     const rowW = COLS * CARD.w + (COLS - 1) * CARD.gap;
     const x0 = PANEL.x + (PANEL.w - rowW) / 2;
+    const label = (y, str) => { const n = el('text', { x: x0, y, 'font-size': 16, 'font-weight': 700, fill: SUB }, root); n.textContent = str; };
+    label(CARD.top - 10, T.ingTitle || '재료');
     cards = ids.map((id, i) => {
       const x = x0 + (i % COLS) * (CARD.w + CARD.gap);
-      const y = CARD.top + Math.floor(i / COLS) * (CARD.h + CARD.gap - 10);
+      const y = CARD.top + Math.floor(i / COLS) * (CARD.h + CARD.rowGap);
       return card(id, x, y);
     });
+
+    // 도구 줄 (T53)
+    toolsToday = new Set();
+    const tids = Object.keys(CFG.tools || {});
+    const tw = tids.length * TOOL.w + Math.max(0, tids.length - 1) * TOOL.gap;
+    const tx0 = PANEL.x + (PANEL.w - tw) / 2;
+    label(TOOL.top - 10, T.toolTitle || '도구');
+    tools = tids.map((id, i) => toolCard(id, tx0 + i * (TOOL.w + TOOL.gap), TOOL.top));
 
     Reserve.pin(root, Flow.day() - 1); // 오늘 예약 쪽지 (T46)
 
     // 장보기 끝 버튼
     const bx = PANEL.x + PANEL.w / 2;
-    const by = PANEL.y + PANEL.h - 50;
+    const by = PANEL.y + PANEL.h - 38; // 도구 줄 아래 (T53)
     const btn = el('g', { cursor: 'pointer' }, root);
     el('rect', { x: bx - 120, y: by - 28, width: 240, height: 56, rx: 16, fill: '#c0661c' }, btn);
     const bt = el('text', { x: bx, y: by, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 24, 'font-weight': 900, fill: '#fffaf0' }, btn);
@@ -110,14 +125,48 @@ const Shop = (() => {
     const T = CFG.letters.shop;
     const g = el('g', { cursor: ing.base ? 'default' : 'pointer' }, root);
     const bg = el('rect', { x, y, width: CARD.w, height: CARD.h, rx: 16, 'stroke-width': 3 }, g);
-    icon(id, g, x + CARD.w / 2, y + 62, 38);
+    icon(id, g, x + CARD.w / 2, y + 46, 30);
     const t = (yy, str, attrs) => { const n = el('text', { x: x + CARD.w / 2, y: yy, 'text-anchor': 'middle', fill: INK, ...attrs }, g); n.textContent = str; return n; };
-    t(y + 132, ing.name, { 'font-size': 24, 'font-weight': 900 });
-    t(y + 162, ing.base ? `${T.base} · 무료` : `₩${ing.price.toLocaleString('ko-KR')}`, { 'font-size': 20, fill: '#c0661c', 'font-weight': 700 });
-    t(y + 190, ing.tags.join(' · '), { 'font-size': 16, fill: SUB });
+    t(y + 100, ing.name, { 'font-size': 22, 'font-weight': 900 });
+    t(y + 123, ing.base ? `${T.base} · 무료` : `₩${ing.price.toLocaleString('ko-KR')}`, { 'font-size': 18, fill: '#c0661c', 'font-weight': 700 });
+    t(y + 142, ing.tags.join(' · '), { 'font-size': 14, fill: SUB });
     const badge = el('text', { x: x + CARD.w - 12, y: y + 26, 'text-anchor': 'end', 'font-size': 16, 'font-weight': 900, fill: '#5f9e3a' }, g);
     if (!ing.base) g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); toggle(id); });
     return { id, g, bg, badge };
+  }
+
+  // 도구 카드 (T53): 그림 글자 · 이름 · 가격 · 한 줄 설명
+  function toolCard(id, x, y) {
+    const tool = CFG.tools[id];
+    const g = el('g', { cursor: 'pointer' }, root);
+    const bg = el('rect', { x, y, width: TOOL.w, height: TOOL.h, rx: 14, 'stroke-width': 3 }, g);
+    const ic = el('text', { x: x + 36, y: y + TOOL.h / 2 + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 32, 'font-family': EMOJI_FONT }, g);
+    ic.textContent = tool.icon || '🔧';
+    const nm = el('text', { x: x + 70, y: y + 30, 'font-size': 19, 'font-weight': 900, fill: INK }, g);
+    nm.textContent = tool.name;
+    const pr = el('tspan', { dx: 8, 'font-size': 16, fill: '#c0661c', 'font-weight': 700 }, nm);
+    pr.textContent = `₩${tool.price.toLocaleString('ko-KR')}`;
+    const ds = el('text', { x: x + 70, y: y + 55, 'font-size': 13, fill: SUB }, g);
+    ds.textContent = tool.desc || '';
+    const badge = el('text', { x: x + TOOL.w - 12, y: y + 22, 'text-anchor': 'end', 'font-size': 14, 'font-weight': 900, fill: '#5f9e3a' }, g);
+    g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); toggleTool(id); });
+    return { id, g, bg, badge };
+  }
+
+  function toggleTool(id) {
+    if (toolsToday.has(id)) {
+      toolsToday.delete(id);
+      Tools.refund(id);
+      Sfx.flipFail();
+    } else if (Tools.has(id)) {
+      return; // 전에 산 도구
+    } else if (Tools.buy(id)) {
+      toolsToday.add(id);
+      Sfx.coin();
+    } else {
+      Sfx.hmm(); // 돈이 모자람
+    }
+    refresh();
   }
 
   function toggle(id) {
@@ -150,6 +199,14 @@ const Shop = (() => {
       c.bg.setAttribute('stroke', have ? '#5f9e3a' : '#d8c7a6');
       c.g.setAttribute('opacity', afford ? 1 : 0.4);
       c.badge.textContent = ing.base ? T.owned : bought.has(c.id) ? T.today : have ? T.owned : '';
+    }
+    for (const c of tools) {
+      const have = Tools.has(c.id);
+      const afford = have || CFG.tools[c.id].price <= Wallet.money;
+      c.bg.setAttribute('fill', have ? '#eef6e4' : '#fffdf6');
+      c.bg.setAttribute('stroke', have ? '#5f9e3a' : '#d8c7a6');
+      c.g.setAttribute('opacity', afford ? 1 : 0.4);
+      c.badge.textContent = toolsToday.has(c.id) ? (T.bought || '✓ 샀음') : have ? T.owned : '';
     }
   }
 

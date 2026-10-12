@@ -69,10 +69,16 @@ const Sfx = (() => {
   // 박자 소리 세트. beat(c, dest, t, index, isLast) → 예약한 노드 목록
   // C장조 도-미-솔처럼 올라가서 마지막 "탁!"이 해결음처럼 들리게 한다
   const NOTE = { C5: 523.25, E5: 659.25, G5: 783.99, C6: 1046.5 };
+  // i번째 박의 음: 마지막은 높은 도, 그 앞은 박 수에 맞춰 도-미-솔(3박) / 도-솔(2박)
+  function scale(i, last, beats) {
+    if (last) return NOTE.C6;
+    const steps = beats <= 2 ? [NOTE.C5, NOTE.G5] : [NOTE.C5, NOTE.E5, NOTE.G5];
+    return steps[Math.min(i, steps.length - 1)];
+  }
   const SETS = {
-    1: (c, d, t, i, last) => marimba(c, d, t, [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6][Math.min(i, 3)], last), // 마림바 도-미-솔
+    1: (c, d, t, i, last, beats) => marimba(c, d, t, scale(i, last, beats), last), // 마림바 도-미-솔-도 (2박이면 도-솔-도, T53)
     2: (c, d, t, i, last) => (last ? bell(c, d, t, NOTE.C6) : woodblock(c, d, t)),                       // 우드블록 툭툭 + 벨
-    3: (c, d, t, i, last) => bubble(c, d, t, [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6][Math.min(i, 3)] / 2, last), // 물방울 퐁퐁퐁
+    3: (c, d, t, i, last, beats) => bubble(c, d, t, scale(i, last, beats) / 2, last), // 물방울 퐁퐁퐁
   };
 
   // 누르는 동안 깔리는 부드러운 "쭈우…" — 걸러낸 잡음, 대역이 천천히 올라간다
@@ -107,7 +113,7 @@ const Sfx = (() => {
     const scheduled = []; // { t, nodes }
     for (let i = 0; i <= beats; i++) {
       const t = t0 + (T * i) / beats;
-      scheduled.push({ t, nodes: play(c, dest, t, i, i === beats) });
+      scheduled.push({ t, nodes: play(c, dest, t, i, i === beats, beats) });
     }
 
     // 깔리는 소리
@@ -233,7 +239,7 @@ const Sfx = (() => {
   }
 
   // 가게 종 "딩~" (T51 개점 의식) — 금속 배음(1 · 2.76 · 5.4배)이 길게 남는다. v = 세기
-  function bell(v = 1) {
+  function shopBell(v = 1) { // (내부 bell(c, dest, t, freq)과 이름이 겹치지 않게)
     if (!ctx) return;
     const t = ctx.currentTime;
     const f = 1046.5; // C6
@@ -357,7 +363,7 @@ const Sfx = (() => {
     finish,
     plop,
     boxLand,
-    bell,
+    bell: shopBell,
     knob,
     stamp,
     squirt,
