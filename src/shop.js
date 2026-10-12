@@ -16,7 +16,8 @@ const Shop = (() => {
   let moneyText = null;
   let bought = new Set();
   let tools = [];      // { id, g, bg, badge }
-  let toolsToday = new Set(); // 이번 장보기에서 산 도구 (무를 수 있음)
+  let toolsToday = new Set(); // 오늘 산 도구 (무를 수 있음)
+  let shopDay = 0;            // bought·toolsToday가 어느 날 것인가 — 준비에서 장보기로 돌아와도 오늘 산 건 기억 (사용자 2026-10-12)
 
   function el(tag, attrs, parent) {
     return Board.el(tag, attrs, parent);
@@ -79,7 +80,7 @@ const Shop = (() => {
 
   function open(then) {
     const T = CFG.letters.shop;
-    bought = new Set();
+    if (shopDay !== Flow.day()) { shopDay = Flow.day(); bought = new Set(); toolsToday = new Set(); }
     root = el('g', { 'pointer-events': 'all' }, Board.layer('top')); // top 레이어는 pointer-events none — 여기서 다시 켠다
     el('rect', { x: 0, y: 0, width: 1280, height: 720, fill: 'rgba(15,10,8,0.6)', 'pointer-events': 'all' }, root);
     el('rect', { x: PANEL.x, y: PANEL.y, width: PANEL.w, height: PANEL.h, rx: 24, fill: '#fbf3e3', stroke: '#c9b89c', 'stroke-width': 5 }, root);
@@ -100,7 +101,6 @@ const Shop = (() => {
     });
 
     // 도구 줄 (T53)
-    toolsToday = new Set();
     const tids = Object.keys(CFG.tools || {});
     const tw = tids.length * TOOL.w + Math.max(0, tids.length - 1) * TOOL.gap;
     const tx0 = PANEL.x + (PANEL.w - tw) / 2;
@@ -134,7 +134,7 @@ const Shop = (() => {
     icon(id, g, x + CARD.w / 2, y + 46, 30);
     const t = (yy, str, attrs) => { const n = el('text', { x: x + CARD.w / 2, y: yy, 'text-anchor': 'middle', fill: INK, ...attrs }, g); n.textContent = str; return n; };
     t(y + 100, ing.name, { 'font-size': 22, 'font-weight': 900 });
-    t(y + 123, ing.base ? `${T.base} · 무료` : `₩${ing.price.toLocaleString('ko-KR')}`, { 'font-size': 18, fill: '#c0661c', 'font-weight': 700 });
+    t(y + 123, ing.base ? `${T.base} · 0원` : `${ing.price.toLocaleString('ko-KR')}원`, { 'font-size': 18, fill: '#c0661c', 'font-weight': 700 });
     t(y + 142, ing.tags.join(' · '), { 'font-size': 14, fill: SUB });
     const badge = el('text', { x: x + CARD.w - 12, y: y + 26, 'text-anchor': 'end', 'font-size': 16, 'font-weight': 900, fill: '#5f9e3a' }, g);
     if (!ing.base) g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); toggle(id); });
@@ -148,12 +148,15 @@ const Shop = (() => {
     const bg = el('rect', { x, y, width: TOOL.w, height: TOOL.h, rx: 14, 'stroke-width': 3 }, g);
     const ic = el('text', { x: x + 36, y: y + TOOL.h / 2 + 1, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 32, 'font-family': EMOJI_FONT }, g);
     ic.textContent = tool.icon || '🔧';
-    const nm = el('text', { x: x + 70, y: y + 30, 'font-size': 19, 'font-weight': 900, fill: INK }, g);
+    // 이름 / 설명 / 가격 세 줄. 설명이 길면 칸에 맞게 글자를 줄인다
+    const room = TOOL.w - 70 - 10;
+    const nm = el('text', { x: x + 70, y: y + 25, 'font-size': 17, 'font-weight': 900, fill: INK }, g);
     nm.textContent = tool.name;
-    const pr = el('tspan', { dx: 8, 'font-size': 16, fill: '#c0661c', 'font-weight': 700 }, nm);
-    pr.textContent = `₩${tool.price.toLocaleString('ko-KR')}`;
-    const ds = el('text', { x: x + 70, y: y + 55, 'font-size': 13, fill: SUB }, g);
+    const ds = el('text', { x: x + 70, y: y + 45, 'font-size': 13, fill: SUB }, g);
     ds.textContent = tool.desc || '';
+    for (let f = 13; f > 10 && ds.getComputedTextLength() > room; f -= 0.5) ds.setAttribute('font-size', f);
+    const pr = el('text', { x: x + 70, y: y + 64, 'font-size': 15, fill: '#c0661c', 'font-weight': 700 }, g);
+    pr.textContent = `${tool.price.toLocaleString('ko-KR')}원`;
     const badge = el('text', { x: x + TOOL.w - 12, y: y + 22, 'text-anchor': 'end', 'font-size': 14, 'font-weight': 900, fill: '#5f9e3a' }, g);
     g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); toggleTool(id); });
     return { id, g, bg, badge };
@@ -196,7 +199,7 @@ const Shop = (() => {
 
   function refresh() {
     const T = CFG.letters.shop;
-    moneyText.textContent = `돈 ₩${Wallet.money.toLocaleString('ko-KR')}`;
+    moneyText.textContent = `돈 ${Wallet.money.toLocaleString('ko-KR')}원`;
     for (const c of cards) {
       const ing = CFG.ingredients[c.id];
       const have = Pantry.has(c.id);

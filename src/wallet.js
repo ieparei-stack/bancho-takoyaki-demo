@@ -16,7 +16,7 @@ const Wallet = (() => {
   }
 
   function won(n) {
-    return `₩${n.toLocaleString('ko-KR')}`;
+    return `${n.toLocaleString('ko-KR')}원`; // 원은 숫자 뒤 (사용자 2026-10-12)
   }
   function show() {
     text.textContent = `돈 ${won(money)}`;

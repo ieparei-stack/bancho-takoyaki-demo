@@ -14,7 +14,7 @@ const Tools = (() => {
     if (!t || owned.has(id)) return false;
     if (!Wallet.spend(t.price, `${t.name} 구매`)) return false;
     owned.add(id);
-    Log.add({ step: '도구', id, price: t.price, line: `도구 | ${t.name} 구매 ₩${t.price.toLocaleString('ko-KR')}` });
+    Log.add({ step: '도구', id, price: t.price, line: `도구 | ${t.name} 구매 ${t.price.toLocaleString('ko-KR')}원` });
     return true;
   }
 

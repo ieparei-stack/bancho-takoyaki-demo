@@ -78,14 +78,14 @@ const Flow = (() => {
         go('OPEN_BELL');
         return;
       }
-      Prep.open(() => { Tray.set(Prep.chosen()); go('OPEN_BELL'); });
+      Prep.open(() => { Tray.set(Prep.chosen()); go('OPEN_BELL'); }, today().shop ? () => go('SHOP') : null); // 뒤로 = 장보기 (사용자 2026-10-12)
     },
     OPEN_BELL() {
       // 개점 의식 (T51): 가스불 → 종 걸기 → 종 울리기 → "시작!" → 첫 손님
       Scene.setOpen(0); // 밝은 오후
       Ritual.open(() => {
         const cover = blocker();
-        const t = bigText('시작!', 72);
+        const t = bigText('영업 개시', 72); // 사용자 2026-10-12 (시작! → 영업 개시)
         setTimeout(() => {
           t.remove();
           cover.remove();
@@ -150,7 +150,7 @@ const Flow = (() => {
     const kept = Gift.carry(); // 어젯밤 남긴 재료 선물 (T37)
     Pantry.newDay([...(e.items || []), ...kept]); // 오늘 가진 재료 = 기본 재료 + 동봉 (T25) + 남긴 선물
     const parts = [];
-    if (e.money) parts.push(`₩${e.money.toLocaleString('ko-KR')}`);
+    if (e.money) parts.push(`${e.money.toLocaleString('ko-KR')}원`);
     const names = (e.items || []).filter((id) => CFG.ingredients[id]).map((id) => CFG.ingredients[id].name);
     if (names.length) parts.push(`${names.join(' · ')} ${L.items}`);
     const keptNames = kept.filter((id) => !(e.items || []).includes(id)).map((id) => CFG.ingredients[id].name);

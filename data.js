@@ -158,9 +158,9 @@ window.DATA = {
   //   price 제안 — "2일차에 재료 2종 + 강화 1개를 고를 수 있는 정도"(사용자). 1일차 끝 돈 ≈ ₩2,000 + 송금 ₩500
   //   pourFast.pour = 산 뒤의 짜기 박자 (도-솔-도, 박 간격 0.5 s 그대로) / icon 장보기 카드 그림 글자
   tools: {
-    pourFast: { name: '빠른 짜기 병', price: 1500, icon: '⏱', desc: '반죽을 더 빠르게 짤 수 있다', pour: { targetMs: 1000, holdBeats: 2 } },
-    fillAll:  { name: '한꺼번에 집게', price: 1800, icon: '🥢', desc: '재료를 한 번에 넣을 수 있다' },
-    pourRow:  { name: '세 구멍 짜는 병', price: 2000, icon: '🧴', desc: '여러 구멍을 한 번에 짤 수 있다' },
+    pourFast: { name: '고급 반죽 디스펜서', price: 1500, icon: '⏱', desc: '반죽을 빠르게 짤 수 있다', pour: { targetMs: 1000, holdBeats: 2 } },
+    fillAll:  { name: '세 묶음 집게', price: 1800, icon: '🥢', desc: '재료를 한꺼번에 넣을 수 있다' },
+    pourRow:  { name: '세 갈래 디스펜서', price: 2000, icon: '🧴', desc: '여러 구멍에 반죽을 한 번에 부을 수 있다' },
   },
   ingredients: {
     octopus:  { name: '문어',     price: 0,   tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
@@ -266,7 +266,7 @@ window.DATA = {
                  },
                  gift: 'pinenut_pack', giftAlways: true }, // giftAlways: 1일차 밤엔 만족과 상관없이 잣 꾸러미 (T45 사용자)
       // 까마귀 형제 — A 형님(과묵), B 동생(촐싹)
-      crow_a:  { emoji: '🐦‍⬛', name: '까마귀 형님', handle: '@karasu_ani', order: '…예약한 거. 하나.', again: '…하나 더.',
+      crow_a:  { emoji: '🐦‍⬛', name: '까마귀 형', handle: '@karasu_ani', order: '…예약한 거. 하나.', again: '…하나 더.',
                  likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'], gift: 'firefly_pack',
                  lines: {
                    flop: '…이건 못 본 걸로 하지.',
@@ -287,7 +287,7 @@ window.DATA = {
                    best: '최고! 형님, 여기 단골 하자!',
                  } },
       // 너구리 (T40, 3일차): 취향을 말하지 않는다 — 첫 판 반응이 유일한 단서. 맛 이름 대신 "바다", "깊이"로 돌려 말한다 (감칠맛·짭조름, 단맛 싫음)
-      tanuki:  { emoji: '🦝', name: '너구리', handle: '@tanuki_gourmet', order: '…쪽지 봤나. 하나.', again: '…다시. 이번엔 제대로.',
+      tanuki:  { emoji: '🦝', name: '너구리 영감', handle: '@tanuki_gourmet', order: '…쪽지 봤나. 하나.', again: '…다시. 이번엔 제대로.',
                  likes: ['감칠맛', '짭조름'], dislikes: ['단맛'], favorites: ['firefly_scallion'], // T54: 새우파 → 반딧불 타코야키 (사용자)
                  lines: {
                    flop: '…이걸 돈 받고 팔 생각인가.',
@@ -316,7 +316,7 @@ window.DATA = {
   // 선물 (T37, 7단계 인터뷰 2026-10-11): 손님이 떠날 때 그 손님 판 중 하나라도 만족이면 cast[id].gift를 두고 간다(결제와 별개).
   //   밤에 선물마다 [팔기 sell] / [남기기]. ingredient 남기면 다음 날 그 재료를 공짜로 가진다. 값은 기획서 시작값, 문구 Claude 초안
   gifts: {
-    pinenut_pack: { name: '잣 꾸러미',   icon: '🌰', sell: 300, keep: '내일 잣을 공짜로 쓴다', ingredient: 'pinenut' },
+    pinenut_pack: { name: '잣 꾸러미',   icon: '🌰', sell: 100, keep: '내일 사용할 잣을 받았다!', ingredient: 'pinenut' }, // 사용자 2026-10-12: 팔기 300 → 100
     // T54: 까마귀 선물 반짝이 단추 → 반딧불이 오징어 (다음 날 너구리에게 득이 되는 재료, 사용자). 문구 Claude 초안
     firefly_pack: { name: '반딧불이 오징어', icon: '🦑', sell: 400, keep: '내일 반딧불이 오징어를 공짜로 쓴다', ingredient: 'firefly' },
   },
@@ -337,7 +337,7 @@ window.DATA = {
           { who: 'crow_b', text: '나도나도! 난 **시원~한** 거! 형님이랑 같이 간다!' },
         ] },
       { shop: true,  enclosed: { money: 500, items: [] },           guests: [{ id: 'tanuki', orders: 2 }], // 3일차 (T40): 2일차와 같은 규칙
-        reserve: [{ who: 'tanuki', text: '…오후에 간다. 대충 만들 거면 문 닫아 둬.' }] },
+        reserve: [{ who: 'tanuki', text: '오후에 갈게. 문어 말고 다른 바다에서 나는 것도 먹고 싶어... 대충 만들거면 그냥 문 닫아.' }] }, // 사용자 2026-10-12
     ],
     startMoney: 0,       // 1일차 시작 돈. 시작값 (기획서)
     resultDelayMs: 1200, // "오늘 영업 끝!" 뒤 결산 화면까지, ms. 제안
@@ -428,13 +428,13 @@ window.DATA = {
       매콤함: '매운 게', 감칠맛: '감칠맛이', 향긋함: '향긋한 게', 쫄깃함: '쫄깃한 게',
     },
     // 준비 (T26). max = 재료판 추가 칸 수 (문어 1 + 추가 3, 사용자 결정 2026-10-10)
-    prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },
+    prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', back: '◀ 장보기로', max: 3 },
     // 장보기 (T25)
-    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료 · 오늘 하루', toolTitle: '도구 · 한 번 사면 계속', bought: '✓ 샀음' },
+    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음' },
     // 한꺼번에 넣기 스위치 (T53, 재료 넣기 단계 "모두 완료!" 아래)
     tools: { massOn: '여섯 알 한꺼번에 ● 켜짐', massOff: '여섯 알 한꺼번에 ○ 꺼짐' },
-    // 결과 화면 ① 3일의 기록 (T41). Claude 초안
-    result: { title: '3일의 기록', day: '{n}일차', boards: '{n}판', fresh: '새 메뉴', found: '발견!', quiet: '새로 만든 메뉴 없음', pinenut: '잣 꾸러미', keep: '남겼다 → 다음 날 재료로', sell: '팔았다 ({값})', missed: '받지 못했다', book: '숨은 요리', total: '3일 매출', funnyTitle: '3일 중 가장 웃긴 한 접시', aceTitle: '3일 중 에이스 한 접시', funnyDay: '{n}일차 · {손님}의 한 판', next: '클릭해서 기획 노트 보기 ▶' },
+    // 결과 화면 "포장마차 운영 일지" (T41 3일의 기록 → T55). letters.funny는 이제 쓰지 않는다 (베스트 메뉴로 바뀜)
+    result: { title: '포장마차 운영 일지', day: '{n}일차', gifts: '받은 선물', bestTitle: '베스트 메뉴', total: '3일 총 매출', none: '없음' }, // T55 사용자 2026-10-12
     // 가장 웃긴 실패 한 줄 (후네 통째로 보여주며)
     funny: {
       noOcto: '문어 실종 사건',

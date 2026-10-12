@@ -55,9 +55,9 @@ const Config = (() => {
     //   price 제안 — "2일차에 재료 2종 + 강화 1개를 고를 수 있는 정도"(사용자). 1일차 끝 돈 ≈ ₩2,000 + 송금 ₩500
     //   pourFast.pour = 산 뒤의 짜기 박자 (도-솔-도, 박 간격 0.5 s 그대로) / icon 장보기 카드 그림 글자
     tools: {
-      pourFast: { name: '빠른 짜기 병', price: 1500, icon: '⏱', desc: '반죽을 더 빠르게 짤 수 있다', pour: { targetMs: 1000, holdBeats: 2 } },
-      fillAll:  { name: '한꺼번에 집게', price: 1800, icon: '🥢', desc: '재료를 한 번에 넣을 수 있다' },
-      pourRow:  { name: '세 구멍 짜는 병', price: 2000, icon: '🧴', desc: '여러 구멍을 한 번에 짤 수 있다' },
+      pourFast: { name: '고급 반죽 디스펜서', price: 1500, icon: '⏱', desc: '반죽을 빠르게 짤 수 있다', pour: { targetMs: 1000, holdBeats: 2 } },
+      fillAll:  { name: '세 묶음 집게', price: 1800, icon: '🥢', desc: '재료를 한꺼번에 넣을 수 있다' },
+      pourRow:  { name: '세 갈래 디스펜서', price: 2000, icon: '🧴', desc: '여러 구멍에 반죽을 한 번에 부을 수 있다' },
     },
     ingredients: {
       octopus: { name: '문어', price: 0, tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
@@ -87,7 +87,7 @@ const Config = (() => {
       giftMs: 900,
       cast: {
         sparrow: { emoji: '🐦', name: '참새', order: '타코야키 하나 줘~ 짹!', again: '한 판 더 줄래? 짹!', likes: ['고소함', '짭조름'], dislikes: ['매콤함'], favorites: ['tako_pinenut'] },
-        crow_a: { emoji: '🐦‍⬛', name: '까마귀 형님', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
+        crow_a: { emoji: '🐦‍⬛', name: '까마귀 형', order: '까악, 하나 부탁해.', again: '하나 더. 까악.', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['tako_pear'] },
         crow_b: { emoji: '🐦‍⬛', name: '까마귀 동생', order: '나도 하나! 까악!', again: '하나 더! 까악!', likes: ['단맛', '시원함'], dislikes: ['매콤함'], favorites: ['pear_pinenut'] },
       },
       value: { like: 20, dislike: 40, favorite: 30, faceMult: { perfect: 1.2, tasty: 1.0, meh: 0.7, raw: 0, burnt: 0, blank: 0 } },
@@ -127,10 +127,10 @@ const Config = (() => {
       faceName: { perfect: '완벽', tasty: '맛있음', meh: '어설픔', raw: '덜 익음', burnt: '탐', blank: '문어 없음' },
       menu: { title: '메뉴', fresh: '새 메뉴!' },
       tagSay: { 고소함: '고소한 게', 짭조름: '짭짤한 게', 단맛: '단 게', 시원함: '시원한 게', 새콤함: '새콤한 게', 매콤함: '매운 게', 감칠맛: '감칠맛이', 향긋함: '향긋한 게', 쫄깃함: '쫄깃한 게' },
-      prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', max: 3 },
-      shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료 · 오늘 하루', toolTitle: '도구 · 한 번 사면 계속', bought: '✓ 샀음' },
+      prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', back: '◀ 장보기로', max: 3 },
+      shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음' },
       tools: { massOn: '여섯 알 한꺼번에 ● 켜짐', massOff: '여섯 알 한꺼번에 ○ 꺼짐' },
-      result: { title: '3일의 기록', day: '{n}일차', boards: '{n}판', fresh: '새 메뉴', found: '발견!', quiet: '새로 만든 메뉴 없음', pinenut: '잣 꾸러미', keep: '남겼다 → 다음 날 재료로', sell: '팔았다 ({값})', missed: '받지 못했다', book: '숨은 요리', total: '3일 매출', funnyTitle: '3일 중 가장 웃긴 한 접시', aceTitle: '3일 중 에이스 한 접시', funnyDay: '{n}일차 · {손님}의 한 판', next: '클릭해서 기획 노트 보기 ▶' },
+      result: { title: '포장마차 운영 일지', day: '{n}일차', gifts: '받은 선물', bestTitle: '베스트 메뉴', total: '3일 총 매출', none: '없음' }, // T55 사용자 2026-10-12
       funny: {
         noOcto: '문어 실종 사건', burnt: '숯불 특선 (주문한 적 없음)', raw: '반숙 타코야키, 신메뉴인가요?',
         sauce: '소스 온천에 몸 담근 타코야키', meh: '개성 넘치는 한 접시', ace: '이 정도면 사장보다 낫다',

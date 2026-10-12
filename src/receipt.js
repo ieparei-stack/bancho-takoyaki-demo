@@ -16,7 +16,7 @@ const Receipt = (() => {
   const KOR_N = ['', '한', '두', '세', '네', '다섯', '여섯'];
 
   function won(n) {
-    return `₩${n.toLocaleString('ko-KR')}`;
+    return `${n.toLocaleString('ko-KR')}원`; // 원은 숫자 뒤 (사용자 2026-10-12)
   }
 
   // 글자 수로 줄 나누기 (SVG text는 자동 줄바꿈이 없다)

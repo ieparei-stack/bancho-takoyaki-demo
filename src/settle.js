@@ -24,7 +24,7 @@ const Settle = (() => {
   const STAMP_TILT = [-11, 7, -5, 9];                // 날마다 조금씩 다르게 기울어진 도장
 
   function won(n) {
-    return `₩${Math.round(n).toLocaleString('ko-KR')}`;
+    return `${Math.round(n).toLocaleString('ko-KR')}원`; // 원은 숫자 뒤
   }
 
   // 오늘 기록 요약 (검증·로그용으로도 쓴다)

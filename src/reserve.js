@@ -40,9 +40,11 @@ const Reserve = (() => {
     return out;
   }
 
-  // 쪽지 한 장 (x, y = 왼쪽 위). scale로 크기 조절
+  // 쪽지 한 장 (x, y = 왼쪽 위). 글이 길면 아래로 늘어난다. 실제 높이를 돌려준다
   function note(parent, r, k, x, y, w, h, size) {
     const c = CFG.customers.cast[r.who];
+    const lines = wrap(r.text, Math.floor(w / (size * 1.02)));
+    h = Math.max(h, size * 3.7 + (lines.length - 1) * size * 1.45 + size * 1.1);
     const tilt = [-3, 2.5, -1.5][k % 3];
     const g = Board.el('g', { transform: `rotate(${tilt} ${x + w / 2} ${y + h / 2})` }, parent);
     Board.el('rect', { x: x + 3, y: y + 4, width: w, height: h, rx: 4, fill: '#000000', opacity: 0.25 }, g);
@@ -50,7 +52,8 @@ const Reserve = (() => {
     Board.el('circle', { cx: x + w / 2, cy: y + 10, r: size * 0.32, fill: '#c0392b', stroke: '#7a2018', 'stroke-width': 1.5 }, g); // 압정
     const t = (tx, ty, str, attrs) => { const n = Board.el('text', { x: tx, y: ty, fill: '#3a2a1e', ...attrs }, g); n.textContent = str; return n; };
     t(x + 14, y + size * 2.2, `${c.emoji} ${c.name}`, { 'font-size': size * 1.05, 'font-weight': 900, 'font-family': EMOJI_FONT });
-    wrap(r.text, Math.floor(w / (size * 1.02))).forEach((ln, i) => Board.rich(t(x + 14, y + size * 3.7 + i * size * 1.45, '', { 'font-size': size }), ln)); // "**힌트**" 강조 (T47)
+    lines.forEach((ln, i) => Board.rich(t(x + 14, y + size * 3.7 + i * size * 1.45, '', { 'font-size': size }), ln)); // "**힌트**" 강조 (T47)
+    return h;
   }
 
   // ── 코르크 메모판 (T52) ─────────────────────────────────
@@ -177,9 +180,10 @@ const Reserve = (() => {
     g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); g.remove(); open = false; then(); }, { once: true });
   }
 
-  // 장보기 화면 옆 작은 쪽지 (그날 예약 다시 보기)
+  // 장보기 화면 옆 작은 쪽지 (그날 예약 다시 보기) — 쪽지 높이만큼 아래로 쌓는다
   function pin(parent, dayIdx) {
-    list(dayIdx).forEach((r, k) => note(parent, r, k, PIN.x, PIN.y + k * (PIN.h + PIN.gap), PIN.w, PIN.h, 13));
+    let y = PIN.y;
+    list(dayIdx).forEach((r, k) => { y += note(parent, r, k, PIN.x, y, PIN.w, PIN.h, 13) + PIN.gap; });
   }
 
   return { init, setDay, morning, show, pin, state: () => ({ day: dayNow, read, gate: !!gate, open }) };

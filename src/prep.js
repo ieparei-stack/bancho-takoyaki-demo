@@ -15,7 +15,8 @@ const Prep = (() => {
     return Board.el(tag, attrs, parent);
   }
 
-  function open(then) {
+  // back: 장보기로 돌아가기 (사용자 2026-10-12 — 다시 재료를 살 수 있게). 장보기가 없는 날은 없음
+  function open(then, back) {
     const T = CFG.letters.prep;
     picked = [];
     root = el('g', { 'pointer-events': 'all' }, Board.layer('top')); // top 레이어는 pointer-events none
@@ -49,6 +50,19 @@ const Prep = (() => {
       Log.add({ step: '준비', items: ['octopus', ...picked], line: `준비 | 재료판: ${names}` });
       then();
     }, { once: true });
+    if (back) {
+      const kx = PANEL.x + 150;
+      const kb = el('g', { cursor: 'pointer' }, root);
+      el('rect', { x: kx - 110, y: by - 28, width: 220, height: 56, rx: 16, fill: '#fffaf0', stroke: '#c0661c', 'stroke-width': 3 }, kb);
+      const kt = el('text', { x: kx, y: by, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 22, 'font-weight': 900, fill: '#c0661c' }, kb);
+      kt.textContent = T.back || '◀ 장보기로';
+      kb.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        root.remove();
+        Log.add({ step: '준비', line: '준비 → 장보기로 돌아감' });
+        back();
+      }, { once: true });
+    }
     refresh();
   }
 

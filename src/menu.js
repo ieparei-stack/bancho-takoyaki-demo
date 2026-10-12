@@ -61,7 +61,7 @@ const Menu = (() => {
       const n = Board.el('text', { x: BOARD.x + 14, y, 'font-size': 15, fill: color }, board);
       n.textContent = CFG.menus[id].name;
       const p = Board.el('text', { x: BOARD.x + BOARD.w - 14, y, 'text-anchor': 'end', 'font-size': 15, fill: color }, board);
-      p.textContent = `₩${CFG.menus[id].price}`;
+      p.textContent = `${CFG.menus[id].price}원`;
     });
     if (fresh) setTimeout(() => draw(), 1500); // 새 줄은 잠깐 노랗게
   }

@@ -9,7 +9,7 @@ const Customer = (() => {
   const WALK_MS = 500;
   const BUBBLE = { x: 640, y: 40, w: 230, h: 60 };
   const EMOJI_SIZE = 84;
-  const POP_MS = 900;                   // "+₩" 팝업
+  const POP_MS = 900;                   // "+N원" 팝업
   const FAIL = ['raw', 'burnt', 'blank'];
 
   let g = null;        // 손님 그룹 (이모지)
@@ -55,7 +55,7 @@ const Customer = (() => {
   }
 
   function won(n) {
-    return `₩${n.toLocaleString('ko-KR')}`;
+    return `${n.toLocaleString('ko-KR')}원`; // 원은 숫자 뒤 (사용자 2026-10-12)
   }
 
   // 반응 고르기 (T29, 위에서부터 처음 맞는 것). balls = Menu.price 결과 + face

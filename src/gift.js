@@ -10,7 +10,7 @@ const Gift = (() => {
   let carry = [];   // 남긴 재료 선물 → 다음 날 재료 id
 
   function won(n) {
-    return `₩${n.toLocaleString('ko-KR')}`;
+    return `${n.toLocaleString('ko-KR')}원`; // 원은 숫자 뒤 (사용자 2026-10-12)
   }
   function L() {
     return CFG.letters.gift || {};
