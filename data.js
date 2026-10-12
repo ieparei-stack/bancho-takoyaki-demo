@@ -162,16 +162,18 @@ window.DATA = {
     fillAll:  { name: '세 묶음 집게', price: 1800, icon: '🥢', desc: '재료를 한꺼번에 넣을 수 있다' },
     pourRow:  { name: '세 갈래 디스펜서', price: 2000, icon: '🧴', desc: '여러 구멍에 반죽을 한 번에 부을 수 있다' },
   },
+  //   day = 장보기에 처음 들어오는 일차 / by = 들여 놓게 해 준 손님 (T56, 사용자 2026-10-12: 손님이 다음 날 장보기를 연다. 무조건)
+  //     참새 → 잣·배, 까마귀 → 새우·반딧불이 오징어. 무·파·생강절임은 2일차부터 기본. 들어온 날 장보기 카드에 NEW + "○○ 소개"
   ingredients: {
     octopus:  { name: '문어',     price: 0,   tags: ['쫄깃함', '짭조름'], flipWindow: 1.0, color: '#b9475a', base: true },
-    pinenut:  { name: '잣',       price: 180, tags: ['고소함'],           flipWindow: 0.6, color: '#efe0a8' },
-    pear:     { name: '배',       price: 150, tags: ['단맛', '시원함'],   flipWindow: 1.0, color: '#d6e89a' },
+    pinenut:  { name: '잣',       price: 180, tags: ['고소함'],           flipWindow: 0.6, color: '#efe0a8', day: 2, by: 'sparrow' },
+    pear:     { name: '배',       price: 150, tags: ['단맛', '시원함'],   flipWindow: 1.0, color: '#d6e89a', day: 2, by: 'sparrow' },
     // 반딧불이 오징어 (T54, 사용자 2026-10-12): 사과 대신. 까마귀가 너구리 몫으로 선물로도 준다. 맛은 평범하게 바다 쪽(감칠맛·짭조름), 가격 제안
-    firefly:  { name: '반딧불이 오징어', price: 220, tags: ['감칠맛', '짭조름'], flipWindow: 1.0, color: '#4a6fd6' },
-    radish:   { name: '무',       price: 80,  tags: ['시원함'],           flipWindow: 1.0, color: '#f6f2e6' },
-    shrimp:   { name: '새우',     price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b' },
-    scallion: { name: '파',       price: 60,  tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a' },
-    ginger:   { name: '생강절임', price: 80,  tags: ['새콤함', '매콤함'], flipWindow: 1.0, color: '#ef8aa8' },
+    firefly:  { name: '반딧불이 오징어', price: 220, tags: ['감칠맛', '짭조름'], flipWindow: 1.0, color: '#4a6fd6', day: 3, by: 'crow_a' },
+    radish:   { name: '무',       price: 80,  tags: ['시원함'],           flipWindow: 1.0, color: '#f6f2e6', day: 2 },
+    shrimp:   { name: '새우',     price: 200, tags: ['감칠맛', '쫄깃함'], flipWindow: 0.8, color: '#f08a4b', day: 3, by: 'crow_a' },
+    scallion: { name: '파',       price: 60,  tags: ['향긋함', '감칠맛'], flipWindow: 1.0, color: '#6cb04a', day: 2 },
+    ginger:   { name: '생강절임', price: 80,  tags: ['새콤함', '매콤함'], flipWindow: 1.0, color: '#ef8aa8', day: 2 },
   },
   // 화자 (T23): 이름 · 색 · 아이콘 기호. 손님은 customers.cast의 emoji·name을 쓴다. icon에 이미지를 넣으면 기호 대신 (9단계)
   //   반쵸는 짧은 반응만 ("…", "음.", "?") — 대사 줄의 mark로 표정 글자를 바꾼다
@@ -204,6 +206,7 @@ window.DATA = {
       { who: 'sparrow', text: '아, 내일은 까마귀들이 올 거야.\n입맛이 참… 까마귀답다고 해야 하나.' },
       { who: 'sparrow', text: '반짝이는 거라면 사족을 못 쓰고… 지난가을엔\n**배** 과수원에 하도 들락날락해서 농부가 울었대.' },
       { who: 'sparrow', text: '아마 내일 아침에 쪽지부터 올걸?\n까마귀들은 예약 없이는 안 움직이거든~' },
+      { who: 'sparrow', text: '아 참, 시장 아저씨한테 **잣**이랑 **배** 좀 들여 놓으라고 해 뒀어.\n장 볼 때 찾아봐~ 고맙단 말은 됐고!' }, // T56 입고 (Claude 초안)
       { who: 'bancho', text: '음.', mark: '음.' },
     ],
     night2: [
@@ -211,6 +214,7 @@ window.DATA = {
       { who: 'crow_a', text: '…다 들린다.' },
       { who: 'crow_a', text: '내일 오는 놈은… 까다롭다.\n뭘 좋아하는지 물어봐도 대답을 안 해.' },
       { who: 'crow_b', text: '맞아맞아. 대신 먹고 나서는 꼭 한마디씩 투덜대더라~' },
+      { who: 'crow_a', text: '…항구 쪽 놈들한테 말해 뒀다.\n내일부터 시장에 **새우**랑 **반딧불이 오징어**가 들어올 거다.' }, // T56 입고 (Claude 초안)
       { who: 'bancho', text: '…', mark: '…' },
     ],
     // 3일차 밤 = 장인의 편지 (T40, 8단계 인터뷰). 문구는 사용자가 직접 작성 — 지금은 기획서 문구를 자리로
@@ -430,7 +434,8 @@ window.DATA = {
     // 준비 (T26). max = 재료판 추가 칸 수 (문어 1 + 추가 3, 사용자 결정 2026-10-10)
     prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', back: '◀ 장보기로', max: 3 },
     // 장보기 (T25)
-    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음' },
+    shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음',
+            fresh: 'NEW', by: '{손님}\n소개' }, // T56: 오늘 처음 들어온 재료 배지 / 들여 놓게 해 준 손님 (\n = 줄바꿈)
     // 한꺼번에 넣기 스위치 (T53, 재료 넣기 단계 "모두 완료!" 아래)
     tools: { massOn: '여섯 알 한꺼번에 ● 켜짐', massOff: '여섯 알 한꺼번에 ○ 꺼짐' },
     // 결과 화면 "포장마차 운영 일지" (T41 3일의 기록 → T55). letters.funny는 이제 쓰지 않는다 (베스트 메뉴로 바뀜)

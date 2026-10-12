@@ -89,7 +89,7 @@ const Shop = (() => {
     moneyText = el('text', { x: PANEL.x + PANEL.w - 100, y: PANEL.y + 52, // 오른쪽 위는 예약 쪽지 자리 (T46)
       'text-anchor': 'end', 'font-size': 28, 'font-weight': 700, fill: '#c0661c' }, root);
 
-    const ids = Object.keys(CFG.ingredients);
+    const ids = Object.keys(CFG.ingredients).filter((id) => (CFG.ingredients[id].day || 1) <= Flow.day()); // 들어온 재료만 (T56)
     const rowW = COLS * CARD.w + (COLS - 1) * CARD.gap;
     const x0 = PANEL.x + (PANEL.w - rowW) / 2;
     const label = (y, str) => { const n = el('text', { x: x0, y, 'font-size': 16, 'font-weight': 700, fill: SUB }, root); n.textContent = str; };
@@ -137,8 +137,24 @@ const Shop = (() => {
     t(y + 123, ing.base ? `${T.base} · 0원` : `${ing.price.toLocaleString('ko-KR')}원`, { 'font-size': 18, fill: '#c0661c', 'font-weight': 700 });
     t(y + 142, ing.tags.join(' · '), { 'font-size': 14, fill: SUB });
     const badge = el('text', { x: x + CARD.w - 12, y: y + 26, 'text-anchor': 'end', 'font-size': 16, 'font-weight': 900, fill: '#5f9e3a' }, g);
+    if (ing.day === Flow.day()) fresh(g, ing, x, y); // 오늘 처음 들어온 재료 (T56)
     if (!ing.base) g.addEventListener('pointerdown', (e) => { e.stopPropagation(); Sfx.unlock(); toggle(id); });
     return { id, g, bg, badge };
+  }
+
+  // 왼쪽 위 "NEW" 띠 + 아래에 들여 놓게 해 준 손님 (T56). 오른쪽 위는 ✓ 배지 자리, 가운데는 아이콘 자리라 왼쪽 위 구석에
+  function fresh(g, ing, x, y) {
+    const T = CFG.letters.shop;
+    el('rect', { x: x + 10, y: y + 10, width: 48, height: 22, rx: 11, fill: '#d8433a' }, g);
+    const t = el('text', { x: x + 34, y: y + 21, 'text-anchor': 'middle', 'dominant-baseline': 'central', 'font-size': 13, 'font-weight': 900, fill: '#fffaf0' }, g);
+    t.textContent = T.fresh || 'NEW';
+    const who = ing.by && CFG.customers.cast[ing.by];
+    if (ing.by && !who) Config.warn(`재료 "${ing.name}"의 by 손님 "${ing.by}"가 customers.cast에 없습니다`);
+    if (!who) return;
+    String(T.by || '{손님} 소개').replace('{손님}', who.name).split('\n').forEach((ln, i) => {
+      const n = el('text', { x: x + 12, y: y + 50 + i * 15, 'font-size': 12, 'font-weight': 700, fill: '#b0503a' }, g);
+      n.textContent = ln;
+    });
   }
 
   // 도구 카드 (T53): 그림 글자 · 이름 · 가격 · 한 줄 설명

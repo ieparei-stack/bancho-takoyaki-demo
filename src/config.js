@@ -128,7 +128,7 @@ const Config = (() => {
       menu: { title: '메뉴', fresh: '새 메뉴!' },
       tagSay: { 고소함: '고소한 게', 짭조름: '짭짤한 게', 단맛: '단 게', 시원함: '시원한 게', 새콤함: '새콤한 게', 매콤함: '매운 게', 감칠맛: '감칠맛이', 향긋함: '향긋한 게', 쫄깃함: '쫄깃한 게' },
       prep: { title: '준비', hint: '오늘 쓸 재료를 3개까지 고르세요', none: '오늘은 문어만', start: '영업 시작 ▶', back: '◀ 장보기로', max: 3 },
-      shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음' },
+      shop: { title: '장보기', done: '장보기 끝 ▶', owned: '보유', today: '✓ 오늘 씀', base: '기본 재료', ingTitle: '재료', toolTitle: '도구', bought: '✓ 샀음', fresh: 'NEW', by: '{손님}\n소개' },
       tools: { massOn: '여섯 알 한꺼번에 ● 켜짐', massOff: '여섯 알 한꺼번에 ○ 꺼짐' },
       result: { title: '포장마차 운영 일지', day: '{n}일차', gifts: '받은 선물', bestTitle: '베스트 메뉴', total: '3일 총 매출', none: '없음' }, // T55 사용자 2026-10-12
       funny: {
