@@ -1,13 +1,12 @@
 // 하루 흐름 상태 머신 (T21, SPEC 2절). 모든 화면 전환은 이 상태 사이에서만 일어난다.
-// LETTER → SHOP → PREP → OPEN_BELL → ORDER → COOK → REACTION → (다음 주문 | DAY_END_TALK) → GIFT_CHOICE → 다음 날 | DEMO_END
+// LETTER → SHOP → PREP → OPEN_BELL(개점 의식) → ORDER → COOK → REACTION → (다음 주문 | CLOSE(마감 의식) → DAY_END_TALK) → GIFT_CHOICE → 다음 날 | DEMO_END
 // 아직 내용이 없는 상태는 "무엇을 할 자리인지" 보여주는 빈 패널(클릭하면 넘어감)이다. 일차 구성은 data.js day.days.
 const Flow = (() => {
   const NAME = {
-    TITLE: '타이틀', LETTER: '편지', SHOP: '장보기', PREP: '준비', OPEN_BELL: '종', ORDER: '주문', COOK: '굽기',
-    REACTION: '반응', DAY_END_TALK: '밤 대화', GIFT_CHOICE: '선물', DEMO_END: '데모 끝',
+    TITLE: '타이틀', LETTER: '편지', SHOP: '장보기', PREP: '준비', OPEN_BELL: '개점', ORDER: '주문', COOK: '굽기',
+    REACTION: '반응', CLOSE: '마감', DAY_END_TALK: '밤 대화', GIFT_CHOICE: '선물', DEMO_END: '데모 끝',
   };
   const CARD_MS = 1000;   // 일차 카드
-  const BELL_MS = 1000;   // 종
   const PANEL = { x: 290, y: 200, w: 700, h: 300 };
 
   let state = null;
@@ -29,16 +28,22 @@ const Flow = (() => {
     return days()[dayIdx];
   }
 
-  // 상태 → 배경 시간대 (T22, 제안)
+  // 상태 → 배경 시간대 (T22, 제안). 영업 중(null)은 건넨 판 수로 흐른다 — Scene.setOpen (T51)
   const TIME = {
     TITLE: 'morning', LETTER: 'morning', SHOP: 'morning', PREP: 'morning',
-    OPEN_BELL: 'open', ORDER: 'open', COOK: 'open', REACTION: 'open',
+    OPEN_BELL: null, ORDER: null, COOK: null, REACTION: null, CLOSE: null,
     DAY_END_TALK: 'night', GIFT_CHOICE: 'night', DEMO_END: 'night',
   };
 
+  // 오늘 영업 진행 0~1 = 오늘 건넨 판 수 / 오늘 전체 판 수
+  function progress() {
+    const total = (today().guests || []).reduce((s, q) => s + (q.orders || 0), 0) || 1;
+    return Math.min(1, (round() - 1) / total);
+  }
+
   function go(next) {
     state = next;
-    Scene.setTime(TIME[state]);
+    if (TIME[state]) Scene.setTime(TIME[state]);
     hud.textContent = `${dayIdx + 1}일차 · ${NAME[state]}`;
     Log.add({ step: '흐름', day: dayIdx + 1, state, line: `── ${dayIdx + 1}일차 · ${state}` });
     Discover.onState(state); // 굽는 동안 도감 버튼 숨김 (T39)
@@ -72,19 +77,22 @@ const Flow = (() => {
       Prep.open(() => { Tray.set(Prep.chosen()); go('OPEN_BELL'); });
     },
     OPEN_BELL() {
-      const cover = blocker();
-      const t = bigText('시작!', 72); // 영업 시작 (T47 사용자: 띵띵 → 시작!)
-      Sfx.finish(); // 종소리 자리 (9단계에서 다듬기)
-      setTimeout(() => {
-        t.remove();
-        cover.remove();
-        queue = today().guests.filter((q) => {
-          if (CFG.customers.cast[q.id]) return true;
-          Config.warn(`day.days[${dayIdx}]의 손님 "${q.id}"가 customers.cast에 없어 건너뜁니다`);
-          return false;
-        }).map((q) => ({ ...q }));
-        nextGuest();
-      }, BELL_MS);
+      // 개점 의식 (T51): 가스불 → 종 걸기 → 종 울리기 → "시작!" → 첫 손님
+      Scene.setOpen(0); // 밝은 오후
+      Ritual.open(() => {
+        const cover = blocker();
+        const t = bigText('시작!', 72);
+        setTimeout(() => {
+          t.remove();
+          cover.remove();
+          queue = today().guests.filter((q) => {
+            if (CFG.customers.cast[q.id]) return true;
+            Config.warn(`day.days[${dayIdx}]의 손님 "${q.id}"가 customers.cast에 없어 건너뜁니다`);
+            return false;
+          }).map((q) => ({ ...q }));
+          nextGuest();
+        }, CFG.timing.ritual.startMs); // 종을 울린 뒤 "시작!" 글자
+      });
     },
     ORDER() {
       if (Stage.finished()) Pour.newRound(); // 앞 손님 판을 비운다
@@ -105,6 +113,13 @@ const Flow = (() => {
         const found = Discover.check(rec);
         const recipes = (rec.fresh || []).filter((id) => !CFG.menus[id].hidden);
         Discover.card([...found, ...recipes], () => scene(rec, () => setTimeout(reacted, CFG.customers.receiptGapMs)));
+      });
+    },
+    CLOSE() {
+      // 마감 의식 (T51): 가스불 끄기 → 종 내리기 → 밤이 내려앉은 뒤 영업 일지
+      Ritual.close(() => {
+        Scene.setTime('night');
+        setTimeout(() => go('DAY_END_TALK'), CFG.timing.ritual.nightMs);
       });
     },
     DAY_END_TALK() {
@@ -180,6 +195,7 @@ const Flow = (() => {
 
   function beginDay(i) {
     dayIdx = i;
+    Ritual.reset(); // 가스 꺼짐, 종은 작업대 (T51)
     const cover = blocker();
     const t = bigText(`${i + 1}일차`, 96);
     setTimeout(() => { t.remove(); cover.remove(); go('LETTER'); }, CARD_MS);
@@ -187,7 +203,7 @@ const Flow = (() => {
 
   function nextGuest() {
     const q = queue.shift();
-    if (!q) { go('DAY_END_TALK'); return; }
+    if (!q) { go('CLOSE'); return; }
     guest = { id: q.id, ...CFG.customers.cast[q.id] };
     ordersLeft = q.orders;
     go('ORDER');
@@ -196,6 +212,7 @@ const Flow = (() => {
   // 손님이 후네를 받았다 (Customer.serve가 부른다)
   function served() {
     Hint.hide();
+    Scene.setOpen(progress()); // 판을 건넬 때마다 하늘이 한 칸 저문다 (T51)
     go('REACTION');
   }
 

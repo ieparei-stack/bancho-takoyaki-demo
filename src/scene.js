@@ -1,5 +1,5 @@
 // 배경 (T22): 도형으로 그린 포장마차. 하늘·골목 → 천막·노렌·등불 → (손님) → 카운터 앞턱 → 작업대 위 불판.
-// 시간대(아침 / 영업 / 밤)는 Flow 상태에 맞춰 0.8 s 동안 섞여 바뀐다. 색은 data.js scene.
+// 시간대(아침 / 영업: 오후→해 질 녘→저녁 / 밤)는 Flow 상태와 건넨 판 수에 맞춰 섞여 바뀐다 (T51). 색은 data.js scene.
 // 9단계: data.js art.background에 이미지(경로 또는 data URI)가 있으면 도형 대신 그 이미지 한 장을 쓴다.
 const Scene = (() => {
   // 배치 상수 (1280×720)
@@ -124,40 +124,93 @@ const Scene = (() => {
   }
 
   // ── 시간대 ──────────────────────────────────────────────
+  // 아침(morning) → 영업(open: 오후 afternoon → 해 질 녘 dusk → 저녁 evening, 판을 건넬 때마다) → 밤(night) (T51)
+  // 제등은 하나씩 켜진다 (lampOn), 가스불은 시간대와 따로 켜고 끈다 (setGas — 개점·마감 의식)
 
-  let blend = null;   // { from, to, t0 }
+  let blend = null;     // { from, to, t0, ms }
+  let lampOn = [];      // 제등마다 지금 밝기 0~1
+  let lampTo = [];      // 제등마다 목표
+  let gasNow = 0;       // 가스불 세기 0~1
+  let gasTo = 0;
+  let last = 0;         // 지난 프레임 시각
 
+  const COLOR_KEYS = ['skyTop', 'skyBottom', 'city'];
+  const NUM_KEYS = ['lamp', 'dark'];
+
+  function mixTime(a, b, u) {
+    const out = {};
+    for (const k of COLOR_KEYS) out[k] = mix(a[k], b[k], u);
+    for (const k of NUM_KEYS) out[k] = a[k] + (b[k] - a[k]) * u;
+    return out;
+  }
+
+  function blendTo(to, ms = BLEND_MS) {
+    blend = { from: { ...now }, to, t0: performance.now(), ms };
+    wake();
+  }
+
+  function wake() {
+    if (!raf) { last = performance.now(); raf = requestAnimationFrame(loop); }
+  }
+
+  // 아침·밤 (영업 중은 setOpen)
   function setTime(next) {
     if (next === time) return;
     time = next;
-    paint(performance.now()); // 가스불 켜고 끄기를 바로
-    blend = { from: { ...now }, to: CFG.scene.times[next], t0: performance.now() };
-    if (!raf) raf = requestAnimationFrame(loop);
+    blendTo(CFG.scene.times[next]);
+    lampTo = LAMPS.map(() => (next === 'night' ? 1 : 0)); // 밤엔 제등이 켜진 채, 아침엔 꺼짐
   }
 
-  // 섞는 동안, 그리고 등불이 켜져 있는 동안(흔들림) 계속 그린다
+  // 영업 진행 u (0 = 막 연 오후, 1 = 마지막 판을 건넨 저녁). 판을 건넬 때마다 Flow가 부른다
+  function setOpen(u) {
+    const T = CFG.scene.times;
+    const R = CFG.timing.ritual;
+    u = Math.max(0, Math.min(1, u));
+    time = 'open';
+    const to = u <= 0.5 ? mixTime(T.afternoon, T.dusk, u / 0.5) : mixTime(T.dusk, T.evening, (u - 0.5) / 0.5);
+    blendTo(to, R.blendMs);
+    lampTo = LAMPS.map((_, i) => (u >= R.lampAt[i] ? 1 : 0));
+  }
+
+  // 가스불 켜기·끄기 (개점·마감 의식)
+  function setGas(on) {
+    gasTo = on ? 1 : 0;
+    wake();
+  }
+
+  // 섞는 동안, 제등이 켜져 있는 동안(흔들림), 가스불이 있는 동안 계속 그린다
   function loop(t) {
     raf = 0;
+    const dt = Math.min(0.1, (t - last) / 1000);
+    last = t;
     if (blend) {
-      const u = Math.min(1, (t - blend.t0) / BLEND_MS);
-      for (const k of ['skyTop', 'skyBottom', 'city']) now[k] = mix(blend.from[k], blend.to[k], u);
-      for (const k of ['lamp', 'dark']) now[k] = blend.from[k] + (blend.to[k] - blend.from[k]) * u;
+      const u = Math.min(1, (t - blend.t0) / blend.ms);
+      Object.assign(now, mixTime(blend.from, blend.to, u));
       if (u >= 1) blend = null;
     }
+    // 제등 하나씩: 켜질 땐 0.6 s, 꺼질 땐 0.8 s
+    lampOn = LAMPS.map((_, i) => {
+      const cur = lampOn[i] || 0;
+      const to = lampTo[i] || 0;
+      if (cur < to) { if (cur === 0) Sfx.tick(); return Math.min(to, cur + dt / 0.6); }
+      return Math.max(to, cur - dt / 0.8);
+    });
+    gasNow = gasNow < gasTo ? Math.min(gasTo, gasNow + dt / 0.35) : Math.max(gasTo, gasNow - dt / 0.5);
     paint(t);
-    if (blend || now.lamp > 0) raf = requestAnimationFrame(loop);
+    const lampsMoving = lampOn.some((v, i) => v > 0 || v !== (lampTo[i] || 0));
+    if (blend || lampsMoving || gasNow > 0 || gasNow !== gasTo) raf = requestAnimationFrame(loop);
   }
 
   function paint(t) {
-    // 가스불·아지랑이: 영업 시간대에만 일렁인다
-    const open = time === 'open';
-    gas.setAttribute('display', open ? 'inline' : 'none');
-    if (open) {
+    // 가스불·아지랑이: 가스가 켜져 있을 때만 일렁인다 (세기만큼 키가 자란다)
+    gas.setAttribute('display', gasNow > 0 ? 'inline' : 'none');
+    if (gasNow > 0) {
       Array.from(gas.children).forEach((f, i) => {
         const x = +f.dataset.x;
         const y = +f.dataset.y;
-        const h = 14 + 5 * Math.sin(t / 90 + i * 1.7) + 3 * Math.sin(t / 37 + i);
-        f.setAttribute('d', `M ${x - 7} ${y} Q ${x - 6} ${y + h * 0.6} ${x} ${y + h} Q ${x + 6} ${y + h * 0.6} ${x + 7} ${y} Z`);
+        const h = (14 + 5 * Math.sin(t / 90 + i * 1.7) + 3 * Math.sin(t / 37 + i)) * gasNow;
+        const w = 7 * Math.min(1, 0.4 + gasNow);
+        f.setAttribute('d', `M ${x - w} ${y} Q ${x - w + 1} ${y + h * 0.6} ${x} ${y + h} Q ${x + w - 1} ${y + h * 0.6} ${x + w} ${y} Z`);
       });
       shimmer.forEach((p, i) => {
         const x = +p.dataset.x;
@@ -165,7 +218,7 @@ const Scene = (() => {
         const ph = ((t / 1400) + i / 3) % 1;
         const w = Math.sin(t / 160 + i) * 5;
         p.setAttribute('d', `M ${x} ${y - ph * 18} q ${w} -5 0 -10 q ${-w} -5 0 -10`);
-        p.setAttribute('opacity', (0.18 * Math.sin(ph * Math.PI)).toFixed(2));
+        p.setAttribute('opacity', (0.18 * gasNow * Math.sin(ph * Math.PI)).toFixed(2));
       });
     } else {
       shimmer.forEach((p) => p.setAttribute('opacity', 0));
@@ -175,8 +228,8 @@ const Scene = (() => {
     for (const c of city) c.setAttribute('fill', now.city);
     for (const w of windows) w.setAttribute('opacity', (0.15 + 0.75 * now.lamp).toFixed(2));
     const flicker = 1 + 0.06 * Math.sin(t / 170) + 0.04 * Math.sin(t / 61);
-    glows.forEach((g, i) => g.setAttribute('opacity', (now.lamp * flicker * (i ? 0.95 : 1)).toFixed(2)));
-    flames.forEach((f) => f.setAttribute('fill', mix('#8e2a22', '#e2483a', now.lamp)));
+    glows.forEach((g, i) => g.setAttribute('opacity', ((lampOn[i] || 0) * flicker * (i ? 0.95 : 1)).toFixed(2)));
+    flames.forEach((f, i) => f.setAttribute('fill', mix('#8e2a22', '#e2483a', lampOn[i] || 0)));
     dark.setAttribute('opacity', now.dark.toFixed(2));
   }
 
@@ -187,5 +240,8 @@ const Scene = (() => {
     return `#${[16, 8, 0].map((sh) => ch(sh).toString(16).padStart(2, '0')).join('')}`;
   }
 
-  return { init, setTime, time: () => time };
+  return {
+    init, setTime, setOpen, setGas, time: () => time,
+    state: () => ({ time, sky: now.skyTop, lamps: lampOn.map((v) => +v.toFixed(2)), gas: +gasNow.toFixed(2) }), // 검증용
+  };
 })();

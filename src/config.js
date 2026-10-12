@@ -13,6 +13,7 @@ const Config = (() => {
       demo: { pour: { cycleMs: 2400, first: 0.6, later: 0 }, box: { cycleMs: 1500, first: 0.6, later: 0 }, topping: { cycleMs: 1800, first: 0.6, later: 0 } },
       octopus: { legRatio: 0.6, perfectRatio: 0.3, guide: { strong: [0.8, 0.55], faint: [0.25, 0.2] }, demo: { cycleMs: 1800, strong: 0.6, faint: 0.22 } },
       fill: { limitMs: [60000, 20000] },
+      ritual: { blendMs: 1200, lampAt: [0.4, 0.8], startMs: 800, nightMs: 900 },
       box: { flickPx: 30, flickMs: 300, coneDeg: 60, flyMs: 350 },
       topping: { boatScale: 1.6, sauceWidth: 7, flakeEveryPx: 18, flakeMax: 400, handoffY: 170 },
       stage: { skipMs: 300, bannerMs: 1200, perfect: 11, great: 8, good: 4 },
@@ -42,7 +43,9 @@ const Config = (() => {
     scene: {
       times: {
         morning: { skyTop: '#f2b880', skyBottom: '#a8d0e6', city: '#8a97ad', lamp: 0, dark: 0 },
-        open: { skyTop: '#3a2a5c', skyBottom: '#d47a5a', city: '#3a2f4a', lamp: 1, dark: 0 },
+        afternoon: { skyTop: '#86bfe8', skyBottom: '#f3dfb0', city: '#7f8ca6', lamp: 0.05, dark: 0 },
+        dusk: { skyTop: '#5b4a8c', skyBottom: '#f29a62', city: '#4c4062', lamp: 0.45, dark: 0 },
+        evening: { skyTop: '#271f4e', skyBottom: '#b8605a', city: '#2c2642', lamp: 0.85, dark: 0.12 },
         night: { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
       },
       awning: ['#c8372d', '#f3e6d6'], flame: { color: '#4aa8ff', count: 9 }, plate: { iron: ['#2a2725', '#141312'], rim: '#34302d', rimHi: '#5a5550' }, wood: '#3b2a1f', counter: '#8a5a34',
@@ -103,6 +106,7 @@ const Config = (() => {
       days: ['(1일차 편지 — 나중에 작성)', '(2일차 편지 — 나중에 작성)'],
       enclosed: { title: '동봉', items: '(준비물)' },
       fill: { done: '모두 완료!' },
+      ritual: { gasOn: '가스 **손잡이**를 눌러 불을 켜요', bellHang: '**종**을 끌어 처마 **고리**에 걸어요', bellRing: '걸린 **종**을 톡 울려 가게를 열어요', gasOff: '가스 **손잡이**를 눌러 불을 꺼요', bellDown: '**종**을 끌어 작업대에 내려놓아요' },
       hints: {
         pour: '구멍을 누르고 있다가, 반죽이 **초록 눈금**에 닿으면 떼요. 도-미-솔-도!',
         octopus: '문어를 끌어 **구멍 가운데**에 놓아요. 다른 재료도 넣고, 다 됐으면 **모두 완료!**',

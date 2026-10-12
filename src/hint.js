@@ -22,6 +22,11 @@ const Hint = (() => {
   function show(stage) {
     const line = CFG.letters.hints[stage];
     if (!first() || !line) { hide(); return; }
+    say(line, stage);
+  }
+
+  // 아무 때나 한 줄 (T51 개점·마감 의식 안내)
+  function say(line, stage = '-') {
     text.replaceChildren();
     line.split('**').forEach((part, i) => {
       if (!part) return;
@@ -43,5 +48,5 @@ const Hint = (() => {
     for (const s of ['octopus', 'flip1', 'flip2', 'box', 'topping']) Stage.onEnter(s, () => show(s));
   }
 
-  return { init: () => { init(); init2(); }, show, hide, text: () => (g.getAttribute('display') === 'none' ? '' : text.textContent) };
+  return { init: () => { init(); init2(); }, show, say, hide, text: () => (g.getAttribute('display') === 'none' ? '' : text.textContent) };
 })();

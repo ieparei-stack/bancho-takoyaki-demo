@@ -232,6 +232,38 @@ const Sfx = (() => {
     [0.07, 0.12, 0.16].forEach((d, i) => tone(ctx, master, t + d, { freq: 900 - i * 60, type: 'triangle', gain: 0.07 - i * 0.015, decay: 0.03 }));
   }
 
+  // 가게 종 "딩~" (T51 개점 의식) — 금속 배음(1 · 2.76 · 5.4배)이 길게 남는다. v = 세기
+  function bell(v = 1) {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    const f = 1046.5; // C6
+    [[1, 0.32, 1.8], [2.76, 0.11, 0.9], [5.4, 0.05, 0.45], [2, 0.05, 1.2]].forEach(([k, g, d]) => {
+      tone(ctx, master, t, { freq: f * k, gain: g * v, attack: 0.002, decay: d });
+    });
+  }
+
+  // 가스 손잡이 "딸깍" + 켤 때는 "화르륵"(낮은 잡음이 부풀었다 가라앉음), 끌 때는 짧은 "푸슉" (T51)
+  function knob(on) {
+    if (!ctx) return;
+    const t = ctx.currentTime;
+    tone(ctx, master, t, { freq: 1900, toFreq: 950, type: 'square', gain: 0.06, decay: 0.025 });
+    const src = ctx.createBufferSource();
+    src.buffer = noise(ctx);
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.setValueAtTime(on ? 500 : 1400, t);
+    bp.Q.value = 0.8;
+    const g = ctx.createGain();
+    const s = t + 0.06;
+    const len = on ? 0.5 : 0.22;
+    g.gain.setValueAtTime(0.0001, s);
+    g.gain.exponentialRampToValueAtTime(on ? 0.22 : 0.1, s + (on ? 0.12 : 0.03));
+    g.gain.exponentialRampToValueAtTime(0.0001, s + len);
+    src.connect(bp).connect(g).connect(master);
+    src.start(s, Math.random() * 0.4);
+    src.stop(s + len + 0.02);
+  }
+
   // 도장 "쾅" (T48) — 낮게 떨어지는 쿵 + 종이 탁
   function stamp() {
     if (!ctx) return;
@@ -325,6 +357,8 @@ const Sfx = (() => {
     finish,
     plop,
     boxLand,
+    bell,
+    knob,
     stamp,
     squirt,
     flake,

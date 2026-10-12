@@ -3,7 +3,7 @@
 // 도감 버튼은 화면 오른쪽 아래 HTML 버튼 — 굽는 동안(주문·굽기)은 숨긴다 (타이머가 도는 중에 화면을 덮지 않게)
 const Discover = (() => {
   const GOOD = ['perfect', 'tasty'];   // "맛있음 이상"
-  const COOKING = ['TITLE', 'ORDER', 'COOK'];   // 도감 버튼을 숨기는 상태 (타이틀 포함, T45)
+  const COOKING = ['TITLE', 'OPEN_BELL', 'ORDER', 'COOK', 'CLOSE'];   // 도감 버튼을 숨기는 상태 (타이틀 포함, T45)
   const CARD = { x: 340, y: 130, w: 600, h: 400 };
   const BOOK = { x: 250, y: 70, w: 780, h: 560, rowTop: 168, rowH: 140 };
 

@@ -54,6 +54,10 @@ window.DATA = {
     // ② 재료 넣기 시간 (T27). limitMs: 일차별 제한 시간(뒤 일차는 마지막 값) — 1일차 60 s(제안, 넉넉하게), 2일차부터 20 s(사용자 2026-10-11)
     //   문어를 다 써도 끝나지 않고 "모두 완료!"를 눌러야 끝 (T50 사용자 — 예전 endOnOctopusDays 삭제)
     fill: { limitMs: [60000, 20000] },
+    // 개점·마감 의식과 영업 중 시간 흐름 (T51, 사용자 2026-10-12). 제안 값
+    //   blendMs 판을 건넨 뒤 하늘이 물드는 시간 / lampAt 제등(왼쪽, 오른쪽)이 켜지는 영업 진행 0~1
+    //   startMs 종을 울린 뒤 "시작!" 글자 / nightMs 종을 내린 뒤 밤이 내려앉고 영업 일지까지
+    ritual: { blendMs: 1200, lampAt: [0.4, 0.8], startMs: 800, nightMs: 900 },
 
     // 단계 진행 (한 판 = 미니게임을 순서대로, 2026-10-10 사용자 결정)
     // 단계 끝에 6번의 점수(퍼펙트 2 / 굿 1 / 그 외 0, 0~12점)를 합쳐 등급 글자를 띄운다. 글자는 letters.grade
@@ -133,7 +137,10 @@ window.DATA = {
   scene: {
     times: {
       morning: { skyTop: '#f2b880', skyBottom: '#a8d0e6', city: '#8a97ad', lamp: 0, dark: 0 },
-      open:    { skyTop: '#3a2a5c', skyBottom: '#d47a5a', city: '#3a2f4a', lamp: 1, dark: 0 },
+      // 영업 중 (T51): 막 연 오후 → 해 질 녘 → 마지막 판을 건넨 저녁. lamp = 골목 창문 불빛
+      afternoon: { skyTop: '#86bfe8', skyBottom: '#f3dfb0', city: '#7f8ca6', lamp: 0.05, dark: 0 },
+      dusk:      { skyTop: '#5b4a8c', skyBottom: '#f29a62', city: '#4c4062', lamp: 0.45, dark: 0 },
+      evening:   { skyTop: '#271f4e', skyBottom: '#b8605a', city: '#2c2642', lamp: 0.85, dark: 0.12 },
       night:   { skyTop: '#0d1230', skyBottom: '#232c4c', city: '#171a30', lamp: 1, dark: 0.45 },
     },
     awning: ['#c8372d', '#f3e6d6'],  // 천막 줄무늬 두 색
@@ -353,6 +360,14 @@ window.DATA = {
               best: '오늘의 한 접시', bestNone: '오늘은 쉬어 가는 날', progress: '{n}일 영업', progress3: '사흘 영업', none: '없음', close: '클릭해서 도장 찍기 ▶', stamp: '다음날로!', stampLast: '영업 끝!' },
     // 선물 (T37). {손님} {값} {선물} 자리는 채워진다
     gift: { got: '🎁', from: '{손님}의 선물', sell: '팔기 {값}', sellSub: '지금 돈으로', keep: '남기기' },
+    // 개점·마감 의식 안내 (T51, 1일차에만 불판 아래 한 줄). Claude 초안 — 대사집에 추가할 문구
+    ritual: {
+      gasOn: '가스 **손잡이**를 눌러 불을 켜요',
+      bellHang: '**종**을 끌어 처마 **고리**에 걸어요',
+      bellRing: '걸린 **종**을 톡 울려 가게를 열어요',
+      gasOff: '가스 **손잡이**를 눌러 불을 꺼요',
+      bellDown: '**종**을 끌어 작업대에 내려놓아요',
+    },
     // ② 재료 넣기 버튼 (T27)
     fill: { done: '모두 완료!' },
     // 첫 판 안내 (T33): 1일차 첫 판에만 단계마다 한 줄. **강조**는 노란 글자. Claude 초안 → 플레이 후 수정
